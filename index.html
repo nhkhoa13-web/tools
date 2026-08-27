@@ -1,1717 +1,461 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Đối chiếu tài liệu</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kho Công Cụ Của Tôi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: #0b0d10; }
-  body { font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; padding: 40px 16px; }
-
-  .ddt-root {
-    --ink: #14171c; --ink-2: #1c2129; --ink-3: #262c36;
-    --paper: #f6f3ea; --paper-2: #efeadb; --paper-line: #ded7c2;
-    --del: #c43d3d; --del-bg: rgba(196,61,61,0.14);
-    --add: #2f8f5b; --add-bg: rgba(47,143,91,0.14);
-    --mod: #c89a3a; --mod-bg: rgba(200,154,58,0.16);
-    --text-hi: #ece8dc; --text-mid: #9098a3; --text-dim: #5b6270;
-    --border: #2c323d;
-    background: var(--ink); color: var(--text-hi);
-    border-radius: 16px; padding: 28px; width: 100%; max-width: 900px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-    position: relative;
-  }
-  .ddt-root ::selection { background: var(--mod); color: #14171c; }
-
-  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: var(--mod); text-transform: uppercase; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
-  .eyebrow::before { content: ''; width: 14px; height: 1px; background: var(--mod); }
-  .h-title { font-family: 'Fraunces', serif; font-optical-sizing: auto; font-weight: 600; font-size: 30px; line-height: 1.15; margin: 0 0 8px; color: var(--text-hi); letter-spacing: -0.01em; }
-  .h-sub { font-size: 14px; color: var(--text-mid); line-height: 1.6; margin: 0 0 18px; max-width: 540px; }
-
-  .format-note { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
-  .format-pill { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.02em; border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; color: var(--text-mid); display: inline-flex; align-items: center; gap: 6px; }
-  .format-pill b { color: var(--text-hi); font-weight: 500; }
-  .format-pill.no { color: var(--del); border-color: rgba(196,61,61,0.4); }
-  .format-pill.no b { color: var(--del); }
-
-  .mode-tabs { display: flex; gap: 6px; margin: 0 0 20px; }
-  .mode-tab { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); cursor: pointer; }
-  .mode-tab.active { border-color: var(--mod); color: var(--mod); background: rgba(200,154,58,0.08); }
-  .mode-tab:hover { color: var(--text-hi); }
-
-  .upload-grid { display: grid; grid-template-columns: minmax(0,1fr) 44px minmax(0,1fr); gap: 0; align-items: stretch; }
-  @media (max-width: 620px) { .upload-grid { grid-template-columns: 1fr; gap: 18px; } }
-
-  .slot { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  .slot-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--text-mid); display: flex; align-items: center; gap: 8px; }
-  .tick { width: 6px; height: 6px; background: var(--mod); border-radius: 1px; transform: rotate(45deg); }
-
-  .dropzone { border: 1.5px dashed var(--border); border-radius: 10px; padding: 28px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; color: var(--text-mid); background: var(--ink-2); transition: border-color 0.15s, background 0.15s; min-height: 150px; min-width: 0; }
-  .dropzone:hover, .dropzone.dragging { border-color: var(--mod); background: var(--ink-3); color: var(--text-hi); }
-  .dz-icon { font-size: 20px; line-height: 1; }
-  .dz-main { font-size: 13.5px; margin: 10px 0 2px; color: inherit; }
-  .dz-sub { font-size: 12px; margin: 0 0 10px; color: var(--text-dim); }
-  .dz-caption { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; margin: 0; color: var(--text-dim); }
-  .chain-dropzone { min-height: 110px; }
-
-  .file-chip { background: var(--paper); color: #2a2620; border-radius: 10px; padding: 14px; display: flex; align-items: center; gap: 10px; min-height: 150px; min-width: 0; position: relative; box-shadow: inset 0 0 0 1px var(--paper-line); }
-  .file-chip-icon { font-size: 18px; }
-  .file-chip-meta { flex: 1; min-width: 0; }
-  .file-chip-name { font-size: 13px; font-weight: 500; margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .file-chip-sub { font-family: 'IBM Plex Mono', monospace; font-size: 11px; margin: 0; color: #6b6455; }
-  .chip-remove { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #8a8370; cursor: pointer; padding: 3px 6px; border-radius: 4px; font-size: 14px; }
-  .chip-remove:hover { background: var(--paper-2); color: #2a2620; }
-
-  .stamp-col { display: flex; align-items: center; justify-content: center; }
-  .swap-btn { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--ink-2); color: var(--text-mid); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-  .swap-btn:hover { border-color: var(--mod); color: var(--mod); background: var(--ink-3); transform: rotate(180deg); }
-  @media (max-width: 620px) {
-    .stamp-col { margin: -9px 0; }
-    .swap-btn { width: 32px; height: 32px; font-size: 13px; }
+  :root{
+    --bg:#13121c;
+    --bg-soft:#1b1a29;
+    --panel:#211f31;
+    --panel-line: rgba(255,255,255,0.08);
+    --ink:#f3f1e7;
+    --ink-dim:#a7a3bd;
+    --amber:#ffcf56;
+    --mint:#6fe7c4;
+    --coral:#ff7a7a;
+    --violet:#b39cff;
+    --sky:#7fd1ff;
+    --radius:14px;
   }
 
-  .compare-row { margin-top: 22px; display: flex; align-items: center; justify-content: center; }
-  .compare-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; background: transparent; border: 1.5px solid var(--border); color: var(--text-dim); padding: 11px 26px; border-radius: 999px; cursor: not-allowed; transition: all 0.15s; }
-  .compare-btn.active { border-color: var(--mod); color: var(--mod); cursor: pointer; }
-  .compare-btn.active:hover { background: var(--mod); color: #14171c; }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
 
-  .err-line { margin-top: 16px; font-size: 12.5px; color: var(--del); background: var(--del-bg); border: 1px solid rgba(196,61,61,0.35); border-radius: 8px; padding: 10px 14px; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(179,156,255,0.10), transparent 45%),
+      radial-gradient(circle at 85% 10%, rgba(255,207,86,0.08), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk', system-ui, sans-serif;
+    min-height:100vh;
+  }
 
-  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 320px; gap: 14px; }
-  .pulse { width: 40px; height: 40px; border-radius: 6px; background: var(--paper); opacity: 0.9; animation: pulse 1.1s ease-in-out infinite; }
-  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.12); opacity: 1; } }
-  .loading-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: var(--text-mid); }
+  a{ color:inherit; }
 
-  .err-stage { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-height: 260px; justify-content: center; }
-  .err-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--del); margin: 0; }
-  .retry-btn { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; background: transparent; border: 1.5px solid var(--border); color: var(--text-hi); padding: 9px 18px; border-radius: 999px; cursor: pointer; }
-  .retry-btn:hover { border-color: var(--text-hi); }
+  /* ---------- MARQUEE HEADER ---------- */
+  .marquee{
+    position:relative;
+    padding: 56px 24px 40px;
+    text-align:center;
+    overflow:hidden;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .marquee::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.35) 1.5px, transparent 1.6px);
+    background-size: 26px 26px;
+    background-position: 0 0;
+    opacity:0.05;
+    pointer-events:none;
+  }
+  .bulbs{
+    display:flex; justify-content:center; gap:10px; margin-bottom:22px;
+  }
+  .bulb{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--amber);
+    box-shadow:0 0 6px 2px rgba(255,207,86,0.6);
+    animation: flicker 2.6s infinite;
+  }
+  .bulb:nth-child(2n){ background:var(--mint); box-shadow:0 0 6px 2px rgba(111,231,196,0.6); animation-delay:.4s; }
+  .bulb:nth-child(3n){ background:var(--coral); box-shadow:0 0 6px 2px rgba(255,122,122,0.6); animation-delay:.8s; }
+  .bulb:nth-child(5n){ background:var(--sky); box-shadow:0 0 6px 2px rgba(127,209,255,0.6); animation-delay:1.2s; }
+  @keyframes flicker{
+    0%, 18%, 22%, 62%, 66%, 100% { opacity:1; }
+    20%, 64% { opacity:0.25; }
+  }
 
-  .result-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; padding-right: 46px; }
-  .back-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.05em; background: none; border: none; color: var(--text-mid); cursor: pointer; padding: 0; }
-  .back-btn:hover { color: var(--text-hi); }
-  .filenames { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .title{
+    font-family:'Press Start 2P', monospace;
+    font-size: clamp(20px, 4vw, 34px);
+    line-height:1.6;
+    margin:0;
+    letter-spacing:1px;
+    color:var(--ink);
+    text-shadow: 0 0 18px rgba(255,207,86,0.25);
+  }
+  .subtitle{
+    margin:18px auto 0;
+    max-width:560px;
+    color:var(--ink-dim);
+    font-size:15px;
+  }
 
-  .result-top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-  .toolbar-btns { display: flex; gap: 8px; }
-  .tool-btn { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.03em; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); padding: 5px 11px; border-radius: 999px; cursor: pointer; }
-  .tool-btn:hover { border-color: var(--text-hi); color: var(--text-hi); }
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    max-width:1100px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .search-wrap{
+    position:relative;
+    flex:1 1 240px;
+    max-width:340px;
+  }
+  .search-wrap input{
+    width:100%;
+    padding:11px 14px 11px 38px;
+    border-radius:999px;
+    border:1px solid var(--panel-line);
+    background:var(--panel);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .search-wrap input:focus-visible{ border-color:var(--amber); }
+  .search-wrap svg{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    width:15px; height:15px; opacity:0.6;
+  }
 
-  .stamp-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.03em; border: 1.5px solid var(--mod); color: var(--mod); border-radius: 6px; padding: 8px 14px; transform: rotate(-1.5deg); display: flex; gap: 12px; background: rgba(200,154,58,0.06); }
-  .stamp-badge b { font-weight: 600; }
-  .s-add { color: var(--add); } .s-del { color: var(--del); } .s-mod { color: var(--mod); }
+  .tags{
+    display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .tag-btn{
+    border:1px solid var(--panel-line);
+    background:var(--panel);
+    color:var(--ink-dim);
+    padding:8px 14px;
+    border-radius:999px;
+    font-family:inherit;
+    font-size:13px;
+    cursor:pointer;
+    transition: all .15s ease;
+  }
+  .tag-btn:hover{ color:var(--ink); border-color:rgba(255,255,255,0.2); }
+  .tag-btn:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+  .tag-btn.active{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:#1a1508;
+    font-weight:600;
+  }
 
-  .page-summary { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--text-mid); margin: 0 0 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .page-summary b { color: var(--text-hi); font-weight: 500; }
-  .page-pill { border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; color: var(--text-hi); cursor: pointer; }
-  .page-pill:hover { border-color: var(--mod); color: var(--mod); }
-  .page-note { font-size: 10.5px; color: var(--text-dim); font-style: italic; }
+  /* ---------- GRID ---------- */
+  .grid{
+    max-width:1100px;
+    margin: 30px auto 80px;
+    padding: 0 24px;
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap:22px;
+  }
 
-  .filter-bar { display: flex; gap: 6px; margin: 0 0 16px; flex-wrap: wrap; }
-  .filter-pill { font-family: 'IBM Plex Mono', monospace; font-size: 11px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
-  .filter-pill:hover { color: var(--text-hi); }
-  .filter-pill.active { border-color: var(--mod); color: var(--mod); background: rgba(200,154,58,0.1); }
-  .filter-pill.added.active { border-color: var(--add); color: var(--add); background: var(--add-bg); }
-  .filter-pill.removed.active { border-color: var(--del); color: var(--del); background: var(--del-bg); }
-  .filter-pill.modified.active { border-color: var(--mod); color: var(--mod); background: var(--mod-bg); }
+  .cartridge{
+    position:relative;
+    background:var(--panel);
+    border-radius:var(--radius);
+    border:1px solid var(--panel-line);
+    padding:22px 18px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    text-decoration:none;
+    color:var(--ink);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .cartridge::before{
+    content:"";
+    position:absolute;
+    top:-9px; left:24px;
+    width:44px; height:16px;
+    background:var(--card-color, var(--amber));
+    border-radius:4px 4px 0 0;
+    opacity:0.9;
+  }
+  .cartridge::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:var(--radius);
+    padding:1px;
+    background: linear-gradient(140deg, var(--card-color, var(--amber)), transparent 40%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity:0;
+    transition: opacity .18s ease;
+    pointer-events:none;
+  }
+  .cartridge:hover, .cartridge:focus-visible{
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,0.55);
+    border-color: transparent;
+  }
+  .cartridge:hover::after, .cartridge:focus-visible::after{ opacity:1; }
+  .cartridge:focus-visible{ outline:2px solid var(--amber); outline-offset:3px; }
 
-  .sheet-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-  .sheet-tab { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); cursor: pointer; }
-  .sheet-tab.active { border-color: var(--mod); color: var(--mod); background: rgba(200,154,58,0.08); }
-  .sheet-tab.added-sheet:not(.active) { color: var(--add); }
-  .sheet-tab.removed-sheet:not(.active) { color: var(--del); }
-  .sheet-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
-  .sheet-dot.add { background: var(--add); }
-  .sheet-dot.del { background: var(--del); }
+  .cart-top{
+    display:flex; align-items:center; gap:12px;
+  }
+  .cart-icon{
+    font-size:26px;
+    width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:10px;
+    background: color-mix(in srgb, var(--card-color, var(--amber)) 18%, transparent);
+    flex-shrink:0;
+  }
+  .cart-name{
+    font-size:16px;
+    font-weight:600;
+    margin:0;
+    line-height:1.3;
+  }
+  .cart-genre{
+    font-size:11.5px;
+    color: var(--card-color, var(--amber));
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-top:2px;
+    display:block;
+  }
+  .cart-desc{
+    font-size:13.5px;
+    color:var(--ink-dim);
+    line-height:1.55;
+    margin:0;
+    flex:1;
+  }
+  .cart-footer{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:4px;
+  }
+  .play-label{
+    font-size:13px;
+    font-weight:600;
+    display:flex; align-items:center; gap:6px;
+  }
+  .play-label svg{ width:13px; height:13px; transition: transform .15s ease; }
+  .cartridge:hover .play-label svg{ transform:translateX(3px); }
 
-  .work-area { display: grid; grid-template-columns: 30px 1fr; gap: 14px; }
-  @media (max-width: 620px) { .work-area { grid-template-columns: 18px 1fr; } }
+  .badge-soon{
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.08);
+    color:var(--ink-dim);
+    letter-spacing:0.03em;
+  }
+  .cartridge.is-soon{
+    opacity:0.55;
+    cursor:not-allowed;
+    pointer-events:none;
+  }
 
-  .rail { display: flex; flex-direction: column; gap: 5px; padding-top: 6px; }
-  .rail-tick { width: 100%; height: 3px; border-radius: 2px; cursor: pointer; opacity: 0.85; transition: opacity 0.15s, transform 0.15s; }
-  .rail-tick:hover { opacity: 1; transform: scaleX(1.4); }
-  .rail-tick.add { background: var(--add); } .rail-tick.del { background: var(--del); } .rail-tick.mod { background: var(--mod); }
+  /* empty state */
+  .empty{
+    grid-column: 1 / -1;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-dim);
+  }
+  .empty p:first-child{
+    font-family:'Press Start 2P', monospace;
+    font-size:13px;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
 
-  .paper-panel { background: var(--paper); border-radius: 10px; padding: 26px 28px; max-height: 520px; overflow-y: auto; color: #2a2620; box-shadow: inset 0 0 0 1px var(--paper-line); }
-  .same-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 240px; color: #6b6455; }
+  footer{
+    text-align:center;
+    padding: 28px 20px 40px;
+    color:var(--ink-dim);
+    font-size:12.5px;
+    border-top:1px solid var(--panel-line);
+  }
+  footer code{
+    background:var(--panel);
+    padding:2px 6px;
+    border-radius:4px;
+    color:var(--mint);
+  }
 
-  .p-block.equal p { font-size: 13.5px; line-height: 1.75; margin: 0 0 6px; color: #3a3527; }
-  .p-block.change { border-left: 3px solid var(--mod); padding: 6px 0 6px 14px; margin: 10px 0; transition: background 0.3s; position: relative; }
-  .p-block.change.flash { background: rgba(200,154,58,0.22); }
-  .page-tag { position: absolute; right: 0; top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8370; background: var(--paper-2); border-radius: 4px; padding: 1px 7px; }
-  .p-line { font-size: 13.5px; line-height: 1.75; margin: 0 0 4px; padding-right: 90px; }
-  .w-equal { color: #3a3527; }
-  .w-del { color: var(--del); text-decoration: line-through; text-decoration-thickness: 1.5px; background: var(--del-bg); border-radius: 2px; }
-  .w-add { color: var(--add); text-decoration: underline; text-decoration-thickness: 1.5px; background: var(--add-bg); border-radius: 2px; }
-  .full-del { color: var(--del); text-decoration: line-through; background: var(--del-bg); border-radius: 2px; padding: 1px 3px; }
-  .full-add { color: var(--add); text-decoration: underline; background: var(--add-bg); border-radius: 2px; padding: 1px 3px; }
-  .equal-toggle { color: #a39d89; font-style: italic; cursor: pointer; font-size: 12.5px; }
-  .equal-toggle:hover { color: #6b6455; text-decoration: underline; }
-
-  .grid-table { border-collapse: collapse; font-size: 12px; width: max-content; min-width: 100%; }
-  .grid-table th { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 10.5px; color: #6b6455; background: var(--paper-2); padding: 5px 10px; border: 1px solid var(--paper-line); position: sticky; top: 0; text-align: left; }
-  .grid-table td { padding: 5px 10px; border: 1px solid var(--paper-line); vertical-align: top; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
-  .row-added td { background: var(--add-bg); }
-  .row-removed td { background: var(--del-bg); text-decoration: line-through; color: var(--del); }
-  .cell-mod { background: var(--mod-bg); }
-  .cell-old { color: var(--del); text-decoration: line-through; font-size: 11px; display: block; }
-  .cell-new { color: var(--add); display: block; }
-  .row-flash td { background: rgba(200,154,58,0.3) !important; }
-
-  .legend { display: flex; gap: 18px; margin-top: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-mid); }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; font-style: normal; }
-  .li-del { background: var(--del); } .li-add { background: var(--add); } .li-mod { background: var(--mod); }
-
-  .chain-wrap { display: flex; flex-direction: column; gap: 12px; }
-  .chain-list { display: flex; flex-direction: column; gap: 8px; }
-  .chain-item { display: flex; align-items: center; gap: 10px; background: var(--paper); border-radius: 10px; padding: 10px 12px; box-shadow: inset 0 0 0 1px var(--paper-line); color: #2a2620; }
-  .chain-index { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6b6455; width: 24px; flex-shrink: 0; }
-  .chain-item-icon { font-size: 16px; }
-  .chain-item-actions { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
-  .chain-item-actions button { width: 24px; height: 24px; border: none; background: var(--paper-2); color: #6b6455; border-radius: 5px; cursor: pointer; font-size: 12px; }
-  .chain-item-actions button:hover:not(:disabled) { background: #e2dcc8; color: #2a2620; }
-  .chain-item-actions button:disabled { opacity: 0.35; cursor: default; }
-  .chain-tabs { margin-top: 4px; }
-
-  .adv-settings { margin-top: 18px; font-size: 12px; color: var(--text-mid); }
-  .adv-settings summary { cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.05em; color: var(--text-mid); }
-  .adv-settings summary:hover { color: var(--text-hi); }
-  .adv-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  .adv-row input { width: 80px; background: var(--ink-2); border: 1px solid var(--border); color: var(--text-hi); border-radius: 6px; padding: 5px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
-
-  .menu-btn { position: absolute; top: 24px; right: 24px; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; z-index: 5; transition: border-color 0.15s, color 0.15s; }
-  .menu-btn:hover { border-color: var(--mod); color: var(--mod); }
-
-  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  .stage-fade { animation: fadeSlideIn 0.22s ease; }
-
-  .calc-page-title { font-size: 22px; margin: 6px 0 22px; }
-  .calc-tabs { display: flex; gap: 6px; margin: 0 0 20px; flex-wrap: wrap; }
-  .calc-tab { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.03em; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
-  .calc-tab.active { border-color: var(--mod); color: var(--mod); background: rgba(200,154,58,0.1); }
-  .calc-tab:hover { color: var(--text-hi); }
-  .calc-body { max-width: 440px; }
-
-  .calc-row { margin-bottom: 12px; }
-  .calc-row label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--text-mid); margin-bottom: 5px; }
-  .calc-inline-label { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--text-mid); margin-bottom: 5px; }
-  .calc-money-wrap { position: relative; flex: 1; min-width: 0; }
-  .calc-money-wrap .calc-input { padding-right: 26px; }
-  .calc-money-suffix { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; font-size: 12px; pointer-events: none; }
-  .calc-row-inline { display: flex; gap: 8px; margin-bottom: 12px; }
-  .calc-input { width: 100%; background: var(--ink-2); border: 1px solid var(--border); color: var(--text-hi); border-radius: 7px; padding: 8px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
-  .calc-input:focus { outline: none; border-color: var(--mod); }
-  .calc-radio-row { display: flex; gap: 16px; font-size: 12px; color: var(--text-mid); flex-wrap: wrap; margin-bottom: 12px; }
-  .calc-radio-row label { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; }
-  .calc-sub-title { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: var(--mod); text-transform: uppercase; margin: 18px 0 8px; }
-  .calc-sub-title:first-child { margin-top: 0; }
-
-  .calc-result { background: var(--paper); border-radius: 8px; padding: 12px 14px; box-shadow: inset 0 0 0 1px var(--paper-line); margin-bottom: 4px; }
-  .calc-result-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: #6b6455; padding: 3px 0; gap: 10px; }
-  .calc-result-row b { font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #2a2620; font-weight: 600; text-align: right; }
-  .calc-result-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; width: 100%; }
-  .copy-btn { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; border: 1px solid var(--paper-line); background: var(--paper-2); color: #6b6455; padding: 4px 10px; border-radius: 999px; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
-  .copy-btn:hover { border-color: #8a8370; color: #2a2620; }
-  .copy-btn.copied { border-color: var(--add); color: var(--add); background: rgba(47,143,91,0.12); }
-  .calc-result-row.block { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .calc-result-row.block b { font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; line-height: 1.5; font-size: 13.5px; }
-
-  .calc-keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .calc-key { padding: 14px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--ink-3); color: var(--text-hi); font-family: 'IBM Plex Mono', monospace; font-size: 15px; cursor: pointer; }
-  .calc-key:hover { border-color: var(--mod); }
-  .calc-key.op { color: var(--mod); }
-  .calc-key.eq { background: var(--mod); color: #14171c; border-color: var(--mod); }
-  .calc-key.eq:hover { opacity: 0.9; }
-  .calc-key.op.active2nd { border-color: var(--mod); color: var(--mod); background: rgba(200,154,58,0.15); }
-
-  .calc-mem-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--mod); min-height: 14px; margin-bottom: 4px; text-align: right; }
-  .calc-sci-display { background: var(--paper); border-radius: 8px; padding: 14px 14px 10px; margin-bottom: 12px; box-shadow: inset 0 0 0 1px var(--paper-line); text-align: right; }
-  .calc-expr-line { font-family: 'IBM Plex Mono', monospace; font-size: 22px; color: #2a2620; white-space: nowrap; overflow-x: auto; }
-  .calc-preview-line { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8a8370; min-height: 18px; margin-top: 4px; white-space: nowrap; overflow-x: auto; }
-  .calc-keypad-sci { gap: 6px; }
-  .calc-keypad-sci .calc-key { padding: 11px 0; font-size: 13px; }
-
-  @media print {
-    .menu-btn { display: none !important; }
-    body { background: #fff; padding: 0; }
-    .ddt-root { box-shadow: none; background: #fff; color: #111; max-width: 100%; border-radius: 0; }
-    .back-btn, .rail, .toolbar-btns, .filter-bar, .mode-tabs, .adv-settings { display: none !important; }
-    .work-area { grid-template-columns: 1fr; }
-    .paper-panel { max-height: none; overflow: visible; box-shadow: none; }
-    .stamp-badge { transform: none; }
+  @media (prefers-reduced-motion: reduce){
+    .bulb{ animation:none !important; }
+    .cartridge{ transition:none !important; }
+    html{ scroll-behavior:auto; }
   }
 </style>
 </head>
 <body>
-<div class="ddt-root" id="app"></div>
+
+<header class="marquee">
+  <div class="bulbs" aria-hidden="true">
+    <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+    <span class="bulb"></span><span class="bulb"></span><span class="bulb"></span>
+    <span class="bulb"></span>
+  </div>
+  <h1 class="title">KHO CÔNG CỤ CỦA TÔI</h1>
+  <p class="subtitle">Bộ công cụ hỗ trợ công việc — chọn một công cụ bên dưới để bắt đầu sử dụng.</p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="search" type="text" placeholder="Tìm công cụ theo tên..." aria-label="Tìm công cụ">
+  </div>
+  <div class="tags" id="tagFilters"></div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<footer>© 2026 Bản quyền thuộc về Nguyễn Hoàng Khoa</footer>
 
 <script>
-/* ---------------- state ---------------- */
-const state = {
-  stage: 'upload',
-  mode: 'pair',
-  fileOld: null, fileNew: null,
-  chainFiles: [], chainResults: null, chainActive: 0,
-  errorMsg: '', diffData: null, flashId: null,
-  filter: 'all',
-  expandedEqual: {},
-  avgWordsPerPage: 450,
-  advOpen: false,
-  returnStage: 'upload',
-  calcTab: 'vat',
-  calc: { expr: '', angleMode: 'deg', memory: 0, justEvaluated: false, shift: false }
-};
-let flashTimer = null;
+/* =====================================================================
+   DANH SÁCH CÔNG CỤ — chỉnh sửa ở đây
+   =====================================================================
+   Mỗi công cụ là một object gồm các trường:
+     title  : Tên công cụ hiển thị
+     genre  : Nhóm/thể loại (VD: "IT", "File", "Excel", "Tiếng Việt"...)
+     desc   : Mô tả ngắn 1 câu
+     icon   : Một emoji đại diện cho công cụ
+     color  : Mã màu viền/nhấn cho card (dùng mã hex, VD "#6fe7c4")
+     href   : Đường dẫn tới file/trang của công cụ (VD: "tools/check-it.html")
+              -> để trống "" hoặc đặt soon:true nếu công cụ chưa xong
+     soon   : true nếu công cụ chưa sẵn sàng (card sẽ mờ đi, không bấm được)
 
-/* ---------------- helpers ---------------- */
-function formatBytes(b){ if(b<1024) return b+' B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/1024/1024).toFixed(1)+' MB'; }
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function getKind(name){
-  const ext=(name.split('.').pop()||'').toLowerCase();
-  if(ext==='docx') return {group:'doc',ext,label:'Word'};
-  if(ext==='doc') return {group:'unsupported',ext,label:'Word 97-2003'};
-  if(ext==='xlsx'||ext==='xls') return {group:'sheet',ext,label:'Excel'};
-  if(ext==='csv') return {group:'sheet',ext,label:'CSV'};
-  if(ext==='txt'||ext==='md') return {group:'doc',ext,label:'Văn bản'};
-  return {group:'unknown',ext,label:ext.toUpperCase()||'?'};
-}
-
-/* ---------------- accounting calculator helpers ---------------- */
-function val(id){ const el=document.getElementById(id); return el?el.value:''; }
-function setText(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
-
-function parseVN(str){
-  if(!str) return 0;
-  let s = String(str).trim();
-  if(s==='') return 0;
-  if(s.indexOf(',')!==-1){
-    s = s.replace(/\./g,'').replace(/,/g,'.');
-  } else {
-    const dotCount = (s.match(/\./g)||[]).length;
-    if(dotCount>1) s = s.replace(/\./g,'');
-  }
-  const n = parseFloat(s);
-  return isFinite(n) ? n : 0;
-}
-function formatVN(n){
-  if(!isFinite(n)) return '0';
-  const neg = n<0; n = Math.abs(n);
-  const rounded = Math.round(n*100)/100;
-  const parts = rounded.toString().split('.');
-  let intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const dec = parts[1] || '';
-  return (neg?'-':'') + intPart + (dec ? (','+dec) : '');
-}
-
-const VN_DIGITS = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
-function threeDigitWords(n, isLeading){
-  const h = Math.floor(n/100), t = Math.floor((n%100)/10), u = n%10;
-  const parts = [];
-  if(h>0){
-    parts.push(VN_DIGITS[h], 'trăm');
-    if(t===0 && u>0) parts.push('lẻ');
-  } else if(!isLeading && (t>0 || u>0)){
-    parts.push('không','trăm');
-    if(t===0 && u>0) parts.push('lẻ');
-  }
-  if(t>=2){
-    parts.push(VN_DIGITS[t]+' mươi');
-    if(u===1) parts.push('mốt'); else if(u===5) parts.push('lăm'); else if(u>0) parts.push(VN_DIGITS[u]);
-  } else if(t===1){
-    parts.push('mười');
-    if(u===5) parts.push('lăm'); else if(u>0) parts.push(VN_DIGITS[u]);
-  } else if(t===0 && u>0){
-    parts.push(VN_DIGITS[u]);
-  }
-  return parts.join(' ');
-}
-function numberToVietnameseWords(num){
-  num = Math.floor(Math.abs(num));
-  if(num===0) return 'không';
-  const unitNames = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ', 'tỷ tỷ'];
-  const groups = [];
-  let n = num;
-  while(n>0){ groups.push(n%1000); n = Math.floor(n/1000); }
-  const resultParts = [];
-  for(let i=groups.length-1; i>=0; i--){
-    const g = groups[i];
-    if(g===0) continue;
-    const words = threeDigitWords(g, i===groups.length-1);
-    resultParts.push(words + (unitNames[i] ? ' '+unitNames[i] : ''));
-  }
-  return resultParts.join(' ').replace(/\s+/g,' ').trim();
-}
-
-function formatDisplayValue(el){
-  const digits = el.value.replace(/\D/g,'');
-  el.value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-function stripDisplayFormatting(el){
-  el.value = el.value.replace(/\D/g,'');
-}
-function parseThousandsInt(str){
-  if(!str) return 0;
-  const n = parseInt(String(str).replace(/\D/g,''), 10);
-  return isFinite(n) ? n : 0;
-}
-
-function updateVat(){
-  const amountEl = document.getElementById('vat-amount');
-  const rateEl = document.getElementById('vat-rate');
-  const modeEl = document.querySelector('input[name="vat-mode"]:checked');
-  if(!amountEl || !rateEl || !modeEl) return;
-  const amount = parseThousandsInt(amountEl.value);
-  const rate = parseFloat(rateEl.value) || 0;
-  let pre, tax, post;
-  if(modeEl.value==='pre'){ pre = amount; tax = amount*rate/100; post = pre+tax; }
-  else { post = amount; pre = (1+rate/100)!==0 ? amount/(1+rate/100) : amount; tax = post-pre; }
-  setText('vat-out-pre', formatVN(pre));
-  setText('vat-out-tax', formatVN(tax));
-  setText('vat-out-post', formatVN(post));
-}
-
-function updatePct(){
-  const el1 = document.getElementById('pct1-a');
-  if(!el1) return;
-  const a1 = parseThousandsInt(val('pct1-a')), p1 = parseVN(val('pct1-p')), op1 = val('pct1-op');
-  const r1 = op1==='inc' ? a1*(1+p1/100) : a1*(1-p1/100);
-  setText('pct1-out', formatVN(r1));
-
-  const a2 = parseThousandsInt(val('pct2-a')), b2 = parseThousandsInt(val('pct2-b'));
-  setText('pct2-out', formatVN(b2!==0 ? (a2/b2*100) : 0)+'%');
-
-  const a3 = parseThousandsInt(val('pct3-a')), b3 = parseThousandsInt(val('pct3-b'));
-  const r3 = a3!==0 ? ((b3-a3)/a3*100) : 0;
-  setText('pct3-out', (r3>=0?'+':'')+formatVN(r3)+'%');
-}
-
-function updateWords(){
-  const el = document.getElementById('words-amount');
-  if(!el) return;
-  const n = parseThousandsInt(el.value);
-  let words = numberToVietnameseWords(n);
-  words = words.charAt(0).toUpperCase()+words.slice(1);
-  setText('words-out', words + ' đồng' + (n>0?' chẵn':'') + '.');
-}
-
-function updateDep(){
-  const el = document.getElementById('dep-cost');
-  if(!el) return;
-  const cost = parseThousandsInt(val('dep-cost'));
-  const salvage = parseThousandsInt(val('dep-salvage'));
-  const years = parseVN(val('dep-years'));
-  const usedMonths = parseVN(val('dep-used'));
-  const base = Math.max(cost-salvage, 0);
-  const perYear = years>0 ? base/years : 0;
-  const perMonth = perYear/12;
-  const accum = Math.min(perMonth*usedMonths, base);
-  const remain = Math.max(cost-accum, 0);
-  setText('dep-out-year', formatVN(perYear));
-  setText('dep-out-month', formatVN(perMonth));
-  setText('dep-out-accum', formatVN(accum));
-  setText('dep-out-remain', formatVN(remain));
-}
-
-/* ---------------- scientific calculator engine ---------------- */
-function toRad(x){ return state.calc.angleMode==='deg' ? x*Math.PI/180 : x; }
-function toDeg(x){ return state.calc.angleMode==='deg' ? x*180/Math.PI : x; }
-
-function calcTokenize(expr){
-  const tokens = [];
-  const funcNames = ['asin','acos','atan','sin','cos','tan','log','ln'];
-  let i = 0;
-  while(i < expr.length){
-    const c = expr[i];
-    if(/\s/.test(c)){ i++; continue; }
-    if(/[\d.]/.test(c)){
-      let j=i;
-      while(j<expr.length && /[\d.]/.test(expr[j])) j++;
-      tokens.push({type:'num', value: parseFloat(expr.slice(i,j))});
-      i=j; continue;
+   Copy một object bên dưới, dán thêm dấu phẩy, rồi sửa nội dung cho
+   công cụ tiếp theo của bạn. Không cần đụng vào phần code phía dưới.
+   ===================================================================== */
+  const tools = [
+    {
+      title: "Check Lỗi IT",
+      genre: "IT",
+      desc: "Rà soát, chẩn đoán nhanh các lỗi kỹ thuật, sự cố máy tính, mạng và phần mềm thường gặp.",
+      icon: "🖥️",
+      color: "#7fd1ff",
+      href: "tool/checkit.html"
+    },
+    {
+      title: "Check Thay Đổi File",
+      genre: "File",
+      desc: "So sánh và phát hiện những thay đổi giữa các phiên bản file trước và sau khi chỉnh sửa.",
+      icon: "📁",
+      color: "#6fe7c4",
+      href: "tool/checkfile.html"
+    },
+    {
+      title: "Check Hàm Excel",
+      genre: "Excel",
+      desc: "Kiểm tra, giải thích và gỡ lỗi các công thức, hàm Excel một cách nhanh chóng.",
+      icon: "📊",
+      color: "#ffcf56",
+      href: "tool/checkexcel.html"
+    },
+    {
+      title: "Check Lỗi Tiếng Việt",
+      genre: "Tiếng Việt",
+      desc: "Phát hiện lỗi chính tả, ngữ pháp và cách dùng từ trong văn bản tiếng Việt.",
+      icon: "📝",
+      color: "#b39cff",
+      href: "tool/checkloi.html"
     }
-    let matched = null;
-    for(const f of funcNames){ if(expr.slice(i,i+f.length)===f){ matched=f; break; } }
-    if(matched){ tokens.push({type:'func', value:matched}); i+=matched.length; continue; }
-    if(c==='√'){ tokens.push({type:'func', value:'sqrt'}); i++; continue; }
-    if(c==='∛'){ tokens.push({type:'func', value:'cbrt'}); i++; continue; }
-    if(c==='π'){ tokens.push({type:'num', value:Math.PI}); i++; continue; }
-    if(c==='e'){ tokens.push({type:'num', value:Math.E}); i++; continue; }
-    if(c==='×'){ tokens.push({type:'op', value:'*'}); i++; continue; }
-    if(c==='÷'){ tokens.push({type:'op', value:'/'}); i++; continue; }
-    if(c==='+'||c==='-'||c==='^'||c==='*'||c==='/'){ tokens.push({type:'op', value:c}); i++; continue; }
-    if(c==='!'){ tokens.push({type:'postfix', value:'!'}); i++; continue; }
-    if(c==='%'){ tokens.push({type:'postfix', value:'%'}); i++; continue; }
-    if(c==='('){ tokens.push({type:'lparen'}); i++; continue; }
-    if(c===')'){ tokens.push({type:'rparen'}); i++; continue; }
-    i++;
-  }
-  return tokens;
-}
-function calcInsertImplicitMul(tokens){
-  const out = [];
-  for(let i=0;i<tokens.length;i++){
-    const cur = tokens[i];
-    if(i>0){
-      const prev = tokens[i-1];
-      const prevEndsValue = prev.type==='num' || prev.type==='rparen' || prev.type==='postfix';
-      const curStartsValue = cur.type==='num' || cur.type==='lparen' || cur.type==='func';
-      if(prevEndsValue && curStartsValue) out.push({type:'op', value:'*'});
-    }
-    out.push(cur);
-  }
-  return out;
-}
-function calcParse(tokens){
-  let pos = 0;
-  const peek = ()=>tokens[pos];
-  const next = ()=>tokens[pos++];
-
-  function parseExpression(){
-    let val = parseTerm();
-    while(peek() && peek().type==='op' && (peek().value==='+'||peek().value==='-')){
-      const op = next().value; const rhs = parseTerm();
-      val = op==='+' ? val+rhs : val-rhs;
-    }
-    return val;
-  }
-  function parseTerm(){
-    let val = parsePow();
-    while(peek() && peek().type==='op' && (peek().value==='*'||peek().value==='/')){
-      const op = next().value; const rhs = parsePow();
-      if(op==='*') val = val*rhs; else { val = val/rhs; }
-    }
-    return val;
-  }
-  function parsePow(){
-    let val = parseUnary();
-    if(peek() && peek().type==='op' && peek().value==='^'){
-      next();
-      const rhs = parsePow();
-      val = Math.pow(val, rhs);
-    }
-    return val;
-  }
-  function parseUnary(){
-    if(peek() && peek().type==='op' && peek().value==='-'){ next(); return -parseUnary(); }
-    if(peek() && peek().type==='op' && peek().value==='+'){ next(); return parseUnary(); }
-    return parsePostfix();
-  }
-  function parsePostfix(){
-    let val = parsePrimary();
-    while(peek() && peek().type==='postfix'){
-      const p = next().value;
-      if(p==='!'){
-        if(val<0 || Math.floor(val)!==val || val>170) throw new Error('bad factorial');
-        let f=1; for(let k=2;k<=val;k++) f*=k;
-        val = f;
-      } else if(p==='%'){ val = val/100; }
-    }
-    return val;
-  }
-  function parsePrimary(){
-    const t = peek();
-    if(!t) throw new Error('unexpected end');
-    if(t.type==='num'){ next(); return t.value; }
-    if(t.type==='lparen'){
-      next();
-      const val = parseExpression();
-      if(peek() && peek().type==='rparen') next(); else throw new Error('missing )');
-      return val;
-    }
-    if(t.type==='func'){
-      next();
-      let arg;
-      if(peek() && peek().type==='lparen'){
-        next(); arg = parseExpression();
-        if(peek() && peek().type==='rparen') next(); else throw new Error('missing )');
-      } else { arg = parseUnary(); }
-      switch(t.value){
-        case 'sin': return Math.sin(toRad(arg));
-        case 'cos': return Math.cos(toRad(arg));
-        case 'tan': return Math.tan(toRad(arg));
-        case 'asin': return toDeg(Math.asin(arg));
-        case 'acos': return toDeg(Math.acos(arg));
-        case 'atan': return toDeg(Math.atan(arg));
-        case 'log': return Math.log10(arg);
-        case 'ln': return Math.log(arg);
-        case 'sqrt': return Math.sqrt(arg);
-        case 'cbrt': return Math.cbrt(arg);
-      }
-    }
-    throw new Error('parse error');
-  }
-
-  const result = parseExpression();
-  if(pos < tokens.length) throw new Error('trailing tokens');
-  return result;
-}
-function safeEvalExpr(exprStr){
-  if(!exprStr || !exprStr.trim()) return null;
-  try{
-    const tokens = calcInsertImplicitMul(calcTokenize(exprStr));
-    if(tokens.length===0) return null;
-    const val = calcParse(tokens);
-    return isFinite(val) ? val : null;
-  } catch(e){ return null; }
-}
-function formatCalcResult(n){
-  if(!isFinite(n)) return '0';
-  const rounded = Math.round(n*1e10)/1e10;
-  return rounded.toString();
-}
-
-function calcInsertRaw(str){
-  const c = state.calc;
-  if(c.justEvaluated){ c.expr=''; c.justEvaluated=false; }
-  c.expr += str;
-}
-function calcPressDigit(d){
-  const c = state.calc;
-  if(c.justEvaluated){ c.expr=''; c.justEvaluated=false; }
-  c.expr += d;
-}
-function calcPressDot(){
-  const c = state.calc;
-  if(c.justEvaluated){ c.expr=''; c.justEvaluated=false; }
-  const m = c.expr.match(/([0-9.]*)$/);
-  if(m && m[1].indexOf('.')!==-1) return;
-  c.expr += (!m || m[1]==='') ? '0.' : '.';
-}
-function calcPressOp(sym){
-  const c = state.calc;
-  if(c.justEvaluated){ c.justEvaluated = false; }
-  if(c.expr===''){ if(sym==='-') c.expr = '-'; return; }
-  if(/[+\-×÷^]$/.test(c.expr)) c.expr = c.expr.slice(0,-1) + sym;
-  else c.expr += sym;
-}
-function calcPressPostfix(sym){
-  const c = state.calc;
-  if(c.expr==='') return;
-  c.expr += sym;
-}
-function calcWrapPower(power){
-  const c = state.calc;
-  if(c.expr==='') return;
-  if(c.justEvaluated) c.justEvaluated = false;
-  c.expr = '(' + c.expr + ')^' + power;
-}
-function calcReciprocal(){
-  const c = state.calc;
-  if(c.expr==='') return;
-  if(c.justEvaluated) c.justEvaluated = false;
-  c.expr = '1/(' + c.expr + ')';
-}
-function calcClear(){ state.calc.expr=''; state.calc.justEvaluated=false; }
-function calcBackspace(){
-  const c = state.calc;
-  if(c.justEvaluated){ c.expr=''; c.justEvaluated=false; return; }
-  c.expr = c.expr.slice(0,-1);
-}
-function calcToggleSign(){
-  const c = state.calc;
-  if(c.expr==='') return;
-  if(/^-\(.*\)$/.test(c.expr)) c.expr = c.expr.slice(2,-1);
-  else if(/^-?\d+(\.\d+)?$/.test(c.expr)) c.expr = c.expr.startsWith('-') ? c.expr.slice(1) : '-'+c.expr;
-  else c.expr = '-(' + c.expr + ')';
-}
-function calcEquals(){
-  const c = state.calc;
-  const val = safeEvalExpr(c.expr);
-  if(val===null) return;
-  c.expr = formatCalcResult(val);
-  c.justEvaluated = true;
-}
-function calcMemClear(){ state.calc.memory = 0; }
-function calcMemRecall(){ calcInsertRaw(formatCalcResult(state.calc.memory)); }
-function calcMemAdd(){ const v = safeEvalExpr(state.calc.expr); if(v!==null) state.calc.memory += v; }
-function calcMemSub(){ const v = safeEvalExpr(state.calc.expr); if(v!==null) state.calc.memory -= v; }
-
-function calcKey(key){
-  const c = state.calc;
-  if(key.length===1 && key>='0' && key<='9'){ calcPressDigit(key); return; }
-  if(key==='.'){ calcPressDot(); return; }
-  if(key==='+'||key==='-'||key==='×'||key==='÷'||key==='^'){ calcPressOp(key); return; }
-  if(key==='('||key===')'){ calcInsertRaw(key); return; }
-  if(key==='π'||key==='e'){ calcInsertRaw(key); return; }
-  if(key==='sin'||key==='cos'||key==='tan'||key==='asin'||key==='acos'||key==='atan'||key==='ln'||key==='log'){ calcInsertRaw(key+'('); return; }
-  if(key==='sqrt'){ calcInsertRaw('√('); return; }
-  if(key==='cbrt'){ calcInsertRaw('∛('); return; }
-  if(key==='pow10'){ calcInsertRaw('10^('); return; }
-  if(key==='expx'){ calcInsertRaw('e^('); return; }
-  if(key==='x2'){ calcWrapPower(2); return; }
-  if(key==='x3'){ calcWrapPower(3); return; }
-  if(key==='inv'){ calcReciprocal(); return; }
-  if(key==='!'||key==='%'){ calcPressPostfix(key); return; }
-  if(key==='C'){ calcClear(); return; }
-  if(key==='⌫'){ calcBackspace(); return; }
-  if(key==='±'){ calcToggleSign(); return; }
-  if(key==='='){ calcEquals(); return; }
-  if(key==='2nd'){ c.shift = !c.shift; return; }
-  if(key==='toggle-angle'){ c.angleMode = c.angleMode==='deg' ? 'rad' : 'deg'; return; }
-  if(key==='MC'){ calcMemClear(); return; }
-  if(key==='MR'){ calcMemRecall(); return; }
-  if(key==='M+'){ calcMemAdd(); return; }
-  if(key==='M-'){ calcMemSub(); return; }
-}
-
-function updateDynamicKeyBtn(id, label, key){
-  const el = document.getElementById(id);
-  if(el){ el.textContent = label; el.dataset.key = key; }
-}
-function updateCalcUI(){
-  const exprEl = document.getElementById('calc-expr-line');
-  if(!exprEl){ render(); return; }
-  const c = state.calc;
-  const previewVal = (!c.justEvaluated) ? safeEvalExpr(c.expr) : null;
-  const preview = previewVal!==null ? '= '+formatCalcResult(previewVal) : '\u00A0';
-  exprEl.textContent = c.expr==='' ? '0' : c.expr;
-  document.getElementById('calc-preview-line').textContent = preview;
-  document.getElementById('calc-mem-badge').textContent = c.memory!==0 ? ('M = '+formatCalcResult(c.memory)) : '\u00A0';
-
-  const shift = c.shift;
-  const btn2nd = document.getElementById('calc-btn-2nd');
-  if(btn2nd) btn2nd.classList.toggle('active2nd', shift);
-  const btnAngle = document.getElementById('calc-btn-angle');
-  if(btnAngle) btnAngle.textContent = c.angleMode==='deg' ? 'DEG' : 'RAD';
-
-  updateDynamicKeyBtn('calc-btn-x2', shift?'x³':'x²', shift?'x3':'x2');
-  updateDynamicKeyBtn('calc-btn-sqrt', shift?'∛':'√', shift?'cbrt':'sqrt');
-  updateDynamicKeyBtn('calc-btn-sin', shift?'sin⁻¹':'sin', shift?'asin':'sin');
-  updateDynamicKeyBtn('calc-btn-cos', shift?'cos⁻¹':'cos', shift?'acos':'cos');
-  updateDynamicKeyBtn('calc-btn-tan', shift?'tan⁻¹':'tan', shift?'atan':'tan');
-  updateDynamicKeyBtn('calc-btn-ln', shift?'eˣ':'ln', shift?'expx':'ln');
-  updateDynamicKeyBtn('calc-btn-log', shift?'10ˣ':'log', shift?'pow10':'log');
-}
-
-function lcsIndexOps(a,b,eq){
-  const n=a.length,m=b.length, CAP=4000000;
-  if(n*m>CAP){
-    const ops=[]; const len=Math.max(n,m);
-    for(let i=0;i<len;i++){
-      if(i<n&&i<m){ if(eq(a[i],b[i])) ops.push({type:'equal',aIdx:i,bIdx:i}); else { ops.push({type:'del',aIdx:i}); ops.push({type:'add',bIdx:i}); } }
-      else if(i<n) ops.push({type:'del',aIdx:i}); else ops.push({type:'add',bIdx:i});
-    }
-    return ops;
-  }
-  const dp=new Array(n+1);
-  for(let i=0;i<=n;i++) dp[i]=new Int32Array(m+1);
-  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) dp[i][j] = eq(a[i],b[j]) ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
-  const ops=[]; let i=0,j=0;
-  while(i<n&&j<m){
-    if(eq(a[i],b[j])){ ops.push({type:'equal',aIdx:i,bIdx:j}); i++; j++; }
-    else if(dp[i+1][j]>=dp[i][j+1]){ ops.push({type:'del',aIdx:i}); i++; }
-    else { ops.push({type:'add',bIdx:j}); j++; }
-  }
-  while(i<n){ ops.push({type:'del',aIdx:i}); i++; }
-  while(j<m){ ops.push({type:'add',bIdx:j}); j++; }
-  return ops;
-}
-
-function lcsOps(a,b){
-  const n=a.length,m=b.length, CAP=4000000;
-  if(n*m>CAP){
-    const ops=[]; const len=Math.max(n,m);
-    for(let i=0;i<len;i++){
-      if(i<n&&i<m){ if(a[i]===b[i]) ops.push({type:'equal',value:a[i]}); else { ops.push({type:'del',value:a[i]}); ops.push({type:'add',value:b[i]}); } }
-      else if(i<n) ops.push({type:'del',value:a[i]}); else ops.push({type:'add',value:b[i]});
-    }
-    return ops;
-  }
-  const dp=new Array(n+1);
-  for(let i=0;i<=n;i++) dp[i]=new Int32Array(m+1);
-  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) dp[i][j]= a[i]===b[j]? dp[i+1][j+1]+1 : Math.max(dp[i+1][j],dp[i][j+1]);
-  const ops=[]; let i=0,j=0;
-  while(i<n&&j<m){
-    if(a[i]===b[j]){ ops.push({type:'equal',value:a[i]}); i++; j++; }
-    else if(dp[i+1][j]>=dp[i][j+1]){ ops.push({type:'del',value:a[i]}); i++; }
-    else { ops.push({type:'add',value:b[j]}); j++; }
-  }
-  while(i<n){ ops.push({type:'del',value:a[i]}); i++; }
-  while(j<m){ ops.push({type:'add',value:b[j]}); j++; }
-  return ops;
-}
-function tokenizeWords(t){ return t.split(/(\s+)/).filter(x=>x.length>0); }
-function wordDiffOps(o,n){ return lcsOps(tokenizeWords(o),tokenizeWords(n)); }
-
-/* ---------------- page-aware paragraph extraction (docx) ---------------- */
-
-function isRunPropOn(rPr, ns, tagName){
-  if(!rPr) return false;
-  const els = rPr.getElementsByTagNameNS(ns, tagName);
-  if(!els.length) return false;
-  const val = els[0].getAttributeNS(ns,'val') || els[0].getAttribute('w:val');
-  return !(val==='0' || val==='false' || val==='off');
-}
-
-async function extractDocxParagraphs(file){
-  const buf = await file.arrayBuffer();
-  const zip = await JSZip.loadAsync(buf);
-  const entry = zip.file('word/document.xml');
-  if(!entry) throw new Error('no document.xml');
-  const xmlText = await entry.async('string');
-  const xmlDoc = new DOMParser().parseFromString(xmlText, 'application/xml');
-  if(xmlDoc.getElementsByTagName('parsererror').length) throw new Error('xml parse error');
-  const ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-  const paragraphs = [];
-  let page = 1;
-  let pendingIncrement = false;
-  let sawAnyBreakMarker = false;
-  const pElements = xmlDoc.getElementsByTagNameNS(ns,'p');
-  for (let idx=0; idx<pElements.length; idx++){
-    const p = pElements[idx];
-    const lastRendered = p.getElementsByTagNameNS(ns,'lastRenderedPageBreak');
-    const brs = p.getElementsByTagNameNS(ns,'br');
-    let hasBreak = lastRendered.length>0;
-    for (let k=0;k<brs.length;k++){
-      const br = brs[k];
-      const t = br.getAttributeNS(ns,'type') || br.getAttribute('w:type');
-      if (t==='page') hasBreak = true;
-    }
-    if (hasBreak) sawAnyBreakMarker = true;
-    if (pendingIncrement) { page++; pendingIncrement = false; }
-
-    // Build text run-by-run (not a flat text-node scan) so we can honour
-    // per-run display formatting that Word stores separately from the
-    // literal characters: ALL CAPS / small caps (w:caps, w:smallCaps) make
-    // Word DISPLAY lower/mixed-case text as uppercase without changing the
-    // stored text, and hidden text (w:vanish) is stored but never shown.
-    // We also turn inline line breaks (w:br without type="page") and tabs
-    // into a space/tab so words from separate visual lines don't get mashed
-    // together into one run-on word.
-    let text = '';
-    const runs = p.getElementsByTagNameNS(ns, 'r');
-    for (let ri=0; ri<runs.length; ri++){
-      const run = runs[ri];
-      const rPrList = run.getElementsByTagNameNS(ns, 'rPr');
-      const rPr = rPrList.length ? rPrList[0] : null;
-      if (isRunPropOn(rPr, ns, 'vanish')) continue;
-      const caps = isRunPropOn(rPr, ns, 'caps') || isRunPropOn(rPr, ns, 'smallCaps');
-      const children = run.childNodes;
-      for (let ci=0; ci<children.length; ci++){
-        const node = children[ci];
-        if (node.nodeType !== 1) continue;
-        const ln = node.localName;
-        if (ln==='t'){
-          let s = node.textContent;
-          if (caps) s = s.toLocaleUpperCase('vi');
-          text += s;
-        } else if (ln==='br'){
-          const bt = node.getAttributeNS(ns,'type') || node.getAttribute('w:type');
-          if (bt!=='page') text += ' ';
-        } else if (ln==='tab'){
-          text += '\t';
-        }
-      }
-    }
-
-    paragraphs.push({ text, page });
-    if (hasBreak) pendingIncrement = true;
-  }
-  return { paragraphs, pageAccurate: sawAnyBreakMarker };
-}
-
-function estimatePages(paragraphs, avg){
-  avg = avg || 450;
-  let cum = 0;
-  return paragraphs.map(p=>{
-    const page = Math.floor(cum / avg) + 1;
-    const words = p.text.trim() ? p.text.trim().split(/\s+/).length : 0;
-    cum += words;
-    return { text: p.text, page };
-  });
-}
-
-async function getDocParagraphs(file, kind, avg){
-  if (kind.ext === 'docx'){
-    try{
-      const { paragraphs, pageAccurate } = await extractDocxParagraphs(file);
-      if (pageAccurate) return { paragraphs, pageAccurate: true };
-      return { paragraphs: estimatePages(paragraphs, avg), pageAccurate: false };
-    } catch(e){
-      const buf = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer: buf });
-      const paras = result.value.replace(/\r\n/g,'\n').split('\n').map(t=>({text:t,page:1}));
-      return { paragraphs: estimatePages(paras, avg), pageAccurate: false };
-    }
-  }
-  const text = await file.text();
-  const paras = text.replace(/\r\n/g,'\n').split('\n').map(t=>({text:t,page:1}));
-  return { paragraphs: estimatePages(paras, avg), pageAccurate: false };
-}
-
-/* ---------------- diff builders ---------------- */
-
-function buildTextRedline(oldParas,newParas){
-  const ops = lcsIndexOps(oldParas, newParas, (x,y)=> x.text===y.text);
-  const blocks=[]; let i=0,changeCount=0;
-  while(i<ops.length){
-    if(ops[i].type==='equal'){
-      const group=[];
-      while(i<ops.length&&ops[i].type==='equal'){ group.push(oldParas[ops[i].aIdx].text); i++; }
-      blocks.push({id:'b'+blocks.length,kind:'equal',lines:group});
-    } else {
-      const dels=[],adds=[];
-      while(i<ops.length&&ops[i].type!=='equal'){
-        if(ops[i].type==='del') dels.push(oldParas[ops[i].aIdx]);
-        else adds.push(newParas[ops[i].bIdx]);
-        i++;
-      }
-      changeCount++;
-      const pairs=[]; const minLen=Math.min(dels.length,adds.length);
-      for(let k=0;k<minLen;k++) pairs.push({kind:'modified',ops:wordDiffOps(dels[k].text,adds[k].text),oldPage:dels[k].page,newPage:adds[k].page});
-      for(let k=minLen;k<dels.length;k++) pairs.push({kind:'removed',text:dels[k].text,oldPage:dels[k].page});
-      for(let k=minLen;k<adds.length;k++) pairs.push({kind:'added',text:adds[k].text,newPage:adds[k].page});
-
-      const news = pairs.filter(p=>p.newPage!=null).map(p=>p.newPage);
-      const olds = pairs.filter(p=>p.oldPage!=null).map(p=>p.oldPage);
-      const newP = news.length ? Math.min.apply(null,news) : null;
-      const oldP = olds.length ? Math.min.apply(null,olds) : null;
-      let pageLabel = '';
-      if(newP!=null && oldP!=null) pageLabel = newP===oldP ? ('Trang '+newP) : ('Trang '+oldP+' → '+newP);
-      else if(newP!=null) pageLabel = 'Trang '+newP;
-      else if(oldP!=null) pageLabel = 'Trang '+oldP;
-      const repPage = newP!=null ? newP : oldP;
-
-      blocks.push({id:'b'+blocks.length,kind:'change',changeIndex:changeCount,pairs,pageLabel,repPage});
-    }
-  }
-  return blocks;
-}
-function computeStatsFromBlocks(blocks){
-  let added=0,removed=0,modified=0;
-  blocks.forEach(b=>{ if(b.kind!=='change') return; b.pairs.forEach(p=>{ if(p.kind==='modified') modified++; else if(p.kind==='added') added++; else if(p.kind==='removed') removed++; }); });
-  return {added,removed,modified,total:added+removed+modified};
-}
-function rowSignature(row){ return row.join('\u0001'); }
-function buildGridDiff(oldGrid,newGrid){
-  const oldSigs=oldGrid.map(rowSignature), newSigs=newGrid.map(rowSignature);
-  const ops=lcsOps(oldSigs,newSigs);
-  const colCount=Math.max(oldGrid.reduce((m,r)=>Math.max(m,r.length),0),newGrid.reduce((m,r)=>Math.max(m,r.length),0),1);
-  const pad=row=>{ const r=row.slice(); while(r.length<colCount) r.push(''); return r; };
-  const blocks=[]; let i=0,oldIdx=0,newIdx=0,changeCount=0;
-  while(i<ops.length){
-    if(ops[i].type==='equal'){
-      const rows=[];
-      while(i<ops.length&&ops[i].type==='equal'){ rows.push({oldRow:pad(oldGrid[oldIdx]),newRow:pad(newGrid[newIdx]),oldIdx,newIdx}); oldIdx++; newIdx++; i++; }
-      blocks.push({id:'r'+blocks.length,kind:'equal',rows});
-    } else {
-      const delRows=[],addRows=[];
-      while(i<ops.length&&ops[i].type!=='equal'){
-        if(ops[i].type==='del'){ delRows.push({row:pad(oldGrid[oldIdx]),oldIdx}); oldIdx++; }
-        else { addRows.push({row:pad(newGrid[newIdx]),newIdx}); newIdx++; }
-        i++;
-      }
-      changeCount++;
-      const items=[]; const minLen=Math.min(delRows.length,addRows.length);
-      for(let k=0;k<minLen;k++){
-        const oldRow=delRows[k].row,newRow=addRows[k].row; const cells=[];
-        for(let c=0;c<colCount;c++) cells.push({old:oldRow[c],new:newRow[c],changed:oldRow[c]!==newRow[c]});
-        items.push({kind:'modified',oldIdx:delRows[k].oldIdx,newIdx:addRows[k].newIdx,cells});
-      }
-      for(let k=minLen;k<delRows.length;k++) items.push({kind:'removed',oldIdx:delRows[k].oldIdx,row:delRows[k].row});
-      for(let k=minLen;k<addRows.length;k++) items.push({kind:'added',newIdx:addRows[k].newIdx,row:addRows[k].row});
-      blocks.push({id:'r'+blocks.length,kind:'change',changeIndex:changeCount,items});
-    }
-  }
-  return {blocks,colCount};
-}
-function computeStatsFromRowBlocks(rb){
-  let added=0,removed=0,modified=0;
-  rb.blocks.forEach(b=>{ if(b.kind!=='change') return; b.items.forEach(it=>{ if(it.kind==='added') added++; else if(it.kind==='removed') removed++; else if(it.kind==='modified') modified++; }); });
-  return {added,removed,modified,total:added+removed+modified};
-}
-function colLetter(n){ let s=''; n=n+1; while(n>0){ const r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26); } return s; }
-
-async function extractSheetGrids(file,kind){
-  let wb;
-  if(kind.ext==='csv'){ const text=await file.text(); wb=XLSX.read(text,{type:'string'}); }
-  else { const buf=await file.arrayBuffer(); wb=XLSX.read(new Uint8Array(buf),{type:'array'}); }
-  const sheets={};
-  wb.SheetNames.forEach(name=>{
-    const ws=wb.Sheets[name];
-    const grid=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-    sheets[name]=grid.map(row=>row.map(cell=>(cell===null||cell===undefined)?'':String(cell)));
-  });
-  return {sheetNames:wb.SheetNames,sheets};
-}
-
-function unionSheetNames(oldNames,newNames){
-  const out = oldNames.slice();
-  newNames.forEach(n=>{ if(!out.includes(n)) out.push(n); });
-  return out;
-}
-
-/* ---------------- state helpers ---------------- */
-function currentDiff(){
-  if(state.mode==='chain') return state.chainResults ? state.chainResults[state.chainActive].diffData : null;
-  return state.diffData;
-}
-function setCurrentDiff(d){
-  if(state.mode==='chain') state.chainResults[state.chainActive].diffData = d;
-  else state.diffData = d;
-}
-function matchesFilter(kind){ return state.filter==='all' || kind===state.filter; }
-
-/* ---------------- render ---------------- */
-const app = document.getElementById('app');
-
-function renderMenuButton(){
-  return `<button class="menu-btn" data-action="open-menu" title="Công cụ kế toán">&#9776;</button>`;
-}
-
-function renderVatPane(){
-  return `
-    <div class="calc-row-inline">
-      <div style="flex:2;min-width:0;">
-        <label class="calc-inline-label">Số tiền</label>
-        <div class="calc-money-wrap">
-          <input type="text" inputmode="numeric" id="vat-amount" class="calc-input" placeholder="0" data-money="1">
-          <span class="calc-money-suffix">đ</span>
-        </div>
-      </div>
-      <div style="flex:1;min-width:0;">
-        <label class="calc-inline-label">Thuế suất</label>
-        <select id="vat-rate" class="calc-input">
-          <option value="0">0%</option><option value="5">5%</option><option value="8">8%</option><option value="10" selected>10%</option>
-        </select>
-      </div>
-    </div>
-    <div class="calc-radio-row">
-      <label><input type="radio" name="vat-mode" value="pre" checked> Số tiền là trước thuế</label>
-      <label><input type="radio" name="vat-mode" value="post"> Số tiền là sau thuế</label>
-    </div>
-    <div class="calc-result">
-      <div class="calc-result-row"><span>Trước thuế</span><b id="vat-out-pre">0</b></div>
-      <div class="calc-result-row"><span>Tiền thuế GTGT</span><b id="vat-out-tax">0</b></div>
-      <div class="calc-result-row"><span>Sau thuế</span><b id="vat-out-post">0</b></div>
-    </div>`;
-}
-
-function renderPctPane(){
-  return `
-    <div class="calc-sub-title">Tăng / giảm phần trăm</div>
-    <div class="calc-row-inline">
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="pct1-a" class="calc-input" placeholder="Số gốc" data-money="1"><span class="calc-money-suffix">đ</span></div>
-      <select id="pct1-op" class="calc-input" style="max-width:90px;"><option value="inc">tăng</option><option value="dec">giảm</option></select>
-      <div class="calc-money-wrap" style="max-width:80px;flex:none;"><input type="text" inputmode="decimal" id="pct1-p" class="calc-input" placeholder="0"><span class="calc-money-suffix">%</span></div>
-    </div>
-    <div class="calc-result"><div class="calc-result-row"><span>Kết quả</span><b id="pct1-out">0</b></div></div>
-
-    <div class="calc-sub-title">A là bao nhiêu % của B</div>
-    <div class="calc-row-inline">
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="pct2-a" class="calc-input" placeholder="A" data-money="1"><span class="calc-money-suffix">đ</span></div>
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="pct2-b" class="calc-input" placeholder="B" data-money="1"><span class="calc-money-suffix">đ</span></div>
-    </div>
-    <div class="calc-result"><div class="calc-result-row"><span>A / B</span><b id="pct2-out">0%</b></div></div>
-
-    <div class="calc-sub-title">Chênh lệch % giữa A và B</div>
-    <div class="calc-row-inline">
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="pct3-a" class="calc-input" placeholder="A (cũ)" data-money="1"><span class="calc-money-suffix">đ</span></div>
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="pct3-b" class="calc-input" placeholder="B (mới)" data-money="1"><span class="calc-money-suffix">đ</span></div>
-    </div>
-    <div class="calc-result"><div class="calc-result-row"><span>Thay đổi</span><b id="pct3-out">0%</b></div></div>`;
-}
-
-function renderWordsPane(){
-  return `
-    <div class="calc-row"><label>Số tiền (VNĐ)</label>
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="words-amount" class="calc-input" placeholder="0" data-money="1"><span class="calc-money-suffix">đ</span></div>
-    </div>
-    <div class="calc-result"><div class="calc-result-row block">
-      <div class="calc-result-head"><span>Bằng chữ</span><button class="copy-btn" data-action="copy-text" data-target="words-out">Sao chép</button></div>
-      <b id="words-out">Không đồng.</b>
-    </div></div>`;
-}
-
-function renderDepPane(){
-  return `
-    <div class="calc-row"><label>Nguyên giá</label>
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="dep-cost" class="calc-input" placeholder="0" data-money="1"><span class="calc-money-suffix">đ</span></div>
-    </div>
-    <div class="calc-row"><label>Giá trị thanh lý ước tính</label>
-      <div class="calc-money-wrap"><input type="text" inputmode="numeric" id="dep-salvage" class="calc-input" placeholder="0" data-money="1"><span class="calc-money-suffix">đ</span></div>
-    </div>
-    <div class="calc-row"><label>Thời gian sử dụng (năm)</label><input type="text" inputmode="decimal" id="dep-years" class="calc-input" placeholder="0"></div>
-    <div class="calc-row"><label>Đã sử dụng (tháng)</label><input type="text" inputmode="decimal" id="dep-used" class="calc-input" placeholder="0"></div>
-    <div class="calc-result">
-      <div class="calc-result-row"><span>Khấu hao / năm</span><b id="dep-out-year">0</b></div>
-      <div class="calc-result-row"><span>Khấu hao / tháng</span><b id="dep-out-month">0</b></div>
-      <div class="calc-result-row"><span>Đã khấu hao luỹ kế</span><b id="dep-out-accum">0</b></div>
-      <div class="calc-result-row"><span>Giá trị còn lại</span><b id="dep-out-remain">0</b></div>
-    </div>`;
-}
-
-function renderBasicPane(){
-  const c = state.calc;
-  const shift = c.shift;
-  const previewVal = (!c.justEvaluated) ? safeEvalExpr(c.expr) : null;
-  const preview = previewVal!==null ? '= '+formatCalcResult(previewVal) : '\u00A0';
-  const mainDisplay = c.expr==='' ? '0' : c.expr;
-
-  const rows = [
-    [ {label:'2nd', key:'2nd', cls:'op'+(shift?' active2nd':''), id:'calc-btn-2nd'},
-      {label: c.angleMode==='deg'?'DEG':'RAD', key:'toggle-angle', cls:'op', id:'calc-btn-angle'},
-      {label:'MC', key:'MC', cls:'op'},
-      {label:'MR', key:'MR', cls:'op'} ],
-    [ {label:'M+', key:'M+', cls:'op'}, {label:'M−', key:'M-', cls:'op'},
-      {label:'(', key:'(', cls:'op'}, {label:')', key:')', cls:'op'} ],
-    [ {label: shift?'x³':'x²', key: shift?'x3':'x2', cls:'', id:'calc-btn-x2'},
-      {label:'xʸ', key:'^', cls:''},
-      {label: shift?'∛':'√', key: shift?'cbrt':'sqrt', cls:'', id:'calc-btn-sqrt'},
-      {label:'1/x', key:'inv', cls:''} ],
-    [ {label: shift?'sin⁻¹':'sin', key: shift?'asin':'sin', cls:'', id:'calc-btn-sin'},
-      {label: shift?'cos⁻¹':'cos', key: shift?'acos':'cos', cls:'', id:'calc-btn-cos'},
-      {label: shift?'tan⁻¹':'tan', key: shift?'atan':'tan', cls:'', id:'calc-btn-tan'},
-      {label: shift?'eˣ':'ln', key: shift?'expx':'ln', cls:'', id:'calc-btn-ln'} ],
-    [ {label: shift?'10ˣ':'log', key: shift?'pow10':'log', cls:'', id:'calc-btn-log'},
-      {label:'π', key:'π', cls:''}, {label:'e', key:'e', cls:''}, {label:'x!', key:'!', cls:''} ],
-    [ {label:'C', key:'C', cls:'op'}, {label:'±', key:'±', cls:'op'},
-      {label:'%', key:'%', cls:'op'}, {label:'÷', key:'÷', cls:'op'} ],
-    [ {label:'7', key:'7', cls:''}, {label:'8', key:'8', cls:''}, {label:'9', key:'9', cls:''}, {label:'×', key:'×', cls:'op'} ],
-    [ {label:'4', key:'4', cls:''}, {label:'5', key:'5', cls:''}, {label:'6', key:'6', cls:''}, {label:'−', key:'-', cls:'op'} ],
-    [ {label:'1', key:'1', cls:''}, {label:'2', key:'2', cls:''}, {label:'3', key:'3', cls:''}, {label:'+', key:'+', cls:'op'} ],
-    [ {label:'0', key:'0', cls:''}, {label:'.', key:'.', cls:''}, {label:'⌫', key:'⌫', cls:''}, {label:'=', key:'=', cls:'eq'} ]
   ];
-  const keysHtml = rows.map(row=>row.map(k=>`<button data-action="calc-key" data-key="${esc(k.key)}" class="calc-key ${k.cls}"${k.id?` id="${k.id}"`:''}>${esc(k.label)}</button>`).join('')).join('');
+/* ===================================================================== */
 
-  return `
-    <div class="calc-mem-badge" id="calc-mem-badge">${c.memory!==0 ? ('M = '+esc(formatCalcResult(c.memory))) : '\u00A0'}</div>
-    <div class="calc-sci-display">
-      <div class="calc-expr-line" id="calc-expr-line">${esc(mainDisplay)}</div>
-      <div class="calc-preview-line" id="calc-preview-line">${esc(preview)}</div>
-    </div>
-    <div class="calc-keypad calc-keypad-sci">${keysHtml}</div>`;
-}
+  const grid = document.getElementById('grid');
+  const tagFiltersEl = document.getElementById('tagFilters');
+  const searchInput = document.getElementById('search');
 
-function renderCalcScreen(){
-  const tabs = [
-    {key:'vat', label:'GTGT'},
-    {key:'pct', label:'Phần trăm'},
-    {key:'words', label:'Số → Chữ'},
-    {key:'dep', label:'Khấu hao'},
-    {key:'basic', label:'Máy tính'}
-  ];
-  const tabsHtml = tabs.map(t=>`<button class="calc-tab${state.calcTab===t.key?' active':''}" data-action="calc-tab" data-tab="${t.key}">${t.label}</button>`).join('');
-  let paneHtml;
-  if(state.calcTab==='vat') paneHtml = renderVatPane();
-  else if(state.calcTab==='pct') paneHtml = renderPctPane();
-  else if(state.calcTab==='words') paneHtml = renderWordsPane();
-  else if(state.calcTab==='dep') paneHtml = renderDepPane();
-  else paneHtml = renderBasicPane();
+  let activeGenre = 'Tất cả';
+  let query = '';
 
-  return `
-    <div id="calc-screen">
-    <button class="back-btn" data-action="close-calc">&#8249; Quay lại</button>
-    <p class="eyebrow" style="margin-top:14px;">Công cụ kế toán</p>
-    <h1 class="h-title calc-page-title">Tính toán nhanh cho việc văn phòng</h1>
-    <div class="calc-tabs">${tabsHtml}</div>
-    <div class="calc-body">${paneHtml}</div>
-    </div>`;
-}
-
-let lastRenderedStage = null;
-function render(){
-  const prevPanel = app.querySelector('.paper-panel');
-  const scrollTop = prevPanel ? prevPanel.scrollTop : 0;
-  const showMenuBtn = state.stage!=='calc' && state.stage!=='loading';
-  const isNewStage = state.stage !== lastRenderedStage;
-  const wrapClass = isNewStage ? ' class="stage-fade"' : '';
-  app.innerHTML = (showMenuBtn ? renderMenuButton() : '') + '<div'+wrapClass+'>' + renderStage() + '</div>';
-  lastRenderedStage = state.stage;
-  const newPanel = app.querySelector('.paper-panel');
-  if(newPanel) newPanel.scrollTop = scrollTop;
-}
-
-function renderStage(){
-  if(state.stage==='upload') return renderUpload();
-  if(state.stage==='loading') return renderLoading();
-  if(state.stage==='error') return renderError();
-  if(state.stage==='result') return renderResult();
-  if(state.stage==='calc') return renderCalcScreen();
-  return '';
-}
-
-function fileSlotHtml(which,label,file,kind,inputId){
-  const inner = !file ? `
-    <div class="dropzone" data-which="${which}" data-action="pick-${which}">
-      <div class="dz-icon">&#8593;</div>
-      <p class="dz-main">Kéo thả file vào đây</p>
-      <p class="dz-sub">hoặc bấm để chọn</p>
-      <p class="dz-caption">.docx · .xlsx · .xls · .csv · .txt</p>
-    </div>` : `
-    <div class="file-chip">
-      <div class="file-chip-icon">${kind.group==='sheet' ? '&#9638;' : '&#9776;'}</div>
-      <div class="file-chip-meta">
-        <p class="file-chip-name">${esc(file.name)}</p>
-        <p class="file-chip-sub">${esc(kind.label)} · ${formatBytes(file.size)}</p>
-      </div>
-      <button class="chip-remove" data-action="remove-${which}">&times;</button>
-    </div>`;
-  return `
-    <div class="slot">
-      <div class="slot-label"><span class="tick"></span>${label}</div>
-      <input id="${inputId}" type="file" accept=".docx,.xlsx,.xls,.csv,.txt,.md" style="display:none">
-      ${inner}
-    </div>`;
-}
-
-function renderPairUpload(){
-  const kindOld = state.fileOld ? getKind(state.fileOld.name) : null;
-  const kindNew = state.fileNew ? getKind(state.fileNew.name) : null;
-  const canCompare = state.fileOld && state.fileNew;
-  return `
-    <div class="upload-grid">
-      ${fileSlotHtml('old','Bản cũ',state.fileOld,kindOld,'input-old')}
-      <div class="stamp-col">
-        <button class="swap-btn" data-action="swap" title="Hoán đổi bản cũ / mới">&#8646;</button>
-      </div>
-      ${fileSlotHtml('new','Bản mới',state.fileNew,kindNew,'input-new')}
-    </div>
-    <div class="compare-row">
-      <button class="compare-btn${canCompare?' active':''}" data-action="compare" ${canCompare?'':'disabled'}>So sánh</button>
-    </div>`;
-}
-
-function renderChainUpload(){
-  const files = state.chainFiles;
-  const canCompare = files.length>=2;
-  const listHtml = files.map((f,idx)=>{
-    const k = getKind(f.name);
-    return `
-      <div class="chain-item">
-        <span class="chain-index">v${idx+1}</span>
-        <div class="chain-item-icon">${k.group==='sheet'?'&#9638;':'&#9776;'}</div>
-        <div class="file-chip-meta">
-          <p class="file-chip-name">${esc(f.name)}</p>
-          <p class="file-chip-sub">${esc(k.label)} · ${formatBytes(f.size)}</p>
-        </div>
-        <div class="chain-item-actions">
-          <button data-action="chain-up" data-index="${idx}" ${idx===0?'disabled':''} title="Lên">&#8593;</button>
-          <button data-action="chain-down" data-index="${idx}" ${idx===files.length-1?'disabled':''} title="Xuống">&#8595;</button>
-          <button data-action="chain-remove" data-index="${idx}" title="Xoá">&times;</button>
-        </div>
-      </div>`;
-  }).join('');
-  return `
-    <div class="chain-wrap">
-      <input id="input-chain" type="file" accept=".docx,.xlsx,.xls,.csv,.txt,.md" multiple style="display:none">
-      <div class="dropzone chain-dropzone" data-which="chain" data-action="pick-chain">
-        <div class="dz-icon">&#8593;</div>
-        <p class="dz-main">Kéo thả các phiên bản vào đây (theo đúng thứ tự cũ → mới)</p>
-        <p class="dz-sub">hoặc bấm để chọn nhiều file cùng lúc</p>
-        <p class="dz-caption">.docx · .xlsx · .xls · .csv · .txt</p>
-      </div>
-      ${files.length ? `<div class="chain-list">${listHtml}</div>` : ''}
-      <div class="compare-row">
-        <button class="compare-btn${canCompare?' active':''}" data-action="compare-chain" ${canCompare?'':'disabled'}>So sánh chuỗi${files.length>=2?` (${files.length-1} lượt)`:''}</button>
-      </div>
-    </div>`;
-}
-
-function renderUpload(){
-  const modeTabs = `
-    <div class="mode-tabs">
-      <button class="mode-tab${state.mode==='pair'?' active':''}" data-action="mode-pair">So sánh 2 file</button>
-      <button class="mode-tab${state.mode==='chain'?' active':''}" data-action="mode-chain">Chuỗi nhiều phiên bản</button>
-    </div>`;
-  const body = state.mode==='pair' ? renderPairUpload() : renderChainUpload();
-  const advSettings = `
-    <details class="adv-settings" ${state.advOpen?'open':''}>
-      <summary>Tuỳ chọn nâng cao</summary>
-      <label class="adv-row">Ước tính trang khi Word không có dấu ngắt trang thật:
-        <input type="number" id="avg-words-input" min="100" max="2000" step="10" value="${state.avgWordsPerPage}"> từ / trang
-      </label>
-    </details>`;
-  return `
-    <p class="eyebrow">Đối chiếu tài liệu</p>
-    <h1 class="h-title">Xem tài liệu đã thay đổi những gì</h1>
-    <p class="h-sub">Tải lên bản cũ và bản mới — hoặc cả một chuỗi phiên bản. Công cụ sẽ đánh dấu từng chỗ thêm, xóa và sửa, kèm số trang đối với file Word.</p>
-    <div class="format-note">
-      <span class="format-pill"><b>.docx</b> Word</span>
-      <span class="format-pill"><b>.xlsx / .xls</b> Excel</span>
-      <span class="format-pill"><b>.csv</b> Bảng dữ liệu</span>
-      <span class="format-pill"><b>.txt / .md</b> Văn bản thuần</span>
-      <span class="format-pill no"><b>.doc, .pdf, .pptx…</b> chưa hỗ trợ</span>
-    </div>
-    ${modeTabs}
-    ${body}
-    ${advSettings}
-    ${state.errorMsg ? `<div class="err-line">${esc(state.errorMsg)}</div>` : ''}
-  `;
-}
-
-function renderLoading(){
-  return `<div class="loading-wrap"><div class="pulse"></div><p class="loading-text">Đang đối chiếu…</p></div>`;
-}
-
-function renderError(){
-  return `
-    <div class="err-stage">
-      <p class="eyebrow">Đối chiếu tài liệu</p>
-      <h2 class="err-title">Không đọc được file</h2>
-      <p style="font-size:13.5px;color:var(--text-mid);max-width:440px;line-height:1.6;">${esc(state.errorMsg)}</p>
-      <button class="retry-btn" data-action="retry">&#8635; Thử lại</button>
-    </div>`;
-}
-
-function renderTextPanel(diffData){
-  const blocksHtml = diffData.blocks.map(block=>{
-    if(block.kind==='equal'){
-      const expanded = !!state.expandedEqual[block.id];
-      const visible = expanded ? block.lines : block.lines.slice(0,3);
-      const hidden = block.lines.length - visible.length;
-      const toggle = hidden>0
-        ? `<p class="equal-toggle" data-action="expand-equal" data-id="${block.id}">⋯ ${hidden} dòng không đổi — bấm để xem</p>`
-        : (expanded && block.lines.length>3 ? `<p class="equal-toggle" data-action="collapse-equal" data-id="${block.id}">▲ Thu gọn</p>` : '');
-      return `<div class="p-block equal">${visible.map(l=>`<p>${esc(l)||'&nbsp;'}</p>`).join('')}${toggle}</div>`;
-    }
-    const visiblePairs = block.pairs.filter(p=>matchesFilter(p.kind));
-    if(visiblePairs.length===0) return '';
-    const flash = state.flashId===block.id ? ' flash' : '';
-    const pairsHtml = visiblePairs.map(p=>{
-      if(p.kind==='modified'){
-        const spans = p.ops.map(op=>{
-          if(op.type==='equal') return `<span class="w-equal">${esc(op.value)}</span>`;
-          if(op.type==='del') return `<span class="w-del">${esc(op.value)}</span>`;
-          return `<span class="w-add">${esc(op.value)}</span>`;
-        }).join('');
-        return `<p class="p-line">${spans}</p>`;
-      }
-      if(p.kind==='removed') return `<p class="p-line"><span class="full-del">${esc(p.text)||'&nbsp;'}</span></p>`;
-      return `<p class="p-line"><span class="full-add">${esc(p.text)||'&nbsp;'}</span></p>`;
-    }).join('');
-    const tag = block.pageLabel ? `<span class="page-tag">${esc(block.pageLabel)}</span>` : '';
-    return `<div class="p-block change${flash}" id="blk-${block.id}">${tag}${pairsHtml}</div>`;
-  }).join('');
-  return `<div class="paper-panel">${blocksHtml}</div>`;
-}
-
-function renderSheetPanel(diffData){
-  const colCount = diffData.rowBlocks.colCount;
-  let head = `<tr><th></th>${Array.from({length:colCount}).map((_,c)=>`<th>${colLetter(c)}</th>`).join('')}</tr>`;
-  let rows = '';
-  diffData.rowBlocks.blocks.forEach(block=>{
-    if(block.kind==='equal'){
-      block.rows.slice(0,400).forEach(r=>{
-        rows += `<tr><th>${r.oldIdx+1}</th>${r.newRow.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`;
+  function renderTags(){
+    const genres = ['Tất cả', ...new Set(tools.map(g => g.genre))];
+    tagFiltersEl.innerHTML = '';
+    genres.forEach(g => {
+      const btn = document.createElement('button');
+      btn.className = 'tag-btn' + (g === activeGenre ? ' active' : '');
+      btn.textContent = g;
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        activeGenre = g;
+        renderTags();
+        renderGrid();
       });
+      tagFiltersEl.appendChild(btn);
+    });
+  }
+
+  function playIcon(){
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 4l14 8-14 8V4z"/></svg>';
+  }
+
+  function renderGrid(){
+    const q = query.trim().toLowerCase();
+    const filtered = tools.filter(g => {
+      const matchGenre = activeGenre === 'Tất cả' || g.genre === activeGenre;
+      const matchQuery = g.title.toLowerCase().includes(q);
+      return matchGenre && matchQuery;
+    });
+
+    grid.innerHTML = '';
+
+    if(filtered.length === 0){
+      grid.innerHTML = `
+        <div class="empty">
+          <p>KHÔNG TÌM THẤY CÔNG CỤ</p>
+          <p>Thử từ khoá khác hoặc chọn lại nhóm.</p>
+        </div>`;
       return;
     }
-    const visibleItems = block.items.filter(it=>matchesFilter(it.kind));
-    visibleItems.forEach((it,idx)=>{
-      const isFlash = state.flashId===block.id && idx===0;
-      const idAttr = idx===0 ? ` id="blk-${block.id}"` : '';
-      if(it.kind==='modified'){
-        const cells = it.cells.map(c=> c.changed
-          ? `<td class="cell-mod"><span class="cell-old">${esc(c.old)||'&nbsp;'}</span><span class="cell-new">${esc(c.new)||'&nbsp;'}</span></td>`
-          : `<td>${esc(c.new)}</td>`).join('');
-        rows += `<tr${idAttr} class="${isFlash?'row-flash':''}"><th>${it.newIdx+1}</th>${cells}</tr>`;
-      } else if(it.kind==='removed'){
-        rows += `<tr${idAttr} class="row-removed ${isFlash?'row-flash':''}"><th>${it.oldIdx+1}</th>${it.row.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`;
-      } else {
-        rows += `<tr${idAttr} class="row-added ${isFlash?'row-flash':''}"><th>${it.newIdx+1}</th>${it.row.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`;
+
+    filtered.forEach(g => {
+      const isSoon = !!g.soon || !g.href;
+      const el = document.createElement(isSoon ? 'div' : 'a');
+      if(!isSoon){
+        el.href = g.href;
+        el.target = '_self';
       }
-    });
-  });
-  return `<div class="paper-panel" style="overflow-x:auto;"><table class="grid-table"><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
-}
+      el.className = 'cartridge' + (isSoon ? ' is-soon' : '');
+      el.style.setProperty('--card-color', g.color || '#ffcf56');
+      if(!isSoon) el.tabIndex = 0;
 
-function renderSheetTabsHtml(d){
-  const oldNames = d.gridsOld.sheetNames, newNames = d.gridsNew.sheetNames;
-  const tabs = d.sheetNames.map(name=>{
-    const inOld = oldNames.includes(name), inNew = newNames.includes(name);
-    let cls = 'sheet-tab';
-    if(name===d.activeSheet) cls += ' active';
-    if(inOld && !inNew) cls += ' removed-sheet';
-    else if(!inOld && inNew) cls += ' added-sheet';
-    const dot = (!inOld && inNew) ? '<span class="sheet-dot add"></span>' : ((inOld && !inNew) ? '<span class="sheet-dot del"></span>' : '');
-    return `<button class="${cls}" data-action="switch-sheet" data-sheet="${esc(name)}">${esc(name)}${dot}</button>`;
-  }).join('');
-  return `<div class="sheet-tabs">${tabs}</div>`;
-}
-
-function computeRailTicks(d){
-  const ticks=[];
-  const blocks = d.type==='doc'? d.blocks : d.rowBlocks.blocks;
-  blocks.forEach(b=>{
-    if(b.kind!=='change') return;
-    const items = d.type==='doc'? b.pairs : b.items;
-    const visibleItems = items.filter(x=>matchesFilter(x.kind));
-    if(visibleItems.length===0) return;
-    const hasAdded = visibleItems.some(x=>x.kind==='added');
-    const hasRemoved = visibleItems.some(x=>x.kind==='removed');
-    const hasMod = visibleItems.some(x=>x.kind==='modified');
-    let color='mod';
-    if(hasMod) color='mod'; else if(hasAdded&&!hasRemoved) color='add'; else if(hasRemoved&&!hasAdded) color='del';
-    const title = d.type==='doc' && b.pageLabel ? `Thay đổi #${b.changeIndex} · ${b.pageLabel}` : `Thay đổi #${b.changeIndex}`;
-    ticks.push({id:b.id, color, title});
-  });
-  return ticks;
-}
-
-function renderFilterBar(d){
-  const items = [
-    {key:'all', label:'Tất cả', count:d.stats.total},
-    {key:'added', label:'Thêm', count:d.stats.added},
-    {key:'removed', label:'Xóa', count:d.stats.removed},
-    {key:'modified', label:'Sửa', count:d.stats.modified}
-  ];
-  return `<div class="filter-bar">${items.map(it=>`<button class="filter-pill ${it.key}${state.filter===it.key?' active':''}" data-action="filter" data-filter="${it.key}">${it.label} (${it.count})</button>`).join('')}</div>`;
-}
-
-function renderDiffBody(d){
-  const sheetTabs = (d.type==='sheet' && d.sheetNames.length>1) ? renderSheetTabsHtml(d) : '';
-
-  let pageSummary = '';
-  if(d.type==='doc' && d.stats.total>0){
-    const pages = Array.from(new Set(d.blocks.filter(b=>b.kind==='change' && b.repPage!=null).map(b=>b.repPage))).sort((a,b)=>a-b);
-    if(pages.length){
-      const pills = pages.map(p=>{
-        const firstBlock = d.blocks.find(b=>b.kind==='change' && b.repPage===p);
-        return `<span class="page-pill" data-action="goto" data-id="${firstBlock.id}">Trang ${p}</span>`;
-      }).join('');
-      const note = d.pageAccurate ? 'số trang lấy từ dấu ngắt trang trong file Word' : 'số trang là ước tính theo số từ mỗi trang, có thể lệch vài trang so với bản in thật';
-      pageSummary = `<p class="page-summary"><b>Thay đổi ở:</b> ${pills} <span class="page-note">(${note})</span></p>`;
-    }
-  }
-
-  const filterBar = d.stats.total>0 ? renderFilterBar(d) : '';
-
-  let body;
-  if(d.stats.total===0){
-    body = `<div class="paper-panel same-state"><div style="font-size:22px;">&#10003;</div><p style="margin:0;font-size:13.5px;">Hai phiên bản giống hệt nhau — không có thay đổi nào.</p></div>`;
-  } else {
-    const railTicks = computeRailTicks(d);
-    if(railTicks.length===0){
-      body = `<div class="paper-panel same-state"><div style="font-size:22px;">&#10003;</div><p style="margin:0;font-size:13.5px;">Không có thay đổi nào khớp với bộ lọc hiện tại.</p></div>`;
-    } else {
-      const railHtml = railTicks.map(t=>`<div class="rail-tick ${t.color}" data-action="goto" data-id="${t.id}" title="${esc(t.title)}"></div>`).join('');
-      const panel = d.type==='doc' ? renderTextPanel(d) : renderSheetPanel(d);
-      body = `<div class="work-area"><div class="rail">${railHtml}</div>${panel}</div>`;
-    }
-  }
-
-  return `
-    ${sheetTabs}
-    ${pageSummary}
-    ${filterBar}
-    ${body}
-    <div class="legend">
-      <span><i class="li-del"></i> Đã xóa</span>
-      <span><i class="li-add"></i> Đã thêm</span>
-      <span><i class="li-mod"></i> Đã sửa</span>
-    </div>`;
-}
-
-function renderResult(){
-  const isChain = state.mode==='chain';
-  const d = currentDiff();
-  if(!d) return '';
-
-  let headerHtml;
-  if(isChain){
-    const cur = state.chainResults[state.chainActive];
-    headerHtml = `
-      <div>
-        <button class="back-btn" data-action="back">&#8249; So sánh chuỗi khác</button>
-        <p class="filenames">${esc(cur.fileOldName)} &#8594; ${esc(cur.fileNewName)}</p>
-      </div>`;
-  } else {
-    headerHtml = `
-      <div>
-        <button class="back-btn" data-action="back">&#8249; So sánh cặp khác</button>
-        <p class="filenames">${esc(state.fileOld.name)} &#8594; ${esc(state.fileNew.name)}</p>
-      </div>`;
-  }
-
-  const toolbarHtml = `
-    <div class="toolbar-btns">
-      <button class="tool-btn" data-action="print-report">In / Lưu PDF</button>
-      <button class="tool-btn" data-action="export-html">Tải HTML</button>
-    </div>`;
-
-  const chainTabsHtml = isChain ? `<div class="sheet-tabs chain-tabs">${state.chainResults.map((r,idx)=>`<button class="sheet-tab${idx===state.chainActive?' active':''}" data-action="chain-tab" data-index="${idx}">${esc(r.label)}</button>`).join('')}</div>` : '';
-
-  const bodyBlock = renderDiffBody(d);
-
-  return `
-    <div class="result-top">
-      ${headerHtml}
-      <div class="result-top-right">
-        <div class="stamp-badge">
-          <span class="s-add"><b>+${d.stats.added}</b> thêm</span>
-          <span class="s-del"><b>&minus;${d.stats.removed}</b> xóa</span>
-          <span class="s-mod"><b>~${d.stats.modified}</b> sửa</span>
+      el.innerHTML = `
+        <div class="cart-top">
+          <div class="cart-icon">${g.icon || '🎮'}</div>
+          <div>
+            <p class="cart-name">${g.title}</p>
+            <span class="cart-genre">${g.genre}</span>
+          </div>
         </div>
-        ${toolbarHtml}
-      </div>
-    </div>
-    ${chainTabsHtml}
-    ${bodyBlock}
-  `;
-}
-
-/* ---------------- actions ---------------- */
-function reset(){
-  state.stage='upload';
-  state.fileOld=null; state.fileNew=null;
-  state.chainFiles=[]; state.chainResults=null; state.chainActive=0;
-  state.errorMsg=''; state.diffData=null; state.flashId=null;
-  state.filter='all'; state.expandedEqual={};
-  render();
-}
-
-function readAvgWordsInput(){
-  const el = document.getElementById('avg-words-input');
-  const v = el ? (parseInt(el.value,10)||450) : state.avgWordsPerPage;
-  state.avgWordsPerPage = v;
-  return v;
-}
-
-async function runCompare(){
-  state.stage='loading'; state.errorMsg=''; render();
-  try{
-    const kOld=getKind(state.fileOld.name), kNew=getKind(state.fileNew.name);
-    if(kOld.group==='unknown'||kNew.group==='unknown') throw new Error('Định dạng file chưa được hỗ trợ. Hỗ trợ: .docx, .xlsx, .xls, .csv, .txt, .md');
-    if(kOld.group==='unsupported'||kNew.group==='unsupported') throw new Error('File .doc (Word 97-2003) chưa được hỗ trợ — hãy lưu lại dưới dạng .docx rồi thử lại.');
-    if(kOld.group!==kNew.group) throw new Error('Hai file phải cùng loại: cả hai là tài liệu văn bản, hoặc cả hai là bảng tính.');
-
-    const avgWordsPerPage = readAvgWordsInput();
-
-    if(kOld.group==='doc'){
-      const [pOld,pNew] = await Promise.all([getDocParagraphs(state.fileOld,kOld,avgWordsPerPage), getDocParagraphs(state.fileNew,kNew,avgWordsPerPage)]);
-      const blocks = buildTextRedline(pOld.paragraphs,pNew.paragraphs);
-      state.diffData = {type:'doc', blocks, stats: computeStatsFromBlocks(blocks), pageAccurate: pOld.pageAccurate && pNew.pageAccurate};
-    } else {
-      const [gOld,gNew] = await Promise.all([extractSheetGrids(state.fileOld,kOld), extractSheetGrids(state.fileNew,kNew)]);
-      const sheetNames = unionSheetNames(gOld.sheetNames, gNew.sheetNames);
-      const common = gOld.sheetNames.filter(n=>gNew.sheetNames.includes(n));
-      const activeSheet = common.length ? common[0] : sheetNames[0];
-      const rowBlocks = buildGridDiff(gOld.sheets[activeSheet]||[], gNew.sheets[activeSheet]||[]);
-      state.diffData = {type:'sheet', sheetNames, activeSheet, gridsOld:gOld, gridsNew:gNew, rowBlocks, stats: computeStatsFromRowBlocks(rowBlocks)};
-    }
-    state.mode='pair'; state.filter='all'; state.expandedEqual={};
-    state.stage='result';
-  } catch(e){
-    state.errorMsg = e.message || 'Có lỗi xảy ra khi đọc file.';
-    state.stage='error';
+        <p class="cart-desc">${g.desc || ''}</p>
+        <div class="cart-footer">
+          ${isSoon
+            ? '<span class="badge-soon">SẮP RA MẮT</span>'
+            : `<span class="play-label">DÙNG NGAY ${playIcon()}</span>`
+          }
+        </div>
+      `;
+      grid.appendChild(el);
+    });
   }
-  render();
-}
 
-async function runCompareChain(){
-  state.stage='loading'; state.errorMsg=''; render();
-  try{
-    const files = state.chainFiles;
-    if(files.length<2) throw new Error('Cần ít nhất 2 file để so sánh chuỗi.');
-    const kinds = files.map(f=>getKind(f.name));
-    if(kinds.some(k=>k.group==='unknown')) throw new Error('Có file định dạng chưa được hỗ trợ. Hỗ trợ: .docx, .xlsx, .xls, .csv, .txt, .md');
-    if(kinds.some(k=>k.group==='unsupported')) throw new Error('File .doc (Word 97-2003) chưa được hỗ trợ — hãy lưu lại dưới dạng .docx rồi thử lại.');
-    const group = kinds[0].group;
-    if(kinds.some(k=>k.group!==group)) throw new Error('Tất cả các file trong chuỗi phải cùng loại: hoặc đều là tài liệu văn bản, hoặc đều là bảng tính.');
+  searchInput.addEventListener('input', (e) => {
+    query = e.target.value;
+    renderGrid();
+  });
 
-    const avgWordsPerPage = readAvgWordsInput();
-    const results = [];
-
-    if(group==='doc'){
-      const parsedAll = [];
-      for(const f of files){ parsedAll.push(await getDocParagraphs(f, getKind(f.name), avgWordsPerPage)); }
-      for(let i=0;i<files.length-1;i++){
-        const blocks = buildTextRedline(parsedAll[i].paragraphs, parsedAll[i+1].paragraphs);
-        const diffData = {type:'doc', blocks, stats: computeStatsFromBlocks(blocks), pageAccurate: parsedAll[i].pageAccurate && parsedAll[i+1].pageAccurate};
-        results.push({label:`v${i+1} → v${i+2}`, fileOldName: files[i].name, fileNewName: files[i+1].name, diffData});
-      }
-    } else {
-      const gridsAll = [];
-      for(const f of files){ gridsAll.push(await extractSheetGrids(f, getKind(f.name))); }
-      for(let i=0;i<files.length-1;i++){
-        const gOld = gridsAll[i], gNew = gridsAll[i+1];
-        const sheetNames = unionSheetNames(gOld.sheetNames, gNew.sheetNames);
-        const common = gOld.sheetNames.filter(n=>gNew.sheetNames.includes(n));
-        const activeSheet = common.length ? common[0] : sheetNames[0];
-        const rowBlocks = buildGridDiff(gOld.sheets[activeSheet]||[], gNew.sheets[activeSheet]||[]);
-        const diffData = {type:'sheet', sheetNames, activeSheet, gridsOld:gOld, gridsNew:gNew, rowBlocks, stats: computeStatsFromRowBlocks(rowBlocks)};
-        results.push({label:`v${i+1} → v${i+2}`, fileOldName: files[i].name, fileNewName: files[i+1].name, diffData});
-      }
-    }
-
-    state.chainResults = results;
-    state.chainActive = 0;
-    state.filter = 'all';
-    state.expandedEqual = {};
-    state.stage = 'result';
-  } catch(e){
-    state.errorMsg = e.message || 'Có lỗi xảy ra khi đọc file.';
-    state.stage = 'error';
-  }
-  render();
-}
-
-function switchSheet(name){
-  const d = currentDiff();
-  if(!d) return;
-  const rowBlocks = buildGridDiff(d.gridsOld.sheets[name]||[], d.gridsNew.sheets[name]||[]);
-  const newD = Object.assign({}, d, {activeSheet:name, rowBlocks, stats: computeStatsFromRowBlocks(rowBlocks)});
-  setCurrentDiff(newD);
-  state.flashId = null;
-  render();
-}
-
-function goToChange(id){
-  render();
-  const el = document.getElementById('blk-'+id);
-  if(!el) return;
-  el.scrollIntoView({behavior:'smooth', block:'center'});
-  state.flashId = id;
-  clearTimeout(flashTimer);
-  const cls = el.classList.contains('p-block') ? 'flash' : 'row-flash';
-  el.classList.add(cls);
-  flashTimer = setTimeout(()=>{ state.flashId=null; el.classList.remove(cls); }, 1000);
-}
-
-function fallbackCopy(text){
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.opacity = '0';
-  document.body.appendChild(ta);
-  ta.select();
-  try{ document.execCommand('copy'); }catch(e){}
-  document.body.removeChild(ta);
-}
-function copyToClipboard(text){
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    return navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text));
-  }
-  return Promise.resolve(fallbackCopy(text));
-}
-
-function exportReportHtml(){
-  const styleText = document.querySelector('style').textContent;
-  let snapshot = renderResult();
-  snapshot = snapshot
-    .replace(/<div class="toolbar-btns">[\s\S]*?<\/div>/,'')
-    .replace(/<button class="back-btn"[\s\S]*?<\/button>/,'')
-    .replace(/data-action="[^"]*"/g,'');
-  const titleName = state.mode==='chain' ? 'chuỗi phiên bản' : (state.fileOld.name+' vs '+state.fileNew.name);
-  const html = '<!doctype html>\n<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-    + '<title>Báo cáo đối chiếu - '+esc(titleName)+'</title>'
-    + '<style>'+styleText+'</style>'
-    + '</head><body><div class="ddt-root">'+snapshot+'</div></body></html>';
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'bao-cao-doi-chieu.html';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
-}
-
-/* ---------------- events (delegated, bound once) ---------------- */
-app.addEventListener('click', e=>{
-  const t = e.target.closest('[data-action]');
-  if(!t) return;
-  const action = t.dataset.action;
-  if(action==='pick-old') document.getElementById('input-old').click();
-  else if(action==='pick-new') document.getElementById('input-new').click();
-  else if(action==='pick-chain') document.getElementById('input-chain').click();
-  else if(action==='remove-old'){ state.fileOld=null; render(); }
-  else if(action==='remove-new'){ state.fileNew=null; render(); }
-  else if(action==='swap'){ const tmp=state.fileOld; state.fileOld=state.fileNew; state.fileNew=tmp; render(); }
-  else if(action==='mode-pair'){ state.mode='pair'; state.errorMsg=''; render(); }
-  else if(action==='mode-chain'){ state.mode='chain'; state.errorMsg=''; render(); }
-  else if(action==='chain-up'){ const i=+t.dataset.index; const arr=state.chainFiles; if(i>0){ const tmp=arr[i-1]; arr[i-1]=arr[i]; arr[i]=tmp; render(); } }
-  else if(action==='chain-down'){ const i=+t.dataset.index; const arr=state.chainFiles; if(i<arr.length-1){ const tmp=arr[i+1]; arr[i+1]=arr[i]; arr[i]=tmp; render(); } }
-  else if(action==='chain-remove'){ const i=+t.dataset.index; state.chainFiles.splice(i,1); render(); }
-  else if(action==='compare'){ if(state.fileOld && state.fileNew) runCompare(); }
-  else if(action==='compare-chain'){ if(state.chainFiles.length>=2) runCompareChain(); }
-  else if(action==='retry' || action==='back') reset();
-  else if(action==='switch-sheet') switchSheet(t.dataset.sheet);
-  else if(action==='chain-tab'){ state.chainActive = +t.dataset.index; state.flashId=null; state.expandedEqual={}; render(); }
-  else if(action==='goto') goToChange(t.dataset.id);
-  else if(action==='filter'){ state.filter = t.dataset.filter; render(); }
-  else if(action==='expand-equal'){ state.expandedEqual[t.dataset.id]=true; render(); }
-  else if(action==='collapse-equal'){ delete state.expandedEqual[t.dataset.id]; render(); }
-  else if(action==='export-html') exportReportHtml();
-  else if(action==='copy-text'){
-    const src = document.getElementById(t.dataset.target);
-    if(src){
-      copyToClipboard(src.textContent).then(()=>{
-        const original = t.textContent;
-        t.textContent = 'Đã copy!';
-        t.classList.add('copied');
-        setTimeout(()=>{ t.textContent = original; t.classList.remove('copied'); }, 1400);
-      });
-    }
-  }
-  else if(action==='print-report') window.print();
-  else if(action==='open-menu'){ state.returnStage = state.stage; state.stage='calc'; render(); }
-  else if(action==='close-calc'){ state.stage = state.returnStage || 'upload'; render(); }
-  else if(action==='calc-tab'){ state.calcTab = t.dataset.tab; render(); }
-  else if(action==='calc-key'){ calcKey(t.dataset.key); updateCalcUI(); }
-});
-
-app.addEventListener('change', e=>{
-  if(e.target.id==='input-old' && e.target.files[0]){ state.fileOld = e.target.files[0]; render(); }
-  if(e.target.id==='input-new' && e.target.files[0]){ state.fileNew = e.target.files[0]; render(); }
-  if(e.target.id==='input-chain' && e.target.files.length){ state.chainFiles = state.chainFiles.concat(Array.from(e.target.files)); render(); }
-  if(e.target.closest && e.target.closest('#calc-screen')){ updateVat(); updatePct(); updateWords(); updateDep(); }
-});
-
-app.addEventListener('input', e=>{
-  if(e.target.closest && e.target.closest('#calc-screen')){ updateVat(); updatePct(); updateWords(); updateDep(); }
-});
-
-app.addEventListener('focusin', e=>{
-  if(e.target.hasAttribute && e.target.hasAttribute('data-money')) stripDisplayFormatting(e.target);
-});
-app.addEventListener('focusout', e=>{
-  if(e.target.hasAttribute && e.target.hasAttribute('data-money')) formatDisplayValue(e.target);
-});
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape' && state.stage==='calc'){ state.stage = state.returnStage || 'upload'; render(); }
-});
-
-app.addEventListener('toggle', e=>{
-  if(e.target.classList && e.target.classList.contains('adv-settings')) state.advOpen = e.target.open;
-}, true);
-
-app.addEventListener('dragover', e=>{
-  const dz = e.target.closest('.dropzone');
-  if(!dz) return;
-  e.preventDefault();
-  dz.classList.add('dragging');
-});
-app.addEventListener('dragleave', e=>{
-  const dz = e.target.closest('.dropzone');
-  if(!dz) return;
-  dz.classList.remove('dragging');
-});
-app.addEventListener('drop', e=>{
-  const dz = e.target.closest('.dropzone');
-  if(!dz) return;
-  e.preventDefault();
-  dz.classList.remove('dragging');
-  const which = dz.dataset.which;
-  if(which==='chain'){
-    const files = Array.from(e.dataTransfer.files);
-    if(files.length){ state.chainFiles = state.chainFiles.concat(files); render(); }
-    return;
-  }
-  const file = e.dataTransfer.files[0];
-  if(!file) return;
-  if(which==='old'){ state.fileOld=file; } else { state.fileNew=file; }
-  render();
-});
-
-render();
+  renderTags();
+  renderGrid();
 </script>
+
 </body>
 </html>

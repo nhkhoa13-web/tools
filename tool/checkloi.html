@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mực Đỏ — Kiểm tra chính tả tiếng Việt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF4;
+    --paper-edge: #F1EEE2;
+    --desk: #E7E2D3;
+    --ink: #1D2B45;
+    --ink-soft: #4A5568;
+    --red: #B8322F;
+    --red-soft: #D9635F;
+    --line: #C3D3E6;
+    --good: #3F6B4A;
+    --good-soft: #DCE9DE;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background: var(--desk);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #F3EEDF 0%, transparent 60%);
+    font-family:'Be Vietnam Pro', sans-serif;
+    color:var(--ink);
+    padding:56px 20px 80px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    text-align:center;
+    margin-bottom:40px;
+    max-width:520px;
+    animation: fadeUp .7s ease both;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(2.1rem, 5vw, 2.85rem);
+    margin:0;
+    letter-spacing:-0.01em;
+    position:relative;
+    display:inline-block;
+  }
+  h1 .do{ color:var(--red); position:relative; }
+  h1 .do::after{
+    content:"";
+    position:absolute;
+    left:6%;
+    right:6%;
+    bottom:-2px;
+    height:3px;
+    background:var(--red);
+    border-radius:2px;
+    transform: rotate(-1.5deg);
+    transform-origin:left;
+  }
+
+  .subtitle{
+    color:var(--ink-soft);
+    font-size:1rem;
+    margin:14px 0 0;
+    line-height:1.6;
+  }
+
+  /* ---------- PAGE (the notebook sheet) ---------- */
+  .sheet-wrap{
+    position:relative;
+    width:100%;
+    max-width:720px;
+  }
+
+  .badge{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--red);
+    color:#fff;
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.01em;
+    padding:7px 14px;
+    border-radius:999px;
+    box-shadow: 0 6px 14px -5px rgba(184,50,47,.55);
+    opacity:0;
+    transform: translateY(-6px) scale(.92);
+    transition: opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .badge.show{ opacity:1; transform: translateY(0) scale(1); }
+  .badge.good{ background:var(--good); box-shadow: 0 6px 14px -5px rgba(63,107,74,.5); }
+  .badge svg{ width:13px; height:13px; flex-shrink:0; }
+
+  .sheet{
+    position:relative;
+    background:var(--paper);
+    border-radius:14px;
+    box-shadow:
+      0 1px 0 var(--paper-edge),
+      0 24px 48px -22px rgba(29,43,69,.4),
+      0 6px 16px -8px rgba(29,43,69,.2);
+    padding: 32px 28px 24px 64px;
+    min-height:280px;
+  }
+
+  .sheet::before{ /* red margin line */
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left:44px;
+    width:2px;
+    background:var(--red-soft);
+    opacity:.55;
+  }
+
+  .sheet.ruled{
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 34px,
+      var(--line) 35px,
+      transparent 36px
+    );
+    background-position: 0 30px;
+    background-attachment: local;
+  }
+
+  textarea{
+    position:relative;
+    z-index:2;
+    width:100%;
+    min-height:230px;
+    border:none;
+    outline:none;
+    resize:vertical;
+    background:transparent;
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-size:16.5px;
+    line-height:36px;
+    color:var(--ink);
+  }
+  textarea::placeholder{ color:#9BA3B0; font-style:italic; }
+  textarea:focus-visible{ outline: 2px dashed var(--red-soft); outline-offset:4px; }
+
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .charcount{ font-size:.82rem; color:#9B9484; }
+
+  .btn{
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-weight:600;
+    font-size:.98rem;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    padding:12px 24px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:focus-visible{ outline:3px solid #1D2B45; outline-offset:2px; }
+
+  .btn-primary{
+    background:var(--red);
+    color:#fff;
+    box-shadow: 0 6px 16px -6px rgba(184,50,47,.55);
+  }
+  .btn-primary:hover:not(:disabled){ transform:translateY(-1px); box-shadow: 0 10px 20px -8px rgba(184,50,47,.6); }
+  .btn-primary:disabled{ opacity:.7; cursor:default; transform:none; }
+
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1.5px solid #D8D2C0;
+    padding:10px 18px;
+  }
+  .btn-ghost:hover{ border-color:var(--ink); }
+
+  .pen{ width:16px; height:16px; }
+  .pen.spin{ animation: nib 1s linear infinite; }
+  @keyframes nib{ 0%{transform:rotate(0)} 50%{transform:rotate(-18deg)} 100%{transform:rotate(0)} }
+
+  /* ---------- RESULT VIEW ---------- */
+  .result-text{
+    position:relative;
+    z-index:2;
+    font-size:16.5px;
+    line-height:2.1;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    color:var(--ink);
+    min-height:230px;
+    padding-top:10px;
+    display:none;
+  }
+
+  .err-group{
+    display:inline;
+    background: #F6E2E1;
+    border-radius:6px;
+    padding:1px 6px;
+    margin:0 1px;
+  }
+  .err-wrong{
+    text-decoration: line-through;
+    text-decoration-color: var(--red-soft);
+    text-decoration-thickness: 1.5px;
+    color:#948C7D;
+  }
+  .err-arrow{
+    color:var(--red-soft);
+    font-size:.8em;
+    margin:0 2px;
+  }
+  .err-correct{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:1.2em;
+    color:var(--red);
+  }
+  .err-group:focus-visible{ outline:2px dashed var(--red); outline-offset:2px; border-radius:4px; }
+
+  .no-errors{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--good);
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.2rem;
+  }
+
+  /* ---------- ACTIONS UNDER SHEET ---------- */
+  .actions{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+
+  .clean-panel{
+    max-width:720px;
+    width:100%;
+    margin-top:16px;
+    background:var(--good-soft);
+    border-radius:14px;
+    padding:22px 24px;
+    display:none;
+    animation: fadeUp .3s ease both;
+  }
+  .clean-panel h3{
+    margin:0 0 8px;
+    font-family:'Fraunces', serif;
+    font-size:1.05rem;
+    color:var(--good);
+  }
+  .clean-panel p{
+    margin:0 0 14px;
+    line-height:1.7;
+    color:#274B32;
+    white-space:pre-wrap;
+  }
+
+  .copy-btn{
+    background:#fff;
+    border:1.5px solid var(--good);
+    color:var(--good);
+    font-weight:600;
+    font-size:.85rem;
+    padding:8px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .copy-btn:hover{ background:var(--good); color:#fff; }
+
+  .err-message{
+    max-width:720px;
+    width:100%;
+    margin-top:16px;
+    background:#FBEAE9;
+    border:1px solid #EFC1BF;
+    color:var(--red);
+    padding:14px 18px;
+    border-radius:10px;
+    font-size:.92rem;
+    display:none;
+    text-align:center;
+  }
+
+  footer{
+    margin-top:44px;
+    font-size:.8rem;
+    color:#A79E8C;
+    text-align:center;
+    max-width:480px;
+  }
+
+  @keyframes fadeUp{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  @media (max-width:600px){
+    .sheet{ padding:28px 18px 20px 44px; }
+    .sheet::before{ left:26px; }
+    .badge{ top:12px; right:12px; font-size:12px; padding:6px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mực <span class="do">Đỏ</span></h1>
+  <p class="subtitle">Dán đoạn văn của bạn vào trang vở dưới đây — Mực Đỏ sẽ chấm lỗi chính tả tiếng Việt như một người thầy tận tâm.</p>
+</header>
+
+<div class="sheet-wrap">
+  <div class="badge" id="stamp">
+    <svg id="badgeCheck" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="badgeText">0 lỗi</span>
+  </div>
+
+  <div class="sheet ruled" id="sheet">
+    <textarea id="input" maxlength="700" placeholder="Ví dụ: Tôi đi sử lý công việc ở sài gòn, sau đó ghé thăm bà ngoại giùm mẹ tôi..."></textarea>
+    <div class="result-text" id="resultText" aria-live="polite"></div>
+
+    <div class="meta-row">
+      <span class="charcount"><span id="charNum">0</span>/700 ký tự</span>
+      <button class="btn btn-primary" id="checkBtn">
+        <svg class="pen" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        <span id="checkLabel">Chấm bài</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="btn btn-ghost" id="toggleCleanBtn">Xem bản đã sửa</button>
+    <button class="btn btn-ghost" id="resetBtn">Kiểm tra đoạn khác</button>
+  </div>
+</div>
+
+<div class="clean-panel" id="cleanPanel">
+  <h3>Bản đã sửa</h3>
+  <p id="cleanText"></p>
+  <button class="copy-btn" id="copyBtn">Sao chép</button>
+</div>
+
+<div class="err-message" id="errMsg">Không chấm được bài lúc này. Bạn thử lại nhé.</div>
+
+<footer>Được chấm bởi trợ lý AI — vẫn có thể sai sót ở những trường hợp tiếng Việt hiếm gặp, hãy đọc lại lần cuối trước khi nộp bài nhé.</footer>
+
+<script>
+const SYSTEM_PROMPT = `Bạn là một giáo viên tiếng Việt kiểm tra lỗi chính tả.
+Chỉ tìm lỗi chính tả (dấu thanh hỏi/ngã/sắc/nặng, phụ âm đầu tr/ch, s/x, l/n, d/gi/r, nguyên âm i/y, ă/â...). Không sửa ngữ pháp, văn phong, không thêm bớt ý.
+Chỉ trả lời một JSON object DUY NHẤT, không markdown, không giải thích thêm:
+{"errors":[{"wrong":"từ sai, nguyên văn trong bài","correct":"từ đúng","note":"giải thích dưới 6 từ"}]}
+Nếu không có lỗi: {"errors":[]}
+Liệt kê "errors" đúng thứ tự xuất hiện trong bài. Không lặp lại văn bản gốc trong câu trả lời.`;
+
+const input = document.getElementById('input');
+const charNum = document.getElementById('charNum');
+const checkBtn = document.getElementById('checkBtn');
+const checkLabel = document.getElementById('checkLabel');
+const pen = checkBtn.querySelector('.pen');
+const sheet = document.getElementById('sheet');
+const resultText = document.getElementById('resultText');
+const stamp = document.getElementById('stamp');
+const badgeText = document.getElementById('badgeText');
+const badgeCheck = document.getElementById('badgeCheck');
+const actions = document.getElementById('actions');
+const cleanPanel = document.getElementById('cleanPanel');
+const cleanText = document.getElementById('cleanText');
+const toggleCleanBtn = document.getElementById('toggleCleanBtn');
+const resetBtn = document.getElementById('resetBtn');
+const copyBtn = document.getElementById('copyBtn');
+const errMsg = document.getElementById('errMsg');
+
+input.addEventListener('input', () => {
+  charNum.textContent = input.value.length;
+});
+
+function escapeHtml(str){
+  return str
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function setLoading(isLoading){
+  checkBtn.disabled = isLoading;
+  checkLabel.textContent = isLoading ? 'Đang chấm...' : 'Chấm bài';
+  pen.classList.toggle('spin', isLoading);
+}
+
+function buildResult(original, errors){
+  let cursor = 0;
+  const found = [];
+  for (const err of errors){
+    if (!err.wrong || err.wrong === err.correct) continue;
+    const idx = original.indexOf(err.wrong, cursor);
+    if (idx === -1) continue;
+    found.push({...err, idx});
+    cursor = idx + err.wrong.length;
+  }
+  found.sort((a,b)=>a.idx-b.idx);
+
+  let html = '';
+  let corrected = '';
+  let pos = 0;
+  for (const err of found){
+    if (err.idx < pos) continue;
+    const before = original.slice(pos, err.idx);
+    html += escapeHtml(before);
+    corrected += before;
+    html += `<span class="err-group" tabindex="0" title="${escapeHtml(err.note||'')}">` +
+              `<span class="err-wrong">${escapeHtml(err.wrong)}</span>` +
+              `<span class="err-arrow">→</span>` +
+              `<span class="err-correct">${escapeHtml(err.correct)}</span>` +
+            `</span>`;
+    corrected += err.correct;
+    pos = err.idx + err.wrong.length;
+  }
+  const tail = original.slice(pos);
+  html += escapeHtml(tail);
+  corrected += tail;
+  return { html, count: found.length, corrected };
+}
+
+function showStamp(count){
+  stamp.classList.remove('good');
+  if (count === 0){
+    stamp.classList.add('good');
+    badgeCheck.style.display = 'block';
+    badgeText.textContent = 'Không có lỗi';
+  } else {
+    badgeCheck.style.display = 'none';
+    badgeText.textContent = `${count} lỗi`;
+  }
+  requestAnimationFrame(()=> stamp.classList.add('show'));
+}
+
+async function checkText(){
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+
+  errMsg.style.display = 'none';
+  setLoading(true);
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: text }]
+      })
+    });
+    const data = await response.json();
+    const raw = (data.content || []).map(b => b.text || '').join('');
+    const clean = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    const parsed = JSON.parse(clean);
+
+    const errors = Array.isArray(parsed.errors) ? parsed.errors : [];
+    const { html, count, corrected } = buildResult(text, errors);
+
+    if (count === 0){
+      resultText.innerHTML = `<div class="no-errors">✓ Không tìm thấy lỗi chính tả nào. Viết tốt lắm!</div><br>${escapeHtml(text)}`;
+    } else {
+      resultText.innerHTML = html;
+    }
+
+    input.style.display = 'none';
+    resultText.style.display = 'block';
+    sheet.classList.remove('ruled');
+    showStamp(count);
+    actions.style.display = 'flex';
+
+    cleanText.textContent = corrected;
+
+  } catch (e){
+    errMsg.style.display = 'block';
+  } finally {
+    setLoading(false);
+  }
+}
+
+function resetSheet(){
+  input.style.display = 'block';
+  resultText.style.display = 'none';
+  resultText.innerHTML = '';
+  sheet.classList.add('ruled');
+  stamp.classList.remove('show');
+  actions.style.display = 'none';
+  cleanPanel.style.display = 'none';
+  toggleCleanBtn.textContent = 'Xem bản đã sửa';
+  input.focus();
+}
+
+checkBtn.addEventListener('click', checkText);
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) checkText();
+});
+
+toggleCleanBtn.addEventListener('click', () => {
+  const isOpen = cleanPanel.style.display === 'block';
+  cleanPanel.style.display = isOpen ? 'none' : 'block';
+  toggleCleanBtn.textContent = isOpen ? 'Xem bản đã sửa' : 'Ẩn bản đã sửa';
+});
+
+resetBtn.addEventListener('click', resetSheet);
+
+copyBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(cleanText.textContent);
+    copyBtn.textContent = 'Đã sao chép ✓';
+    setTimeout(()=> copyBtn.textContent = 'Sao chép', 1600);
+  } catch(e){ /* clipboard not available */ }
+});
+</script>
+</body>
+</html>

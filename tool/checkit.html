@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trạm Chẩn Đoán IT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF0F2;
+    --panel:#FFFFFF;
+    --panel-recessed:#E2E5EA;
+    --ink:#17202B;
+    --ink-soft:#5B6672;
+    --signal:#F2A93B;
+    --signal-ink:#5A3B08;
+    --trace:#2E6F6E;
+    --alert:#C4432B;
+    --line:#C9CDD3;
+    --radius:10px;
+    --display:'Space Grotesk',sans-serif;
+    --body:'Inter',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--body);}
+  body{padding:0 0 64px;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:56px 0 28px;}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--trace);display:flex;align-items:center;gap:8px;margin-bottom:18px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--trace);
+    box-shadow:0 0 0 3px rgba(46,111,110,.15);}
+  h1{
+    font-family:var(--display);font-weight:700;font-size:clamp(28px,4.6vw,44px);line-height:1.08;
+    margin:0 0 14px;letter-spacing:-.01em;
+  }
+  h1 .hl{color:var(--signal-ink);background:linear-gradient(180deg,transparent 62%,var(--signal) 62%);}
+  .sub{font-size:16px;color:var(--ink-soft);max-width:56ch;line-height:1.6;margin:0 0 32px;}
+
+  .terminal{
+    background:var(--ink);border-radius:var(--radius);padding:18px 18px 16px;
+    box-shadow:0 1px 0 rgba(0,0,0,.05), 0 12px 28px -18px rgba(23,32,43,.55);
+  }
+  .terminal-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .dot{width:9px;height:9px;border-radius:50%;}
+  .dot.r{background:#C4432B99;} .dot.y{background:#F2A93B99;} .dot.g{background:#2E6F6E99;}
+  .terminal-label{margin-left:8px;font-family:var(--mono);font-size:11px;color:#8E99A8;letter-spacing:.06em;}
+  .prompt-row{display:flex;gap:10px;align-items:flex-start;}
+  .prompt-char{font-family:var(--mono);color:var(--trace);font-size:16px;line-height:1.6;padding-top:2px;}
+  textarea#errInput{
+    flex:1;resize:vertical;min-height:52px;max-height:220px;background:transparent;border:none;outline:none;
+    color:#EDEFF2;font-family:var(--mono);font-size:15px;line-height:1.6;padding:0;
+  }
+  textarea#errInput::placeholder{color:#5C6772;}
+  textarea#errInput:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .terminal-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px;flex-wrap:wrap;}
+  .hint{font-family:var(--mono);font-size:11px;color:#697380;}
+  .foot-actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{
+    width:40px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid #3A4553;color:#B7C0CB;font-size:17px;line-height:1;
+    border-radius:8px;cursor:pointer;padding:0;transition:border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .icon-btn:hover{border-color:#697380;color:#EDEFF2;background:#1D2733;}
+  .icon-btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .icon-btn.primary{
+    background:var(--signal);border-color:var(--signal);color:var(--ink);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .icon-btn.primary:hover{border-color:var(--signal);color:var(--ink);background:var(--signal);box-shadow:0 6px 16px -8px rgba(242,169,59,.7);}
+  .icon-btn.primary:active{transform:translateY(1px);}
+  .icon-btn[disabled]{opacity:.55;cursor:progress;}
+  .icon-btn .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(23,32,43,.25);border-top-color:var(--ink);animation:spin .8s linear infinite;}
+  .icon-caption{font-family:var(--mono);font-size:10.5px;color:#5C6772;text-align:right;margin-top:6px;}
+  .privacy-note{font-family:var(--mono);font-size:10.5px;color:#8E99A8;line-height:1.6;margin:10px 0 0;}
+  .img-preview-list{display:none;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .img-preview-list.show{display:flex;}
+  .img-chip{
+    display:flex;align-items:center;gap:8px;max-width:220px;padding:6px 8px 6px 6px;
+    background:#1D2733;border-radius:8px;border:1px solid #3A4553;
+  }
+  .img-chip img{width:32px;height:32px;object-fit:cover;border-radius:5px;flex:0 0 auto;}
+  .img-chip .name{font-family:var(--mono);font-size:11px;color:#B7C0CB;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .img-remove{
+    width:20px;height:20px;border-radius:6px;border:none;background:transparent;color:#8E99A8;
+    cursor:pointer;font-size:12px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  }
+  .img-remove:hover{background:#2A3543;color:#EDEFF2;}
+  .img-limit-note{font-family:var(--mono);font-size:11px;color:#C4432B;margin-top:8px;display:none;}
+  .img-limit-note.show{display:block;}
+  .file-preview-list{display:none;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .file-preview-list.show{display:flex;}
+  .file-chip{
+    display:flex;align-items:center;gap:8px;max-width:220px;padding:6px 10px;
+    background:#1D2733;border-radius:8px;border:1px solid #3A4553;
+  }
+  .file-chip .fic{font-size:15px;flex:0 0 auto;}
+  .file-chip .name{font-family:var(--mono);font-size:11px;color:#B7C0CB;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .source-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;}
+  .source-list li{border-top:1px dashed var(--line);padding:8px 0 0;}
+  .source-list li:first-child{border-top:none;padding-top:0;}
+  .source-list a{color:var(--trace);font-size:13px;text-decoration:none;word-break:break-word;}
+  .source-list a:hover{text-decoration:underline;}
+  .regen-btn{
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:transparent;
+    border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .regen-btn:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .regen-btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .regen-btn[disabled]{opacity:.5;cursor:progress;}
+  .chat-sources{margin-top:6px;font-size:11px;display:flex;gap:10px;flex-wrap:wrap;}
+  .chat-sources a{color:var(--trace);text-decoration:none;}
+  .chat-sources a:hover{text-decoration:underline;}
+
+  /* ---------- TRACE DIVIDER ---------- */
+  .trace-divider{padding:30px 0 6px;}
+  .trace-divider svg{width:100%;height:auto;display:block;}
+  @media (prefers-reduced-motion: no-preference){
+    .trace-node{animation:pulse 2.6s ease-in-out infinite;}
+  }
+  @keyframes pulse{0%,100%{opacity:.35;}50%{opacity:1;}}
+
+  /* ---------- RESULT TICKET ---------- */
+  #resultZone{margin-top:6px;}
+  .ticket{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px 24px;position:relative;overflow:hidden;
+  }
+  .ticket::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--sev-color,var(--trace));
+  }
+  .ticket-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .ticket-id{font-family:var(--mono);font-size:12px;color:var(--ink-soft);letter-spacing:.05em;}
+  .ticket-head-right{display:flex;align-items:center;gap:10px;}
+  .ticket-close{
+    width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink-soft);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;padding:0;transition:background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .ticket-close:hover{background:var(--panel-recessed);color:var(--ink);border-color:var(--ink-soft);}
+  .ticket-close:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .sev-badge{
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 10px;border-radius:100px;background:var(--sev-bg,#EAF3F2);color:var(--sev-color,var(--trace));
+    border:1px solid var(--sev-color,var(--trace));white-space:nowrap;
+  }
+  .ticket h3{font-family:var(--display);font-size:20px;margin:0 0 6px;}
+  .ticket p.diag{color:var(--ink-soft);line-height:1.6;margin:0 0 18px;font-size:15px;}
+  .ticket-section{margin-bottom:16px;}
+  .ticket-section h4{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 10px;
+  }
+  .conf-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .conf-badge{
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;
+    border:1px solid var(--conf-color,var(--trace));color:var(--conf-color,var(--trace));background:var(--conf-bg,#E9F3F2);
+  }
+  .search-badge{
+    font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:3px 9px;border-radius:100px;
+    border:1px solid var(--trace);color:var(--trace);background:#E9F3F2;
+  }
+  .caution-box{
+    display:flex;gap:10px;background:#FDF3E1;border:1px solid #E9C878;border-radius:8px;
+    padding:11px 13px;margin-bottom:16px;font-size:13px;line-height:1.55;color:#5A3B08;
+  }
+  .caution-box .ic{flex:0 0 auto;font-size:15px;line-height:1;}
+  .verify-line{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);margin:0 0 14px;}
+  .cause-list{margin:0;padding-left:0;list-style:none;}
+  .cause-list li{
+    padding:8px 0 8px 20px;position:relative;font-size:14px;line-height:1.5;border-top:1px dashed var(--line);
+  }
+  .cause-list li:first-child{border-top:none;}
+  .cause-list li::before{content:"—";position:absolute;left:0;color:var(--ink-soft);}
+  .step-list{margin:0;padding:0;list-style:none;counter-reset:step;}
+  .step-list li{
+    display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px dashed var(--line);
+    cursor:pointer;user-select:none;
+  }
+  .step-list li:first-child{border-top:none;}
+  .step-num{
+    font-family:var(--mono);font-size:12px;flex:0 0 26px;height:26px;border-radius:6px;
+    background:var(--panel-recessed);color:var(--ink);display:flex;align-items:center;justify-content:center;
+  }
+  .step-list li.done .step-num{background:var(--trace);color:#fff;}
+  .step-list li.done .step-text{color:var(--ink-soft);text-decoration:line-through;}
+  .step-text{font-size:14.5px;line-height:1.55;padding-top:3px;}
+  .ticket-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);flex-wrap:wrap;gap:8px;}
+  .est-time{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .ticket-footer .stamp{font-family:var(--mono);font-size:11px;color:var(--line);letter-spacing:.05em;}
+
+  .followup-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .followup-section h4{
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 12px;
+  }
+  .chat-log{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+  .chat-bubble{max-width:82%;padding:9px 13px;border-radius:10px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;}
+  .chat-bubble.user{align-self:flex-end;background:var(--ink);color:#EDEFF2;border-bottom-right-radius:3px;}
+  .chat-bubble.assistant{align-self:flex-start;background:var(--panel-recessed);color:var(--ink);border-bottom-left-radius:3px;}
+  .chat-bubble.pending{align-self:flex-start;background:var(--panel-recessed);color:var(--ink-soft);
+    font-family:var(--mono);font-size:12px;display:flex;align-items:center;gap:8px;}
+  .chat-input-row{display:flex;gap:8px;}
+  .chat-input{
+    flex:1;font-family:var(--body);font-size:13.5px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:8px;background:var(--paper);color:var(--ink);outline:none;
+  }
+  .chat-input:focus-visible{outline:2px solid var(--signal);outline-offset:1px;}
+  .chat-send{
+    font-family:var(--body);font-weight:600;font-size:13px;color:var(--ink);background:var(--signal);
+    border:none;border-radius:8px;padding:0 16px;cursor:pointer;flex:0 0 auto;
+  }
+  .chat-send:hover{box-shadow:0 6px 16px -8px rgba(242,169,59,.7);}
+  .chat-send:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .chat-send[disabled]{opacity:.55;cursor:progress;}
+
+  .state-msg{font-family:var(--mono);font-size:13px;color:var(--ink-soft);padding:18px 2px;display:flex;align-items:center;gap:10px;}
+  .spinner{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--signal);
+    animation:spin .8s linear infinite;flex:0 0 auto;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error-msg{color:var(--alert);}
+
+  /* ---------- CATEGORIES ---------- */
+  .cat-header{margin:52px 0 18px;}
+  .cat-header .eyebrow{margin-bottom:10px;}
+  .cat-header h2{font-family:var(--display);font-size:22px;margin:0 0 6px;}
+  .cat-header p{color:var(--ink-soft);font-size:14.5px;margin:0;}
+
+  .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .cat-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px 14px;cursor:pointer;position:relative;
+    background-image: radial-gradient(circle, var(--paper) 4px, transparent 4.5px);
+    background-position: -4px 46px, -4px 46px;
+    background-size: 14px 100%;
+    background-repeat: repeat-y;
+  }
+  .cat-card{
+    background-image:
+      radial-gradient(circle, var(--paper) 3.5px, transparent 4px);
+    background-position: right 42px top 0;
+    background-size: 10px 12px;
+    background-repeat: repeat-y;
+  }
+  .cat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .cat-icon{font-size:20px;line-height:1;}
+  .cat-code{font-family:var(--mono);font-size:10.5px;color:var(--line);}
+  .cat-title{font-family:var(--display);font-weight:600;font-size:16px;margin:10px 0 4px;}
+  .cat-meta{font-family:var(--mono);font-size:11px;color:var(--ink-soft);}
+  .chev{position:absolute;right:16px;bottom:14px;font-family:var(--mono);color:var(--ink-soft);font-size:13px;transition:transform .15s ease;}
+  .cat-card.open .chev{transform:rotate(45deg);}
+
+  .cat-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .cat-card.open .cat-body{max-height:900px;}
+  .issue{padding:12px 0;border-top:1px dashed var(--line);}
+  .issue:first-child{margin-top:14px;}
+  .issue-q{font-weight:600;font-size:13.5px;margin:0 0 6px;}
+  .issue-a{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);}
+  footer p{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);line-height:1.7;max-width:64ch;}
+
+  @media (max-width:520px){
+    .hero{padding-top:36px;}
+    .ticket-head{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Trạm chẩn đoán · đang hoạt động</div>
+    <h1>Mô tả lỗi. Nhận <span class="hl">hướng khắc phục.</span></h1>
+    <p class="sub">Gõ nguyên văn thông báo lỗi, hoặc mô tả triệu chứng bằng lời của bạn — máy chậm, wifi rớt, app treo, màn hình xanh. Hệ thống sẽ phân tích và trả về các bước xử lý cụ thể.</p>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="terminal-label">chan-doan.sh</span>
+      </div>
+      <div class="prompt-row">
+        <span class="prompt-char">&gt;</span>
+        <textarea id="errInput" placeholder="ví dụ: Win 11 báo lỗi 0x80070005 khi cài driver máy in..." rows="2"></textarea>
+      </div>
+      <div class="terminal-foot">
+        <span class="hint">Enter + Shift để xuống dòng · Enter để gửi</span>
+        <div class="foot-actions">
+          <input type="file" id="imgInput" accept="image/*" multiple style="display:none">
+          <input type="file" id="fileInput" accept=".txt,.log,.md,.json,.csv,.yaml,.yml,.ini,.conf" multiple style="display:none">
+          <button class="icon-btn" id="fileBtn" type="button" title="Tải file log/text" aria-label="Tải file log/text">📄</button>
+          <button class="icon-btn" id="attachBtn" type="button" title="Đính kèm ảnh lỗi (nhiều ảnh)" aria-label="Đính kèm ảnh lỗi">📎</button>
+          <button class="icon-btn primary" id="diagBtn" type="button" title="Chẩn đoán ngay" aria-label="Chẩn đoán ngay">🔍</button>
+        </div>
+      </div>
+      <div class="icon-caption">📄 log/text&nbsp;&nbsp;·&nbsp;&nbsp;📎 ảnh lỗi&nbsp;&nbsp;·&nbsp;&nbsp;🔍 chẩn đoán</div>
+      <div class="img-preview-list" id="imgPreviewList"></div>
+      <div class="file-preview-list" id="filePreviewList"></div>
+      <div class="img-limit-note" id="imgLimitNote">Chỉ có thể đính kèm tối đa 4 ảnh mỗi lần chẩn đoán.</div>
+      <div class="img-limit-note" id="fileLimitNote">Chỉ có thể đính kèm tối đa 3 file văn bản mỗi lần chẩn đoán.</div>
+      <div class="img-limit-note" id="sizeLimitNote">Tổng dung lượng đính kèm hơi lớn, hãy bớt vài ảnh/file rồi thử lại.</div>
+      <p class="privacy-note">⚠ Đừng đính kèm ảnh/log chứa thông tin nhạy cảm (email, IP nội bộ, tên máy công ty...) — nội dung sẽ được gửi thẳng tới dịch vụ AI để phân tích.</p>
+    </div>
+  </section>
+
+  <div class="trace-divider" aria-hidden="true">
+    <svg viewBox="0 0 900 40" preserveAspectRatio="none">
+      <path d="M0 20 H340 L360 6 L400 34 L420 20 H900" fill="none" stroke="#C9CDD3" stroke-width="1.5"/>
+      <circle class="trace-node" cx="360" cy="6" r="3.5" fill="#2E6F6E"/>
+      <circle class="trace-node" cx="400" cy="34" r="3.5" fill="#F2A93B"/>
+    </svg>
+  </div>
+
+  <div id="resultZone" aria-live="polite"></div>
+
+  <section class="cat-header">
+    <div class="eyebrow">Thư viện sự cố thường gặp</div>
+    <h2>Không cần chờ — tự tra theo nhóm</h2>
+    <p>8 nhóm lỗi phổ biến nhất, kèm cách xử lý nhanh. Nhấn vào từng thẻ để mở.</p>
+  </section>
+
+  <div class="cat-grid" id="catGrid"></div>
+
+  <footer>
+    <p>Công cụ này đưa ra hướng chẩn đoán dựa trên mô tả bạn cung cấp, không thay thế kỹ thuật viên khi phần cứng hư hỏng vật lý, mất dữ liệu quan trọng, hoặc nghi ngờ rò rỉ điện / cháy nổ thiết bị — trong các trường hợp đó, hãy ngắt nguồn và liên hệ đơn vị sửa chữa có chuyên môn.</p>
+  </footer>
+
+</div>
+
+<script>
+// ---------------- Category knowledge base ----------------
+const CATEGORIES = [
+  {code:"OS", icon:"🖥️", title:"Hệ điều hành", meta:"Windows · macOS", issues:[
+    {q:"Máy khởi động chậm bất thường", a:"Kiểm tra Task Manager (Ctrl+Shift+Esc) → tab Startup, tắt bớt ứng dụng khởi động cùng hệ thống. Trên macOS: System Settings → General → Login Items."},
+    {q:"Màn hình xanh / Blue Screen of Death", a:"Ghi lại mã lỗi hiển thị (ví dụ IRQL_NOT_LESS_OR_EQUAL). Khởi động vào Safe Mode, gỡ driver hoặc phần mềm vừa cài gần nhất, sau đó chạy Windows Update để cập nhật driver."},
+    {q:"Ứng dụng bị treo, không phản hồi", a:"Mở Task Manager, chọn ứng dụng bị treo → End Task. Nếu lặp lại thường xuyên, kiểm tra dung lượng RAM đang dùng và gỡ cài đặt lại ứng dụng."},
+  ]},
+  {code:"NET", icon:"📶", title:"Mạng & Wi-Fi", meta:"Kết nối · Tốc độ", issues:[
+    {q:"Wi-Fi hiện kết nối nhưng không vào mạng được", a:"Chạy lệnh: Windows → Settings → Network → Network reset. Hoặc tắt/bật lại router 30 giây. Kiểm tra DNS bằng cách đổi sang 8.8.8.8."},
+    {q:"Wi-Fi chậm dù tín hiệu đầy", a:"Kiểm tra số thiết bị đang dùng chung băng thông, đổi băng tần từ 2.4GHz sang 5GHz nếu router hỗ trợ, và đặt router tránh xa vật cản kim loại."},
+    {q:"Không thấy tên mạng Wi-Fi trong danh sách", a:"Khởi động lại adapter mạng: Device Manager → Network adapters → chuột phải → Disable rồi Enable lại. Cập nhật driver Wi-Fi."},
+  ]},
+  {code:"WEB", icon:"🌐", title:"Trình duyệt", meta:"Chrome · Edge · Safari", issues:[
+    {q:"Trang web báo lỗi 'kết nối không an toàn'", a:"Kiểm tra đồng hồ hệ thống có đúng giờ không (chứng chỉ SSL phụ thuộc vào thời gian). Xoá cache trình duyệt và thử lại ở chế độ ẩn danh."},
+    {q:"Trình duyệt load trang rất chậm", a:"Vào phần Extensions, tắt bớt tiện ích mở rộng không cần thiết. Xoá cache & cookie trong Settings → Privacy."},
+    {q:"Trang web hiển thị lỗi liên tục dù mạng ổn", a:"Thử mở bằng trình duyệt khác để loại trừ nguyên nhân từ trình duyệt. Nếu vẫn lỗi, khả năng cao do phía máy chủ website."},
+  ]},
+  {code:"APP", icon:"⚙️", title:"Phần mềm & Ứng dụng", meta:"Crash · Cài đặt", issues:[
+    {q:"Ứng dụng bị crash ngay khi mở", a:"Gỡ cài đặt hoàn toàn rồi tải bản cài mới nhất từ trang chủ nhà phát triển. Kiểm tra ứng dụng có tương thích với phiên bản hệ điều hành hiện tại không."},
+    {q:"Cập nhật phần mềm bị lỗi giữa chừng", a:"Xoá file cài đặt tạm trong thư mục Temp/Downloads, khởi động lại máy, sau đó tải lại bộ cài đầy đủ thay vì dùng trình cập nhật tự động."},
+    {q:"Phần mềm báo thiếu file .dll", a:"Không tải file .dll lẻ từ nguồn lạ. Cài lại Microsoft Visual C++ Redistributable hoặc cài lại chính ứng dụng đó."},
+  ]},
+  {code:"HW", icon:"🔧", title:"Phần cứng", meta:"Nhiệt độ · Thiết bị", issues:[
+    {q:"Máy nóng bất thường, quạt kêu to", a:"Kiểm tra khe thoát nhiệt có bị bụi che không, dùng khí nén vệ sinh định kỳ. Đóng bớt ứng dụng ngốn CPU qua Task Manager."},
+    {q:"Màn hình bị nhấp nháy hoặc sọc màu", a:"Kiểm tra lại dây cáp kết nối (HDMI/DisplayPort). Cập nhật driver card đồ hoạ. Nếu vẫn lỗi, khả năng cao do card màn hình hoặc panel."},
+    {q:"Laptop sạc pin rất chậm hoặc không nhận sạc", a:"Thử cổng sạc và dây sạc khác để loại trừ. Vệ sinh chân tiếp xúc cổng sạc. Nếu pin chai (dưới 80% dung lượng thiết kế), cân nhắc thay pin."},
+  ]},
+  {code:"MAIL", icon:"✉️", title:"Email & Tài khoản", meta:"Đăng nhập · Đồng bộ", issues:[
+    {q:"Không đăng nhập được dù đúng mật khẩu", a:"Kiểm tra Caps Lock. Thử đặt lại mật khẩu qua liên kết 'Quên mật khẩu'. Nếu có xác thực 2 lớp, đảm bảo thiết bị nhận mã vẫn hoạt động."},
+    {q:"Email gửi đi bị treo ở trạng thái 'đang gửi'", a:"Kiểm tra dung lượng file đính kèm (thường giới hạn 25MB). Thử gửi lại qua giao diện web thay vì ứng dụng desktop."},
+    {q:"Email mới không đồng bộ về ứng dụng", a:"Kiểm tra cài đặt đồng bộ (IMAP nên đồng bộ đầy đủ hơn POP3). Xoá và thêm lại tài khoản trong ứng dụng mail."},
+  ]},
+  {code:"SEC", icon:"🛡️", title:"Bảo mật & Virus", meta:"Mã độc · Pop-up lạ", issues:[
+    {q:"Xuất hiện quảng cáo pop-up liên tục dù không mở trình duyệt", a:"Rất có thể máy đã nhiễm adware. Quét toàn bộ hệ thống bằng Windows Defender hoặc Malwarebytes ở chế độ Full Scan."},
+    {q:"Máy chạy chậm bất thường, quạt chạy dù không mở app nào", a:"Kiểm tra Task Manager xem có tiến trình lạ chiếm CPU cao. Có thể là phần mềm đào coin ẩn — quét virus toàn diện."},
+    {q:"Nhận được email yêu cầu đăng nhập lại tài khoản gấp", a:"Đây là dấu hiệu điển hình của lừa đảo phishing. Không bấm vào liên kết trong email, hãy tự gõ địa chỉ trang web chính thức để kiểm tra."},
+  ]},
+  {code:"PRN", icon:"🖨️", title:"Máy in & Thiết bị ngoại vi", meta:"In ấn · USB", issues:[
+    {q:"Máy tính không nhận diện được máy in", a:"Kiểm tra dây kết nối hoặc Wi-Fi của máy in. Gỡ và cài lại driver máy in mới nhất từ trang hãng sản xuất."},
+    {q:"Lệnh in bị kẹt trong hàng đợi, không in được", a:"Mở Control Panel → Devices and Printers → xoá lệnh in đang treo, sau đó khởi động lại dịch vụ Print Spooler."},
+    {q:"Máy in báo kẹt giấy dù đã lấy giấy ra", a:"Kiểm tra kỹ các khay và trục lăn xem còn mảnh giấy nhỏ sót lại không. Tắt nguồn máy in 30 giây rồi bật lại."},
+  ]},
+];
+
+function renderCategories(){
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = CATEGORIES.map((c,i)=>`
+    <div class="cat-card" data-idx="${i}">
+      <div class="cat-top">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-code">${c.code}-0${i+1}</span>
+      </div>
+      <div class="cat-title">${c.title}</div>
+      <div class="cat-meta">${c.meta}</div>
+      <span class="chev">＋</span>
+      <div class="cat-body">
+        ${c.issues.map(is=>`
+          <div class="issue">
+            <p class="issue-q">${is.q}</p>
+            <p class="issue-a">${is.a}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.cat-card').forEach(card=>{
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+  });
+}
+renderCategories();
+
+// ---------------- AI diagnosis ----------------
+const input = document.getElementById('errInput');
+const btn = document.getElementById('diagBtn');
+const zone = document.getElementById('resultZone');
+const attachBtn = document.getElementById('attachBtn');
+const imgInput = document.getElementById('imgInput');
+const imgPreviewList = document.getElementById('imgPreviewList');
+const imgLimitNote = document.getElementById('imgLimitNote');
+const fileBtn = document.getElementById('fileBtn');
+const fileInput = document.getElementById('fileInput');
+const filePreviewList = document.getElementById('filePreviewList');
+const fileLimitNote = document.getElementById('fileLimitNote');
+
+const MAX_IMAGES = 4;
+const MAX_TEXT_FILES = 3;
+const MAX_FILE_CHARS = 15000;
+const MAX_TOTAL_ATTACHMENT_BYTES = 12 * 1024 * 1024; // ~12MB gộp ảnh (base64) + file text
+let isBusy = false; // chặn thao tác chồng chéo: chỉ 1 request tới API tại một thời điểm
+let attachedImages = []; // [{ base64, mediaType, name }]
+let attachedTextFiles = []; // [{ name, content }]
+
+attachBtn.addEventListener('click', ()=> imgInput.click());
+fileBtn.addEventListener('click', ()=> fileInput.click());
+
+imgInput.addEventListener('change', async ()=>{
+  const files = Array.from(imgInput.files || []).filter(f => f.type.startsWith('image/'));
+  imgLimitNote.classList.remove('show');
+
+  for(const file of files){
+    if(attachedImages.length >= MAX_IMAGES){
+      imgLimitNote.classList.add('show');
+      break;
+    }
+    try{
+      const base64 = await new Promise((res, rej)=>{
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(',')[1]);
+        r.onerror = () => rej(new Error('Read failed'));
+        r.readAsDataURL(file);
+      });
+      attachedImages.push({ base64, mediaType: file.type, name: file.name });
+    }catch(err){ /* bỏ qua file đọc lỗi */ }
+  }
+
+  renderImagePreviews();
+  imgInput.value = '';
+});
+
+fileInput.addEventListener('change', async ()=>{
+  const files = Array.from(fileInput.files || []);
+  fileLimitNote.classList.remove('show');
+
+  for(const file of files){
+    if(attachedTextFiles.length >= MAX_TEXT_FILES){
+      fileLimitNote.classList.add('show');
+      break;
+    }
+    try{
+      const text = await file.text();
+      const content = text.length > MAX_FILE_CHARS
+        ? text.slice(0, MAX_FILE_CHARS) + '\n...(nội dung đã bị cắt bớt do quá dài)...'
+        : text;
+      attachedTextFiles.push({ name: file.name, content });
+    }catch(err){ /* bỏ qua file đọc lỗi */ }
+  }
+
+  renderFilePreviews();
+  fileInput.value = '';
+});
+
+function renderFilePreviews(){
+  if(attachedTextFiles.length === 0){
+    filePreviewList.classList.remove('show');
+    filePreviewList.innerHTML = '';
+    return;
+  }
+  filePreviewList.classList.add('show');
+  filePreviewList.innerHTML = attachedTextFiles.map((f, i) => `
+    <div class="file-chip" data-idx="${i}">
+      <span class="fic">📄</span>
+      <span class="name">${escapeHtml(f.name)}</span>
+      <button class="img-remove" data-idx="${i}" type="button" aria-label="Bỏ file này" title="Bỏ file">✕</button>
+    </div>
+  `).join('');
+
+  filePreviewList.querySelectorAll('.img-remove').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = Number(b.dataset.idx);
+      attachedTextFiles.splice(idx, 1);
+      fileLimitNote.classList.remove('show');
+      renderFilePreviews();
+    });
+  });
+}
+
+function renderImagePreviews(){
+  if(attachedImages.length === 0){
+    imgPreviewList.classList.remove('show');
+    imgPreviewList.innerHTML = '';
+    return;
+  }
+  imgPreviewList.classList.add('show');
+  imgPreviewList.innerHTML = attachedImages.map((img, i) => `
+    <div class="img-chip" data-idx="${i}">
+      <img src="data:${img.mediaType};base64,${img.base64}" alt="">
+      <span class="name">${escapeHtml(img.name)}</span>
+      <button class="img-remove" data-idx="${i}" type="button" aria-label="Bỏ ảnh này" title="Bỏ ảnh">✕</button>
+    </div>
+  `).join('');
+
+  imgPreviewList.querySelectorAll('.img-remove').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = Number(b.dataset.idx);
+      attachedImages.splice(idx, 1);
+      imgLimitNote.classList.remove('show');
+      renderImagePreviews();
+    });
+  });
+}
+
+function clearAttachments(){
+  attachedImages = [];
+  attachedTextFiles = [];
+  imgLimitNote.classList.remove('show');
+  fileLimitNote.classList.remove('show');
+  renderImagePreviews();
+  renderFilePreviews();
+}
+
+let conversationHistory = []; // full message history for the current diagnosis session
+let clarifyRoundCount = 0; // số lượt hỏi làm rõ đã dùng trong phiên hiện tại (tối đa 2)
+let diagnosisEstablishedIndex = null; // độ dài conversationHistory ngay sau khi có chẩn đoán chính thức, dùng cho "Chẩn đoán lại"
+
+const DIAG_SYSTEM = "Bạn là chuyên gia hỗ trợ kỹ thuật IT nói tiếng Việt, giàu kinh nghiệm xử lý mọi loại sự cố công nghệ (hệ điều hành, mạng, phần mềm, phần cứng, bảo mật, thiết bị ngoại vi...). Người dùng có thể mô tả lỗi bằng chữ, gửi kèm ảnh chụp màn hình lỗi, hoặc cả hai. Nếu có ảnh, hãy đọc kỹ thông báo lỗi/mã lỗi/giao diện trong ảnh để chẩn đoán chính xác. Nếu ảnh đính kèm KHÔNG thể hiện rõ một lỗi công nghệ nào (mờ, không liên quan, thiếu thông tin), hãy nói thẳng điều này trong 'diagnosis' thay vì cố suy diễn ra một lỗi không có thật.\n\nBẠN CÓ CÔNG CỤ TÌM KIẾM WEB. Nếu lỗi có mã cụ thể (ví dụ: mã lỗi Windows, mã HTTP, mã lỗi hãng thiết bị), tên phần mềm/driver/hãng cụ thể, hoặc là lỗi bạn không chắc chắn dựa trên kiến thức đã học, HÃY chủ động tìm kiếm trên web (ưu tiên trang hỗ trợ chính thức của hãng, tài liệu kỹ thuật, diễn đàn uy tín) trước khi trả lời, để chẩn đoán dựa trên nguồn thật thay vì đoán. Với lỗi phổ thông, đơn giản, đã rõ nguyên nhân thì không bắt buộc phải tìm kiếm.\n\nHỎI LÀM RÕ TRƯỚC KHI CHẨN ĐOÁN: Nếu mô tả lỗi thiếu MỘT thông tin then chốt thực sự làm thay đổi đáng kể hướng chẩn đoán và các bước xử lý (ví dụ: không rõ hệ điều hành/phiên bản khi lỗi đặc thù theo hệ điều hành, không rõ hãng/model thiết bị khi cần thao tác theo driver riêng, thông báo lỗi bị cắt cụt không rõ mã), hãy hỏi lại TỐI ĐA 2 câu hỏi ngắn gọn, dễ trả lời thay vì đoán liều. KHÔNG lạm dụng — nếu thông tin đã đủ để đưa ra hướng xử lý hữu ích, hãy chẩn đoán ngay, không hỏi thêm. Nếu người dùng vừa trả lời câu hỏi làm rõ (có ghi chú trong tin nhắn), hãy chẩn đoán ngay dựa trên thông tin đã có, không hỏi thêm lần nữa dù vẫn còn thiếu chi tiết.\n\nAN TOÀN VẬT LÝ LÀ ƯU TIÊN TUYỆT ĐỐI: Nếu mô tả hoặc ảnh có dấu hiệu nguy hiểm vật lý thực sự (mùi khét, khói, pin phồng, tia lửa điện, thiết bị nóng bất thường kèm mùi lạ...), BƯỚC ĐẦU TIÊN trong 'steps' BẮT BUỘC phải là ngừng sử dụng/ngắt nguồn ngay lập tức và liên hệ kỹ thuật viên chuyên nghiệp — đặt 'severity' là 'khẩn cấp', và điều này ưu tiên cao hơn mọi hướng dẫn sắp xếp bước khác bên dưới.\n\nTHỨ TỰ VÀ CHẤT LƯỢNG CÁC BƯỚC: Sắp xếp 'steps' theo nguyên tắc chẩn đoán chuyên nghiệp — bước đơn giản, nhanh, ít rủi ro nhất trước (kiểm tra cơ bản, khởi động lại), bước phức tạp/tốn thời gian/rủi ro hơn sau (cài lại driver, reset sâu, thay linh kiện). Nếu 'causes' liệt kê nhiều khả năng, sắp theo thứ tự khả năng cao nhất trước, và ưu tiên để bước đầu tiên vừa có tác dụng khắc phục vừa giúp thu hẹp được nguyên nhân nào đúng, thay vì chỉ liệt kê các cách 'sửa mù' không liên quan đến nhau.\n\nQUAN TRỌNG VỀ ĐỘ CHÍNH XÁC: Khi đã đến lúc chẩn đoán, nếu vẫn còn điểm chưa chắc chắn (kể cả sau khi tìm kiếm), TUYỆT ĐỐI KHÔNG bịa ra chi tiết nghe có vẻ hợp lý. Thay vào đó: (a) tự đánh giá trung thực mức độ tự tin vào trường \"confidence\", (b) nếu confidence không phải \"cao\", giải thích rõ trong \"confidence_note\" phần nào bạn không chắc, (c) nếu đã tìm kiếm và tìm được nguồn đáng tin cậy, ghi tên/URL nguồn THẬT (không bịa) vào \"verify_source\" và có thể nâng độ tin cậy tương ứng.\n\nHãy trả lời DUY NHẤT bằng một object JSON hợp lệ ở tin nhắn cuối cùng, không kèm markdown, không kèm code fence, không kèm lời dẫn, theo MỘT trong hai cấu trúc sau:\n\nNếu cần hỏi làm rõ trước: {\"response_type\":\"clarify\",\"questions\":[\"câu hỏi 1\",\"câu hỏi 2\"]}\n\nNếu đã đủ để chẩn đoán: {\"response_type\":\"diagnosis\",\"category\":\"tên nhóm lỗi ngắn gọn\",\"severity\":\"một trong: thấp, trung bình, cao, khẩn cấp\",\"confidence\":\"một trong: cao, trung bình, thấp\",\"confidence_note\":\"chỉ điền nếu confidence không phải cao; để chuỗi rỗng nếu confidence là cao\",\"diagnosis\":\"giải thích ngắn gọn 1-2 câu về nguyên nhân khả dĩ nhất\",\"causes\":[\"nguyên nhân 1 (khả năng cao nhất trước)\",\"nguyên nhân 2\"],\"steps\":[\"bước khắc phục 1 (đơn giản/nhanh nhất, ưu tiên an toàn nếu cần)\",\"bước khắc phục 2\",\"bước khắc phục 3 (phức tạp hơn)\"],\"verify_source\":\"nếu đã tìm kiếm và có nguồn thật, ghi tên nguồn/URL thật ở đây; nếu chưa tìm kiếm, gợi ý chung nơi kiểm tra chéo — không bịa link\",\"estimated_time\":\"ước lượng thời gian xử lý, ví dụ '5-10 phút'; ghi 'khó ước lượng' nếu không rõ\"}";
+
+const FOLLOWUP_SYSTEM = "Bạn là chuyên gia hỗ trợ kỹ thuật IT nói tiếng Việt. Bạn vừa đưa ra một chẩn đoán ban đầu (dạng JSON) ở lượt trước trong cuộc hội thoại. Bây giờ người dùng đang hỏi thêm hoặc báo lại kết quả sau khi đã thử các bước. Hãy trả lời bằng VĂN BẢN THƯỜNG bằng tiếng Việt, ngắn gọn, thân thiện, đi thẳng vào hướng xử lý tiếp theo. Dùng gạch đầu dòng (bắt đầu bằng '- ') nếu cần liệt kê nhiều bước mới. KHÔNG trả về JSON, không dùng markdown code fence.\n\nCÁC QUY TẮC CHỐNG BỊA ĐẶT VẪN ÁP DỤNG Ở LƯỢT NÀY, không chỉ ở lượt chẩn đoán đầu: nếu bạn không chắc chắn về bước tiếp theo (đặc biệt nếu người dùng vừa cung cấp thông tin mới quan trọng như hệ điều hành, model thiết bị, hoặc báo các bước cũ không hiệu quả), hãy nói THẲNG bạn không chắc thay vì đoán liều, và có thể dùng công cụ tìm kiếm web để kiểm chứng trước khi trả lời nếu cần. Nếu có dấu hiệu nguy hiểm vật lý (khét, khói, phồng pin, tia lửa điện), khuyên ngừng sử dụng ngay và liên hệ chuyên gia, bất kể ngữ cảnh trước đó. Nếu thông tin người dùng vừa cho biết thay đổi đáng kể tình huống, có thể hỏi lại một câu ngắn gọn trước khi đưa hướng xử lý tiếp theo, thay vì đoán tiếp trên giả định cũ.";
+
+input.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    runDiagnosis();
+  }
+});
+btn.addEventListener('click', runDiagnosis);
+
+function sevStyle(sev){
+  const s = (sev||'').toLowerCase();
+  if(s.includes('khẩn')) return {color:'#8C2A18', bg:'#FBEAE6'};
+  if(s.includes('cao')) return {color:'#C4432B', bg:'#FBEEEA'};
+  if(s.includes('trung')) return {color:'#8A5A0B', bg:'#FDF3E1'};
+  return {color:'#2E6F6E', bg:'#E9F3F2'};
+}
+
+function confStyle(conf){
+  const c = (conf||'').toLowerCase();
+  if(c.includes('thấp')) return {color:'#C4432B', bg:'#FBEEEA'};
+  if(c.includes('trung')) return {color:'#8A5A0B', bg:'#FDF3E1'};
+  return {color:'#2E6F6E', bg:'#E9F3F2'};
+}
+
+// Cố gắng trích JSON từ phản hồi thô: bỏ code fence, thử parse trực tiếp,
+// nếu fail thì cắt từ dấu { đầu tiên đến } cuối cùng và thử lại.
+function extractJson(raw){
+  const clean = raw.replace(/^```json\s*|^```\s*|```$/g, '').trim();
+  try{ return JSON.parse(clean); }catch(e){ /* thử cách khác */ }
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if(start !== -1 && end !== -1 && end > start){
+    const sliced = clean.slice(start, end + 1);
+    return JSON.parse(sliced); // để lỗi ném ra nếu vẫn hỏng
+  }
+  throw new Error('Không tìm thấy JSON hợp lệ trong phản hồi');
+}
+
+// Kiểm tra các trường bắt buộc để tránh hiển thị phiếu chẩn đoán rỗng/hỏng
+function isValidResult(r){
+  if(!r || typeof r !== 'object') return false;
+  if(r.response_type === 'clarify'){
+    return Array.isArray(r.questions) && r.questions.length > 0;
+  }
+  // mặc định coi là dạng chẩn đoán đầy đủ (kể cả khi model quên điền response_type)
+  return typeof r.diagnosis === 'string' && r.diagnosis.trim().length > 0
+    && Array.isArray(r.steps) && r.steps.length > 0;
+}
+
+// Trích các nguồn (URL thật) mà công cụ tìm kiếm web đã tìm được, để hiển thị cho người dùng kiểm chứng
+function extractSources(blocks){
+  const map = new Map();
+  blocks.forEach(b=>{
+    if(b.type === 'web_search_tool_result' && Array.isArray(b.content)){
+      b.content.forEach(item=>{
+        if(item && item.url && !map.has(item.url)){
+          map.set(item.url, item.title || item.url);
+        }
+      });
+    }
+    if(b.type === 'text' && Array.isArray(b.citations)){
+      b.citations.forEach(c=>{
+        if(c && c.url && !map.has(c.url)){
+          map.set(c.url, c.title || c.url);
+        }
+      });
+    }
+  });
+  return Array.from(map.entries()).slice(0, 5).map(([url, title]) => ({ url, title }));
+}
+
+async function callClaude(messages, system, maxTokens, useSearch){
+  const body = { model: "claude-sonnet-4-6", max_tokens: maxTokens, system, messages };
+  if(useSearch){
+    body.tools = [{ type: "web_search_20250305", name: "web_search" }];
+  }
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!response.ok) throw new Error("API error " + response.status);
+  const data = await response.json();
+  const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+  const usedSearch = data.content.some(b => b.type === 'server_tool_use' || b.type === 'web_search_tool_result');
+  const sources = extractSources(data.content);
+  return { raw, usedSearch, sources };
+}
+
+async function requestDiagnosisTurn(){
+  let { raw, usedSearch, sources } = await callClaude(conversationHistory, DIAG_SYSTEM, 2000, true);
+  let result;
+  try{
+    result = extractJson(raw);
+    if(!isValidResult(result)) throw new Error('Thiếu trường bắt buộc');
+  }catch(parseErr){
+    // Định dạng sai hoặc thiếu trường — thử lại đúng 1 lần với yêu cầu nghiêm ngặt hơn
+    const retryHistory = [
+      ...conversationHistory,
+      { role: "assistant", content: raw },
+      { role: "user", content: "Phản hồi trước không đúng định dạng JSON hợp lệ theo schema yêu cầu. Hãy trả lời LẠI, CHỈ DUY NHẤT một object JSON hợp lệ đúng schema, không thêm bất kỳ ký tự, chú thích hay markdown nào khác." }
+    ];
+    const retryRes = await callClaude(retryHistory, DIAG_SYSTEM, 2000, false);
+    raw = retryRes.raw;
+    usedSearch = usedSearch || retryRes.usedSearch;
+    sources = (sources && sources.length) ? sources : retryRes.sources;
+    result = extractJson(raw); // nếu vẫn lỗi, sẽ ném ra ngoài
+    if(!isValidResult(result)) throw new Error('Phản hồi vẫn thiếu trường bắt buộc sau khi thử lại');
+  }
+
+  conversationHistory.push({ role: "assistant", content: raw });
+  return { result, usedSearch, sources };
+}
+
+function totalAttachmentBytes(){
+  const imgBytes = attachedImages.reduce((sum, img) => sum + img.base64.length * 0.75, 0);
+  const fileBytes = attachedTextFiles.reduce((sum, f) => sum + f.content.length, 0);
+  return imgBytes + fileBytes;
+}
+
+async function runDiagnosis(){
+  if(isBusy) return;
+  const text = input.value.trim();
+  if(!text && attachedImages.length === 0 && attachedTextFiles.length === 0) { input.focus(); return; }
+
+  const sizeNote = document.getElementById('sizeLimitNote');
+  if(totalAttachmentBytes() > MAX_TOTAL_ATTACHMENT_BYTES){
+    sizeNote.classList.add('show');
+    return;
+  }
+  sizeNote.classList.remove('show');
+
+  isBusy = true;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  btn.title = 'Đang phân tích...';
+  zone.innerHTML = `<div class="state-msg"><span class="spinner"></span> Đang phân tích và có thể đang tra cứu nguồn hỗ trợ chính hãng trên web…</div>`;
+
+  const userContent = [];
+  attachedImages.forEach(img=>{
+    userContent.push({
+      type: "image",
+      source: { type: "base64", media_type: img.mediaType, data: img.base64 }
+    });
+  });
+  attachedTextFiles.forEach(f=>{
+    userContent.push({
+      type: "text",
+      text: `--- Nội dung file đính kèm: ${f.name} ---\n${f.content}\n--- Hết file ${f.name} ---`
+    });
+  });
+  const hasAttachments = attachedImages.length > 0 || attachedTextFiles.length > 0;
+  userContent.push({
+    type: "text",
+    text: text || (hasAttachments
+      ? "Đây là ảnh chụp màn hình và/hoặc nội dung file log liên quan đến một lỗi. Hãy phân tích thông báo lỗi hoặc triệu chứng xuất hiện trong đó."
+      : "")
+  });
+
+  // Bắt đầu phiên hội thoại mới cho lượt chẩn đoán này
+  conversationHistory = [{ role: "user", content: userContent }];
+  clarifyRoundCount = 0;
+  diagnosisEstablishedIndex = null;
+
+  try{
+    const { result, usedSearch, sources } = await requestDiagnosisTurn();
+    if(result.response_type === 'clarify'){
+      clarifyRoundCount++;
+      renderClarify(result);
+    }else{
+      renderTicket(result, text, usedSearch, sources);
+      diagnosisEstablishedIndex = conversationHistory.length;
+    }
+    clearAttachments();
+
+  }catch(err){
+    zone.innerHTML = `<div class="state-msg error-msg">⚠ Không thể hoàn tất chẩn đoán tự động lúc này (${escapeHtml(err.message || 'lỗi không xác định')}). Hãy thử tra theo nhóm lỗi bên dưới, hoặc mô tả lại chi tiết hơn.</div>`;
+  }finally{
+    isBusy = false;
+    btn.disabled = false;
+    btn.innerHTML = '🔍';
+    btn.title = 'Chẩn đoán ngay';
+  }
+}
+
+function renderClarify(result){
+  const qs = (result.questions||[]).map(q=>`<li>${escapeHtml(q)}</li>`).join('');
+  zone.innerHTML = `
+    <div class="ticket" style="--sev-color:#8A5A0B;--sev-bg:#FDF3E1">
+      <div class="ticket-head">
+        <span class="ticket-id">CẦN THÊM THÔNG TIN ĐỂ CHẨN ĐOÁN CHÍNH XÁC</span>
+        <button class="ticket-close" id="closeTicket" aria-label="Đóng" title="Đóng">✕</button>
+      </div>
+      <h3>Trước khi kết luận, cho tôi biết thêm:</h3>
+      <ul class="cause-list">${qs}</ul>
+      <div class="chat-input-row" style="margin-top:16px;">
+        <input type="text" class="chat-input" id="clarifyInput" placeholder="Trả lời ở đây (có thể gộp cả 2 câu)...">
+        <button class="chat-send" id="clarifySend">Gửi &amp; Chẩn đoán</button>
+      </div>
+      <p class="verify-line" style="margin-top:10px;">Bỏ qua và mô tả lại từ đầu? Đóng phiếu này rồi gõ lại ở ô phía trên với đầy đủ thông tin hơn.</p>
+    </div>
+  `;
+
+  document.getElementById('closeTicket').addEventListener('click', ()=>{
+    zone.innerHTML = '';
+    input.value = '';
+    conversationHistory = [];
+    clarifyRoundCount = 0;
+    diagnosisEstablishedIndex = null;
+    input.focus();
+  });
+
+  const clarifyInput = document.getElementById('clarifyInput');
+  const clarifySend = document.getElementById('clarifySend');
+  const submit = () => submitClarifyAnswer(clarifyInput.value.trim());
+  clarifySend.addEventListener('click', submit);
+  clarifyInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); submit(); }
+  });
+  clarifyInput.focus();
+}
+
+async function submitClarifyAnswer(answer){
+  if(!answer || isBusy) return;
+  isBusy = true;
+  const clarifyInput = document.getElementById('clarifyInput');
+  const clarifySend = document.getElementById('clarifySend');
+  clarifyInput.disabled = true;
+  clarifySend.disabled = true;
+  zone.insertAdjacentHTML('beforeend', `<div class="state-msg" id="clarifyLoading"><span class="spinner"></span> Đang chẩn đoán với thông tin bổ sung…</div>`);
+
+  const forceNote = clarifyRoundCount >= 2
+    ? " (Đây đã là lượt làm rõ thứ hai — BẮT BUỘC phải chẩn đoán ngay bây giờ với response_type: diagnosis, không được hỏi thêm nữa dù còn thiếu chi tiết.)"
+    : " (Đây là câu trả lời làm rõ của người dùng. Nếu đã đủ, hãy chẩn đoán ngay với response_type: diagnosis.)";
+  conversationHistory.push({ role: "user", content: answer + forceNote });
+
+  try{
+    const { result, usedSearch, sources } = await requestDiagnosisTurn();
+    if(result.response_type === 'clarify' && clarifyRoundCount < 2){
+      clarifyRoundCount++;
+      renderClarify(result);
+    }else{
+      renderTicket(result, answer, usedSearch, sources);
+      diagnosisEstablishedIndex = conversationHistory.length;
+    }
+  }catch(err){
+    document.getElementById('clarifyLoading')?.remove();
+    zone.insertAdjacentHTML('beforeend', `<div class="state-msg error-msg">⚠ Không gửi được (${escapeHtml(err.message || 'lỗi không xác định')}). Thử lại nhé.</div>`);
+    clarifyInput.disabled = false;
+    clarifySend.disabled = false;
+  }finally{
+    isBusy = false;
+  }
+}
+
+async function regenerateDiagnosis(){
+  if(isBusy || diagnosisEstablishedIndex === null) return;
+  isBusy = true;
+  const regenBtn = document.getElementById('regenBtn');
+  if(regenBtn){ regenBtn.disabled = true; regenBtn.textContent = '🔄 Đang chẩn đoán lại...'; }
+
+  conversationHistory = conversationHistory.slice(0, diagnosisEstablishedIndex);
+  conversationHistory.push({
+    role: "user",
+    content: "Hãy xem xét lại từ đầu và đưa ra một góc chẩn đoán khác hoặc bổ sung nếu có nguyên nhân khả dĩ khác hợp lý hơn, dựa trên đúng mô tả/ảnh/file ban đầu. Nếu chẩn đoán trước đã là hướng hợp lý nhất, hãy giữ nguyên hướng đó nhưng có thể bổ sung thêm góc nhìn hoặc kiểm tra thêm. Trả lời theo đúng schema JSON dạng diagnosis, không hỏi lại."
+  });
+
+  zone.innerHTML = `<div class="state-msg"><span class="spinner"></span> Đang chẩn đoán lại theo góc nhìn khác…</div>`;
+
+  try{
+    const { result, usedSearch, sources } = await requestDiagnosisTurn();
+    if(result.response_type === 'clarify'){
+      clarifyRoundCount++;
+      renderClarify(result);
+    }else{
+      renderTicket(result, null, usedSearch, sources);
+      diagnosisEstablishedIndex = conversationHistory.length;
+    }
+  }catch(err){
+    zone.innerHTML = `<div class="state-msg error-msg">⚠ Không chẩn đoán lại được (${escapeHtml(err.message || 'lỗi không xác định')}).</div>`;
+  }finally{
+    isBusy = false;
+  }
+}
+
+function renderTicket(result, originalText, usedSearch, sources){
+  const ticketId = 'IT-' + Math.floor(1000 + Math.random()*9000);
+  const sev = sevStyle(result.severity);
+  const conf = confStyle(result.confidence);
+  const causes = (result.causes||[]).map(c=>`<li>${escapeHtml(c)}</li>`).join('');
+  const steps = (result.steps||[]).map((s,i)=>`
+    <li data-i="${i}">
+      <span class="step-num">${i+1}</span>
+      <span class="step-text">${escapeHtml(s)}</span>
+    </li>
+  `).join('');
+
+  const showCaution = result.confidence && !result.confidence.toLowerCase().includes('cao') && result.confidence_note;
+  const cautionHtml = showCaution ? `
+    <div class="caution-box">
+      <span class="ic">⚠</span>
+      <span>${escapeHtml(result.confidence_note)}</span>
+    </div>` : '';
+  const verifyHtml = result.verify_source ? `<p class="verify-line">🔎 Kiểm tra chéo tại: ${escapeHtml(result.verify_source)}</p>` : '';
+  const sourcesHtml = (sources && sources.length) ? `
+    <div class="ticket-section">
+      <h4>Nguồn đã tra cứu</h4>
+      <ul class="source-list">
+        ${sources.map(s => `<li><a href="${encodeURI(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.title || s.url)}</a></li>`).join('')}
+      </ul>
+    </div>` : '';
+
+  zone.innerHTML = `
+    <div class="ticket" style="--sev-color:${sev.color};--sev-bg:${sev.bg}">
+      <div class="ticket-head">
+        <span class="ticket-id">PHIẾU CHẨN ĐOÁN #${ticketId}</span>
+        <div class="ticket-head-right">
+          <span class="sev-badge">Mức độ: ${escapeHtml(result.severity||'—')}</span>
+          <button class="ticket-close" id="closeTicket" aria-label="Đóng phiếu chẩn đoán" title="Đóng">✕</button>
+        </div>
+      </div>
+      <h3>${escapeHtml(result.category||'Sự cố công nghệ')}</h3>
+      <div class="conf-row" style="--conf-color:${conf.color};--conf-bg:${conf.bg}">
+        ${result.confidence ? `<span class="conf-badge">Độ tin cậy: ${escapeHtml(result.confidence)}</span>` : ''}
+        ${usedSearch ? `<span class="search-badge">🌐 Đã tra cứu web</span>` : ''}
+      </div>
+      ${cautionHtml}
+      <p class="diag">${escapeHtml(result.diagnosis||'')}</p>
+
+      ${causes ? `<div class="ticket-section">
+        <h4>Nguyên nhân có thể</h4>
+        <ul class="cause-list">${causes}</ul>
+      </div>` : ''}
+
+      <div class="ticket-section">
+        <h4>Các bước khắc phục <span style="text-transform:none;letter-spacing:0;color:var(--ink-soft);font-weight:400;">— nhấn từng bước để đánh dấu đã làm</span></h4>
+        <ul class="step-list">${steps}</ul>
+      </div>
+      ${verifyHtml}
+      ${sourcesHtml}
+
+      <div class="ticket-footer">
+        <span class="est-time">⏱ Thời gian ước tính: ${escapeHtml(result.estimated_time||'—')}</span>
+        <button class="regen-btn" id="regenBtn" type="button">🔄 Chẩn đoán lại</button>
+      </div>
+
+      <div class="followup-section">
+        <h4>Vẫn còn vướng? Hỏi thêm</h4>
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="chatInput" placeholder="ví dụ: đã làm bước 1-2 nhưng vẫn lỗi...">
+          <button class="chat-send" id="chatSend">Gửi</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  zone.querySelectorAll('.step-list li').forEach(li=>{
+    li.addEventListener('click', ()=> li.classList.toggle('done'));
+  });
+
+  const closeBtn = document.getElementById('closeTicket');
+  closeBtn.addEventListener('click', ()=>{
+    zone.innerHTML = '';
+    input.value = '';
+    conversationHistory = [];
+    clarifyRoundCount = 0;
+    diagnosisEstablishedIndex = null;
+    input.focus();
+  });
+
+  document.getElementById('regenBtn').addEventListener('click', regenerateDiagnosis);
+
+  const chatLog = document.getElementById('chatLog');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+
+  const sendFollowUp = () => askFollowUp(chatLog, chatInput, chatSend);
+  chatSend.addEventListener('click', sendFollowUp);
+  chatInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); sendFollowUp(); }
+  });
+}
+
+async function askFollowUp(chatLog, chatInput, chatSend){
+  const question = chatInput.value.trim();
+  if(!question || isBusy) { if(!isBusy) chatInput.focus(); return; }
+  isBusy = true;
+
+  const ticketEl = chatLog.closest('.ticket');
+  const triedSteps = ticketEl
+    ? Array.from(ticketEl.querySelectorAll('.step-list li.done .step-text')).map(el => el.textContent.trim())
+    : [];
+  const regenBtnEl = document.getElementById('regenBtn');
+  if(regenBtnEl) regenBtnEl.disabled = true;
+
+  chatLog.insertAdjacentHTML('beforeend', `<div class="chat-bubble user">${escapeHtml(question)}</div>`);
+  chatInput.value = '';
+  chatInput.disabled = true;
+  chatSend.disabled = true;
+  chatLog.insertAdjacentHTML('beforeend', `<div class="chat-bubble pending" id="pendingBubble"><span class="spinner"></span> Đang trả lời…</div>`);
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  const contextNote = triedSteps.length
+    ? `\n\n(Ghi chú hệ thống — người dùng đã đánh dấu là đã thử các bước sau, đừng lặp lại trừ khi cần làm lại: ${triedSteps.map((s,i)=>`${i+1}. ${s}`).join(' | ')})`
+    : '';
+  conversationHistory.push({ role: "user", content: question + contextNote });
+
+  try{
+    const { raw, sources } = await callClaude(conversationHistory, FOLLOWUP_SYSTEM, 2000, true);
+
+    conversationHistory.push({ role: "assistant", content: raw });
+
+    document.getElementById('pendingBubble')?.remove();
+    const sourcesLine = (sources && sources.length)
+      ? `<div class="chat-sources">${sources.map(s => `<a href="${encodeURI(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.title || s.url)}</a>`).join('')}</div>`
+      : '';
+    chatLog.insertAdjacentHTML('beforeend', `<div class="chat-bubble assistant">${escapeHtml(raw)}${sourcesLine}</div>`);
+
+  }catch(err){
+    document.getElementById('pendingBubble')?.remove();
+    chatLog.insertAdjacentHTML('beforeend', `<div class="chat-bubble assistant">⚠ Không gửi được câu hỏi này, thử lại nhé.</div>`);
+    conversationHistory.pop(); // bỏ câu hỏi lỗi khỏi lịch sử để không làm hỏng ngữ cảnh
+  }finally{
+    isBusy = false;
+    if(regenBtnEl) regenBtnEl.disabled = false;
+    chatInput.disabled = false;
+    chatSend.disabled = false;
+    chatLog.scrollTop = chatLog.scrollHeight;
+    chatInput.focus();
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
