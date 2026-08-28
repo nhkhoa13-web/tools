@@ -24,6 +24,11 @@
     --shadow: 0 1px 0 rgba(28,27,23,0.04), 0 6px 16px -10px rgba(28,27,23,0.25);
   }
   *{box-sizing:border-box;}
+  html{
+    -webkit-text-size-adjust:100%;
+    -moz-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
   html,body{margin:0;padding:0;}
   body{
     background:
@@ -71,7 +76,7 @@
   .colheader div:first-child{background:#E6E3D5;}
   .hero-body{
     display:grid;
-    grid-template-columns:44px 1fr;
+    grid-template-columns:44px minmax(0,1fr);
   }
   .rownums{
     background:#EFEDE2;
@@ -506,7 +511,8 @@
 
   @media (max-width:640px){
     .frame{padding:0 12px 70px;}
-    .colheader, .hero-body{grid-template-columns:0 1fr;}
+    .colheader{grid-template-columns:0;}
+    .hero-body{grid-template-columns:1fr;}
     .rownums, .colheader{display:none;}
     .sheet-chrome{margin-top:14px; border-radius:8px;}
     .hero-main{padding:18px 16px 20px;}
@@ -584,7 +590,7 @@
       <div class="rownums"><div>1</div><div>2</div><div>3</div><div>4</div></div>
       <div class="hero-main">
         <span class="eyebrow">● Excel Toolkit</span>
-        <h1>Mọi phím tắt, hàm và <span class="accent">mẹo Excel</span><br>trong một ô tìm kiếm.</h1>
+        <h1>Mọi phím tắt, hàm và <span class="accent">mẹo Excel</span> trong một ô tìm kiếm.</h1>
         <p class="hero-sub">Gõ tên hàm, mô tả phím tắt hoặc từ khoá — kết quả lọc theo thời gian thực trên cả ba danh mục bên dưới.</p>
         <div class="formula-bar">
           <div class="cellref">A1</div>
