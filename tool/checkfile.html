@@ -238,6 +238,21 @@
   .calc-keypad-sci { gap: 6px; }
   .calc-keypad-sci .calc-key { padding: 11px 0; font-size: 13px; }
 
+  .calc-mem-badge-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+  .calc-history-toggle { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); padding: 4px 10px; border-radius: 999px; cursor: pointer; flex-shrink: 0; }
+  .calc-history-toggle:hover { color: var(--text-hi); border-color: var(--mod); }
+  .calc-history-list { display: flex; flex-direction: column; gap: 8px; max-height: 430px; overflow-y: auto; margin-bottom: 12px; }
+  .calc-history-item { background: var(--paper); border-radius: 8px; padding: 10px 14px; box-shadow: inset 0 0 0 1px var(--paper-line); cursor: pointer; text-align: right; transition: box-shadow 0.15s; }
+  .calc-history-item:hover { box-shadow: inset 0 0 0 1.5px var(--mod); }
+  .calc-history-expr { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8a8370; white-space: nowrap; overflow-x: auto; }
+  .calc-history-result { font-family: 'IBM Plex Mono', monospace; font-size: 17px; color: #2a2620; font-weight: 600; margin-top: 2px; }
+  .calc-history-empty { text-align: center; color: var(--text-mid); font-size: 13px; padding: 50px 0; }
+  .calc-history-actions { display: flex; justify-content: space-between; gap: 8px; }
+  .calc-history-back, .calc-history-clear { font-family: 'IBM Plex Mono', monospace; font-size: 11px; border: 1px solid var(--border); background: var(--ink-2); color: var(--text-mid); padding: 9px 16px; border-radius: 999px; cursor: pointer; }
+  .calc-history-back:hover { color: var(--text-hi); }
+  .calc-history-clear:hover { color: var(--del); border-color: var(--del); }
+  .calc-kbd-hint { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--text-dim); text-align: center; margin: 10px 0 0; }
+
   @media print {
     .menu-btn { display: none !important; }
     body { background: #fff; padding: 0; }
@@ -266,7 +281,7 @@ const state = {
   advOpen: false,
   returnStage: 'upload',
   calcTab: 'vat',
-  calc: { expr: '', angleMode: 'deg', memory: 0, justEvaluated: false, shift: false }
+  calc: { expr: '', angleMode: 'deg', memory: 0, justEvaluated: false, shift: false, history: [], showHistory: false }
 };
 let flashTimer = null;
 
@@ -566,6 +581,14 @@ function formatCalcResult(n){
   const rounded = Math.round(n*1e10)/1e10;
   return rounded.toString();
 }
+function formatNumberDisplay(numStr){
+  const parts = numStr.split('.');
+  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return parts.length>1 ? intPart+','+parts[1] : intPart;
+}
+function formatExprForDisplay(expr){
+  return expr.replace(/\d+(\.\d+)?/g, m => formatNumberDisplay(m));
+}
 
 function calcInsertRaw(str){
   const c = state.calc;
@@ -625,7 +648,12 @@ function calcEquals(){
   const c = state.calc;
   const val = safeEvalExpr(c.expr);
   if(val===null) return;
-  c.expr = formatCalcResult(val);
+  const resultStr = formatCalcResult(val);
+  if(c.expr.trim()!=='' && c.expr!==resultStr){
+    c.history.unshift({ expr: c.expr, result: resultStr });
+    if(c.history.length>50) c.history.length = 50;
+  }
+  c.expr = resultStr;
   c.justEvaluated = true;
 }
 function calcMemClear(){ state.calc.memory = 0; }
@@ -670,10 +698,12 @@ function updateCalcUI(){
   if(!exprEl){ render(); return; }
   const c = state.calc;
   const previewVal = (!c.justEvaluated) ? safeEvalExpr(c.expr) : null;
-  const preview = previewVal!==null ? '= '+formatCalcResult(previewVal) : '\u00A0';
-  exprEl.textContent = c.expr==='' ? '0' : c.expr;
+  const preview = previewVal!==null ? '= '+formatNumberDisplay(formatCalcResult(previewVal)) : '\u00A0';
+  exprEl.textContent = c.expr==='' ? '0' : formatExprForDisplay(c.expr);
   document.getElementById('calc-preview-line').textContent = preview;
-  document.getElementById('calc-mem-badge').textContent = c.memory!==0 ? ('M = '+formatCalcResult(c.memory)) : '\u00A0';
+  document.getElementById('calc-mem-badge').textContent = c.memory!==0 ? ('M = '+formatNumberDisplay(formatCalcResult(c.memory))) : '\u00A0';
+  const histBtn = document.getElementById('calc-history-toggle');
+  if(histBtn) histBtn.textContent = 'Lịch sử' + (c.history.length ? ` (${c.history.length})` : '');
 
   const shift = c.shift;
   const btn2nd = document.getElementById('calc-btn-2nd');
@@ -1052,8 +1082,8 @@ function renderBasicPane(){
   const c = state.calc;
   const shift = c.shift;
   const previewVal = (!c.justEvaluated) ? safeEvalExpr(c.expr) : null;
-  const preview = previewVal!==null ? '= '+formatCalcResult(previewVal) : '\u00A0';
-  const mainDisplay = c.expr==='' ? '0' : c.expr;
+  const preview = previewVal!==null ? '= '+formatNumberDisplay(formatCalcResult(previewVal)) : '\u00A0';
+  const mainDisplay = c.expr==='' ? '0' : formatExprForDisplay(c.expr);
 
   const rows = [
     [ {label:'2nd', key:'2nd', cls:'op'+(shift?' active2nd':''), id:'calc-btn-2nd'},
@@ -1080,14 +1110,40 @@ function renderBasicPane(){
     [ {label:'0', key:'0', cls:''}, {label:'.', key:'.', cls:''}, {label:'⌫', key:'⌫', cls:''}, {label:'=', key:'=', cls:'eq'} ]
   ];
   const keysHtml = rows.map(row=>row.map(k=>`<button data-action="calc-key" data-key="${esc(k.key)}" class="calc-key ${k.cls}"${k.id?` id="${k.id}"`:''}>${esc(k.label)}</button>`).join('')).join('');
+  const bodyHtml = c.showHistory ? renderCalcHistoryPanel() : `<div class="calc-keypad calc-keypad-sci">${keysHtml}</div><p class="calc-kbd-hint">Có thể gõ bàn phím: số, + − × ÷ ( ) ^ % ! · Enter = · Backspace = ⌫</p>`;
 
   return `
-    <div class="calc-mem-badge" id="calc-mem-badge">${c.memory!==0 ? ('M = '+esc(formatCalcResult(c.memory))) : '\u00A0'}</div>
+    <div class="calc-mem-badge-row">
+      <button class="calc-history-toggle" id="calc-history-toggle" data-action="calc-history-open">Lịch sử${c.history.length?` (${c.history.length})`:''}</button>
+      <div class="calc-mem-badge" id="calc-mem-badge">${c.memory!==0 ? ('M = '+esc(formatNumberDisplay(formatCalcResult(c.memory)))) : '\u00A0'}</div>
+    </div>
     <div class="calc-sci-display">
       <div class="calc-expr-line" id="calc-expr-line">${esc(mainDisplay)}</div>
       <div class="calc-preview-line" id="calc-preview-line">${esc(preview)}</div>
     </div>
-    <div class="calc-keypad calc-keypad-sci">${keysHtml}</div>`;
+    ${bodyHtml}`;
+}
+
+function renderCalcHistoryPanel(){
+  const c = state.calc;
+  if(c.history.length===0){
+    return `
+      <div class="calc-history-empty">Chưa có phép tính nào.</div>
+      <div class="calc-history-actions">
+        <button class="calc-history-back" data-action="calc-history-close">&#8249; Quay lại bàn phím</button>
+      </div>`;
+  }
+  const items = c.history.map((h,i)=>`
+    <div class="calc-history-item" data-action="calc-history-use" data-index="${i}">
+      <div class="calc-history-expr">${esc(formatExprForDisplay(h.expr))} =</div>
+      <div class="calc-history-result">${esc(formatNumberDisplay(h.result))}</div>
+    </div>`).join('');
+  return `
+    <div class="calc-history-list">${items}</div>
+    <div class="calc-history-actions">
+      <button class="calc-history-back" data-action="calc-history-close">&#8249; Quay lại bàn phím</button>
+      <button class="calc-history-clear" data-action="calc-history-clear">Xóa lịch sử</button>
+    </div>`;
 }
 
 function renderCalcScreen(){
@@ -1655,6 +1711,15 @@ app.addEventListener('click', e=>{
   else if(action==='close-calc'){ state.stage = state.returnStage || 'upload'; render(); }
   else if(action==='calc-tab'){ state.calcTab = t.dataset.tab; render(); }
   else if(action==='calc-key'){ calcKey(t.dataset.key); updateCalcUI(); }
+  else if(action==='calc-history-open'){ state.calc.showHistory = true; render(); }
+  else if(action==='calc-history-close'){ state.calc.showHistory = false; render(); }
+  else if(action==='calc-history-clear'){ state.calc.history = []; render(); }
+  else if(action==='calc-history-use'){
+    const entry = state.calc.history[+t.dataset.index];
+    if(entry){ state.calc.expr = entry.result; state.calc.justEvaluated = true; }
+    state.calc.showHistory = false;
+    render();
+  }
 });
 
 app.addEventListener('change', e=>{
@@ -1676,7 +1741,39 @@ app.addEventListener('focusout', e=>{
 });
 
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape' && state.stage==='calc'){ state.stage = state.returnStage || 'upload'; render(); }
+  if(e.key==='Escape' && state.stage==='calc'){ state.stage = state.returnStage || 'upload'; render(); return; }
+
+  if(state.stage!=='calc' || state.calcTab!=='basic' || state.calc.showHistory) return;
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+  const key = e.key;
+  // If a calculator button is currently keyboard-focused (Tab navigation),
+  // let native Enter-activates-focused-button behavior win instead of
+  // hijacking Enter into "=" — otherwise Tab+Enter could never activate a
+  // specific button like "sin".
+  if(key==='Enter' && e.target && e.target.tagName==='BUTTON' && e.target.closest && e.target.closest('.calc-keypad-sci')) return;
+
+  let mapped = null;
+  if(key>='0' && key<='9' && key.length===1) mapped = key;
+  else if(key==='.') mapped = '.';
+  else if(key==='+') mapped = '+';
+  else if(key==='-') mapped = '-';
+  else if(key==='*') mapped = '×';
+  else if(key==='/') mapped = '÷';
+  else if(key==='^') mapped = '^';
+  else if(key==='(') mapped = '(';
+  else if(key===')') mapped = ')';
+  else if(key==='%') mapped = '%';
+  else if(key==='!') mapped = '!';
+  else if(key==='Enter' || key==='=') mapped = '=';
+  else if(key==='Backspace') mapped = '⌫';
+  else if(key==='Delete') mapped = 'C';
+
+  if(mapped!==null){
+    e.preventDefault();
+    calcKey(mapped);
+    updateCalcUI();
+  }
 });
 
 app.addEventListener('toggle', e=>{
