@@ -242,6 +242,50 @@
     color:var(--red);
   }
   .err-group:focus-visible{ outline:2px dashed var(--red); outline-offset:2px; border-radius:4px; }
+  .err-group{ cursor:pointer; }
+
+  .err-group.vocab{ background:#F6ECD9; }
+  .err-group.vocab .err-wrong{ text-decoration-color:#D9A54F; }
+  .err-group.vocab .err-correct{ color:#96691E; }
+  .err-group.vocab .err-arrow{ color:#C89344; }
+
+  .stat-line{
+    max-width:720px;
+    width:100%;
+    margin:14px 2px 0;
+    font-size:.88rem;
+    color:var(--ink-soft);
+  }
+  .stat-line strong{ color:var(--ink); }
+
+  .detail-panel{
+    max-width:720px;
+    width:100%;
+    margin-top:10px;
+    background:#fff;
+    border:1px solid #EAE5D6;
+    border-radius:10px;
+    padding:12px 16px;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    box-shadow: 0 4px 12px -6px rgba(29,43,69,.12);
+    animation: fadeUp .2s ease both;
+  }
+  .detail-tag{
+    background:var(--paper-edge);
+    color:var(--ink-soft);
+    font-size:.72rem;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .detail-note{
+    font-size:.92rem;
+    color:var(--ink);
+    line-height:1.5;
+  }
 
   .no-errors{
     display:flex;
@@ -365,6 +409,9 @@
     <button class="btn btn-ghost" id="toggleCleanBtn">Xem bản đã sửa</button>
     <button class="btn btn-ghost" id="resetBtn">Kiểm tra đoạn khác</button>
   </div>
+
+  <p class="stat-line" id="statLine" style="display:none;"></p>
+  <div class="detail-panel" id="detailPanel" style="display:none;"></div>
 </div>
 
 <div class="clean-panel" id="cleanPanel">
@@ -378,11 +425,24 @@
 <footer>Được chấm bởi trợ lý AI — vẫn có thể sai sót ở những trường hợp tiếng Việt hiếm gặp, hãy đọc lại lần cuối trước khi nộp bài nhé.</footer>
 
 <script>
-const SYSTEM_PROMPT = `Bạn là một giáo viên tiếng Việt kiểm tra lỗi chính tả.
-Chỉ tìm lỗi chính tả (dấu thanh hỏi/ngã/sắc/nặng, phụ âm đầu tr/ch, s/x, l/n, d/gi/r, nguyên âm i/y, ă/â...). Không sửa ngữ pháp, văn phong, không thêm bớt ý.
-Chỉ trả lời một JSON object DUY NHẤT, không markdown, không giải thích thêm:
-{"errors":[{"wrong":"từ sai, nguyên văn trong bài","correct":"từ đúng","note":"giải thích dưới 6 từ"}]}
-Nếu không có lỗi: {"errors":[]}
+const SYSTEM_PROMPT = `Bạn là một giáo viên tiếng Việt kiểm tra lỗi chính tả và dùng từ, rất thận trọng để không sửa nhầm từ đúng.
+
+Có 2 loại lỗi cần tìm:
+1. Lỗi chính tả con chữ — phân vào các category sau:
+   - "dau_thanh": sai dấu thanh (hỏi/ngã/sắc/nặng/huyền)
+   - "phu_am_dau": sai phụ âm đầu (tr/ch, s/x, l/n, d/gi/r)
+   - "nguyen_am": sai nguyên âm (i/y, ă/â...)
+2. Lỗi dùng từ gần âm, đặc biệt từ Hán Việt hay bị nhầm (category "tu_vung"): ví dụ "tham quan"→"thăm quan", "chín muồi"→"chín mùi", "sáp nhập"→"sát nhập", "giả thuyết"→"giả thiết" khi dùng sai ngữ cảnh. CHỈ báo loại này khi rất chắc chắn từ gốc dùng sai ngữ cảnh, không phải chỉ vì nghe lạ.
+
+QUAN TRỌNG — trước khi đưa một lỗi vào danh sách, tự hỏi: "từ 'wrong' này có phải một từ/cụm từ tiếng Việt hợp lệ và đúng ngữ cảnh không?" Nếu có thể đúng thì KHÔNG báo lỗi. Ưu tiên độ chính xác hơn số lượng lỗi tìm được — thà bỏ sót còn hơn báo sai.
+
+Phân biệt rõ 2 trường hợp sau:
+- Biến thể PHƯƠNG NGỮ thật sự, phản ánh cách phát âm vùng miền, được chấp nhận trong văn viết — ví dụ: "giùm/dùm", "dòn/giòn", "ngoài/ngoải". Loại này KHÔNG báo lỗi.
+- Chữ viết CƯỜNG ĐIỆU THEO GIỌNG kiểu tin nhắn/teencode để tạo hiệu ứng vui, đáng yêu — ví dụ: "gì"→"dì", "vậy"→"dị", "trời"→"chời", "biết"→"bit". Đây KHÔNG phải phương ngữ, đây vẫn là lệch chuẩn chính tả — VẪN BÁO LỖI bình thường (category "phu_am_dau" hoặc "nguyen_am" tuỳ trường hợp).
+
+Chỉ trả lời một JSON object DUY NHẤT, không markdown, không giải thích thêm ngoài JSON:
+{"errors":[{"wrong":"từ sai, nguyên văn trong bài","correct":"từ đúng","category":"dau_thanh|phu_am_dau|nguyen_am|tu_vung","note":"giải thích quy tắc ngắn gọn, dưới 15 từ, giúp người dùng hiểu vì sao sai","confidence":"cao|thap"}]}
+Chỉ đưa vào danh sách các lỗi có confidence "cao". Nếu không có lỗi: {"errors":[]}
 Liệt kê "errors" đúng thứ tự xuất hiện trong bài. Không lặp lại văn bản gốc trong câu trả lời.`;
 
 const input = document.getElementById('input');
@@ -402,6 +462,8 @@ const toggleCleanBtn = document.getElementById('toggleCleanBtn');
 const resetBtn = document.getElementById('resetBtn');
 const copyBtn = document.getElementById('copyBtn');
 const errMsg = document.getElementById('errMsg');
+const statLine = document.getElementById('statLine');
+const detailPanel = document.getElementById('detailPanel');
 
 input.addEventListener('input', () => {
   charNum.textContent = input.value.length;
@@ -421,11 +483,19 @@ function setLoading(isLoading){
   pen.classList.toggle('spin', isLoading);
 }
 
+const CATEGORY_LABELS = {
+  dau_thanh: 'dấu thanh (hỏi/ngã/sắc/nặng)',
+  phu_am_dau: 'phụ âm đầu (tr/ch, s/x, l/n, d/gi/r)',
+  nguyen_am: 'nguyên âm (i/y, ă/â...)',
+  tu_vung: 'dùng từ gần âm'
+};
+
 function buildResult(original, errors){
   let cursor = 0;
   const found = [];
   for (const err of errors){
     if (!err.wrong || err.wrong === err.correct) continue;
+    if (err.confidence === 'thap') continue; // bỏ qua lỗi model không chắc chắn
     const idx = original.indexOf(err.wrong, cursor);
     if (idx === -1) continue;
     found.push({...err, idx});
@@ -436,23 +506,37 @@ function buildResult(original, errors){
   let html = '';
   let corrected = '';
   let pos = 0;
+  const categoryCounts = {};
   for (const err of found){
     if (err.idx < pos) continue;
     const before = original.slice(pos, err.idx);
     html += escapeHtml(before);
     corrected += before;
-    html += `<span class="err-group" tabindex="0" title="${escapeHtml(err.note||'')}">` +
+    const isVocab = err.category === 'tu_vung';
+    html += `<span class="err-group${isVocab ? ' vocab' : ''}" tabindex="0" ` +
+              `data-note="${escapeHtml(err.note||'')}" data-category="${escapeHtml(CATEGORY_LABELS[err.category] || '')}">` +
               `<span class="err-wrong">${escapeHtml(err.wrong)}</span>` +
               `<span class="err-arrow">→</span>` +
               `<span class="err-correct">${escapeHtml(err.correct)}</span>` +
             `</span>`;
     corrected += err.correct;
     pos = err.idx + err.wrong.length;
+    categoryCounts[err.category] = (categoryCounts[err.category] || 0) + 1;
   }
   const tail = original.slice(pos);
   html += escapeHtml(tail);
   corrected += tail;
-  return { html, count: found.length, corrected };
+  return { html, count: found.length, corrected, categoryCounts };
+}
+
+function topCategorySentence(categoryCounts){
+  const entries = Object.entries(categoryCounts);
+  if (entries.length === 0) return '';
+  entries.sort((a,b)=>b[1]-a[1]);
+  const [cat, num] = entries[0];
+  const label = CATEGORY_LABELS[cat];
+  if (!label) return '';
+  return `Lỗi hay gặp nhất trong bài: <strong>${label}</strong> (${num} lỗi).`;
 }
 
 function showStamp(count){
@@ -492,7 +576,7 @@ async function checkText(){
     const parsed = JSON.parse(clean);
 
     const errors = Array.isArray(parsed.errors) ? parsed.errors : [];
-    const { html, count, corrected } = buildResult(text, errors);
+    const { html, count, corrected, categoryCounts } = buildResult(text, errors);
 
     if (count === 0){
       resultText.innerHTML = `<div class="no-errors">✓ Không tìm thấy lỗi chính tả nào. Viết tốt lắm!</div><br>${escapeHtml(text)}`;
@@ -505,6 +589,15 @@ async function checkText(){
     sheet.classList.remove('ruled');
     showStamp(count);
     actions.style.display = 'flex';
+    detailPanel.style.display = 'none';
+
+    const statSentence = topCategorySentence(categoryCounts);
+    if (statSentence){
+      statLine.innerHTML = statSentence;
+      statLine.style.display = 'block';
+    } else {
+      statLine.style.display = 'none';
+    }
 
     cleanText.textContent = corrected;
 
@@ -523,6 +616,8 @@ function resetSheet(){
   stamp.classList.remove('show');
   actions.style.display = 'none';
   cleanPanel.style.display = 'none';
+  detailPanel.style.display = 'none';
+  statLine.style.display = 'none';
   toggleCleanBtn.textContent = 'Xem bản đã sửa';
   input.focus();
 }
@@ -539,6 +634,18 @@ toggleCleanBtn.addEventListener('click', () => {
 });
 
 resetBtn.addEventListener('click', resetSheet);
+
+resultText.addEventListener('click', (e) => {
+  const chip = e.target.closest('.err-group');
+  if (!chip) return;
+  const note = chip.dataset.note;
+  const category = chip.dataset.category;
+  if (!note && !category) { detailPanel.style.display = 'none'; return; }
+  detailPanel.innerHTML =
+    (category ? `<span class="detail-tag">${escapeHtml(category)}</span>` : '') +
+    (note ? `<span class="detail-note">${escapeHtml(note)}</span>` : '');
+  detailPanel.style.display = 'flex';
+});
 
 copyBtn.addEventListener('click', async () => {
   try {
