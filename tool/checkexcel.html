@@ -6,1137 +6,2098 @@
 <title>Excel Toolkit — Phím tắt · Hàm · Mẹo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hyperformula/dist/hyperformula.full.min.js"></script>
 <style>
   :root{
-    --paper:#F6F5EF;
-    --ink:#1C1B17;
-    --ink-soft:#5B5847;
-    --green:#1D6F42;
-    --green-dark:#123F27;
-    --green-tint:#E4F0E9;
-    --amber:#D9922E;
-    --amber-tint:#FBEEDA;
-    --blue:#3B5BA5;
-    --blue-tint:#E7ECF6;
-    --line:#DAD6C6;
-    --line-strong:#C3BEA9;
-    --card:#FFFFFF;
+    --paper:#F6F5EF; --ink:#1C1B17; --ink-soft:#5B5847;
+    --green:#1D6F42; --green-dark:#123F27; --green-tint:#E4F0E9;
+    --amber:#D9922E; --amber-tint:#FBEEDA;
+    --blue:#3B5BA5; --blue-tint:#E7ECF6;
+    --red:#B3432B; --red-tint:#FBE7E1;
+    --line:#DAD6C6; --line-strong:#C3BEA9; --card:#FFFFFF;
     --shadow: 0 1px 0 rgba(28,27,23,0.04), 0 6px 16px -10px rgba(28,27,23,0.25);
   }
   *{box-sizing:border-box;}
-  html{
-    -webkit-text-size-adjust:100%;
-    -moz-text-size-adjust:100%;
-    text-size-adjust:100%;
-  }
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%;}
   html,body{margin:0;padding:0;}
   body{
     background:
       linear-gradient(var(--line) 1px, transparent 1px) 0 0/100% 34px,
       linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/56px 100%,
       var(--paper);
-    background-attachment:local;
-    color:var(--ink);
-    font-family:'Inter', sans-serif;
-    -webkit-font-smoothing:antialiased;
-    min-height:100vh;
+    color:var(--ink); font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
   }
-  ::selection{background:var(--green); color:#fff;}
   a{color:inherit;}
+  .frame{max-width:980px; margin:0 auto; padding:0 18px 80px;}
 
-  .frame{
-    max-width:1180px;
-    margin:0 auto;
-    padding:0 20px 80px;
+  /* ---------- hero ---------- */
+  .hero{
+    margin-top:24px; background:var(--card); border:1px solid var(--line-strong);
+    border-radius:10px; box-shadow:var(--shadow); padding:26px 28px;
   }
-
-  /* ---------- HEADER / HERO (spreadsheet chrome) ---------- */
-  .sheet-chrome{
-    margin-top:22px;
-    border:1px solid var(--line-strong);
-    background:var(--card);
-    box-shadow:var(--shadow);
-    border-radius:6px;
-    overflow:hidden;
-  }
-  .colheader{
-    display:grid;
-    grid-template-columns:44px repeat(6,1fr);
-    background:#EFEDE2;
-    border-bottom:1px solid var(--line-strong);
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--ink-soft);
-  }
-  .colheader div{
-    padding:6px 0;
-    text-align:center;
-    border-right:1px solid var(--line);
-  }
-  .colheader div:first-child{background:#E6E3D5;}
-  .hero-body{
-    display:grid;
-    grid-template-columns:44px minmax(0,1fr);
-  }
-  .rownums{
-    background:#EFEDE2;
-    border-right:1px solid var(--line-strong);
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--ink-soft);
-    display:flex;
-    flex-direction:column;
-  }
-  .rownums div{
-    flex:1;
-    display:flex; align-items:center; justify-content:center;
-    border-bottom:1px solid var(--line);
-    min-height:38px;
-  }
-  .hero-main{padding:28px 32px 26px;}
   .eyebrow{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    color:var(--green-dark);
-    background:var(--green-tint);
-    border:1px solid #C6DFCF;
-    padding:4px 10px;
-    border-radius:4px;
-    margin-bottom:16px;
+    display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono', monospace;
+    font-size:12px; color:var(--green-dark); background:var(--green-tint);
+    border:1px solid #C6DFCF; padding:4px 10px; border-radius:4px; margin-bottom:14px;
   }
-  h1{
-    font-family:'Space Grotesk', sans-serif;
-    font-size:clamp(28px,4vw,42px);
-    line-height:1.08;
-    margin:0 0 10px;
-    letter-spacing:-0.01em;
-  }
-  h1 .accent{color:var(--green);}
-  .hero-sub{
-    color:var(--ink-soft);
-    font-size:15.5px;
-    max-width:560px;
-    margin:0 0 22px;
-    line-height:1.55;
+  h1{font-family:'Space Grotesk', sans-serif; font-size:clamp(22px,3.2vw,32px); line-height:1.15; margin:0 0 10px;}
+  .hero-sub{color:var(--ink-soft); font-size:14.5px; line-height:1.55; margin:0; max-width:640px;}
+  .privacy-note{
+    margin-top:14px; display:flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--green-dark);
   }
 
-  /* formula bar search */
-  .formula-bar{
-    display:flex;
-    align-items:stretch;
-    border:1px solid var(--line-strong);
-    border-radius:5px;
-    overflow:hidden;
-    background:#fff;
-    max-width:640px;
+  /* ---------- category tabs + pills ---------- */
+  .cat-tabs{display:flex; gap:6px; margin-top:20px; flex-wrap:wrap;}
+  .cat-tab{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:10px 18px; background:#EFEDE2; border:1px solid var(--line-strong);
+    border-radius:8px; color:var(--ink-soft); cursor:pointer;
   }
-  .cellref{
-    font-family:'JetBrains Mono', monospace;
-    font-weight:600;
-    font-size:13px;
-    color:var(--green-dark);
-    background:var(--green-tint);
-    padding:0 14px;
-    display:flex; align-items:center;
-    border-right:1px solid var(--line-strong);
+  .cat-tab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .pill-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px;}
+  .pill{
+    font-family:'JetBrains Mono', monospace; font-size:12px; padding:7px 12px;
+    background:#fff; border:1px solid var(--line); border-radius:20px;
+    color:var(--ink-soft); cursor:pointer;
+  }
+  .pill.active{background:var(--blue-tint); border-color:#C7D3EA; color:var(--blue); font-weight:600;}
+
+  /* ---------- tool panels ---------- */
+  main{margin-top:18px;}
+  .tool-panel{display:none;}
+  .tool-panel.active{display:block; animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;} to{opacity:1;}}
+  .tool-card{
+    background:var(--card); border:1px solid var(--line-strong); border-radius:10px;
+    box-shadow:var(--shadow); padding:22px 24px;
+  }
+  .tool-head h2{font-family:'Space Grotesk', sans-serif; font-size:19px; margin:0 0 6px;}
+  .tool-head p{color:var(--ink-soft); font-size:13.5px; margin:0 0 18px; line-height:1.5;}
+
+  /* ---------- dropzone ---------- */
+  .dropzone{
+    border:2px dashed var(--line-strong); border-radius:10px; padding:32px 16px;
+    text-align:center; cursor:pointer; transition:border-color .15s, background .15s;
+    background:#FAF9F4;
+  }
+  .dropzone:hover, .dropzone.dragover{border-color:var(--green); background:var(--green-tint);}
+  .dz-icon{font-size:26px; color:var(--green); margin-bottom:8px;}
+  .dz-text{font-size:14px; color:var(--ink);}
+  .dz-browse{color:var(--green-dark); text-decoration:underline; font-weight:600;}
+  .dz-sub{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-soft); margin-top:6px;}
+  .dz-blank-row{text-align:center; margin-top:10px;}
+  .btn-link{background:none; border:none; padding:0; font:inherit; font-size:13px; color:var(--accent, #8a5a2b); text-decoration:underline; cursor:pointer;}
+  .btn-link:hover{opacity:.75;}
+
+  .source-meta{display:none; align-items:center; gap:12px; flex-wrap:wrap; margin-top:2px;}
+  .file-chip{
+    font-family:'JetBrains Mono', monospace; font-size:12px; background:var(--green-tint);
+    color:var(--green-dark); border:1px solid #C6DFCF; padding:6px 12px; border-radius:20px;
+  }
+  .sheet-select-row{display:none; align-items:center; gap:8px; font-size:13px;}
+  select{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; padding:6px 8px;
+    border:1px solid var(--line-strong); border-radius:5px; background:#fff; color:var(--ink);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn-primary{
+    background:var(--green); color:#fff; border:none; border-radius:8px;
+    padding:11px 20px; font-family:'Space Grotesk', sans-serif; font-weight:600;
+    font-size:14px; cursor:pointer;
+  }
+  .btn-primary:hover{background:var(--green-dark);}
+  .btn-primary:disabled{background:#B9C4BB; cursor:not-allowed;}
+  .btn-secondary{
+    background:#fff; color:var(--ink); border:1px solid var(--line-strong); border-radius:8px;
+    padding:10px 16px; font-family:'Inter', sans-serif; font-weight:600; font-size:13px; cursor:pointer;
+  }
+  .btn-secondary:hover{background:#EFEDE2;}
+  .btn-secondary:disabled{color:var(--ink-soft); opacity:.5; cursor:not-allowed; background:#fff;}
+  .btn-tertiary{
+    background:none; border:none; color:var(--ink-soft); text-decoration:underline;
+    font-size:12.5px; cursor:pointer; padding:4px 0;
+  }
+  .file-label{display:inline-flex; align-items:center; cursor:pointer;}
+  .action-row{display:none; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap;}
+
+  /* ---------- preview table ---------- */
+  .preview-wrap{display:none; margin-top:20px;}
+  .preview-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;}
+  .preview-title{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;}
+  .preview-count{font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--ink-soft);}
+  .table-scroll{max-height:420px; overflow:auto; border:1px solid var(--line); border-radius:8px;}
+  table.data-table{border-collapse:collapse; width:100%; font-size:12.5px;}
+  table.data-table th{
+    position:sticky; top:0; background:#EFEDE2; text-align:left; padding:8px 10px;
+    border-bottom:2px solid var(--line-strong); border-right:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--green-dark);
     white-space:nowrap;
   }
-  .fx{
-    font-family:'JetBrains Mono', monospace;
-    font-style:italic;
-    font-weight:600;
-    color:var(--ink-soft);
-    padding:0 12px;
-    display:flex; align-items:center;
-    border-right:1px solid var(--line);
-    font-size:14px;
+  table.data-table th.sortable{cursor:pointer; user-select:none;}
+  table.data-table th.sortable:hover{background:#E6E3D5;}
+  table.data-table td{
+    padding:7px 10px; border-bottom:1px solid var(--line); border-right:1px solid var(--line);
+    white-space:nowrap; max-width:260px; overflow:hidden; text-overflow:ellipsis;
   }
-  #search{
-    flex:1;
-    border:none;
-    outline:none;
-    padding:12px 14px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:14.5px;
-    color:var(--ink);
-    background:transparent;
+  table.data-table tr:nth-child(even) td{background:#FAF9F4;}
+  td.cell-diff{background:var(--red-tint) !important; padding-top:6px !important; padding-bottom:6px !important;}
+  td.cell-extra{background:#F1EEE3 !important; color:#B0AA92;}
+  td.cell-diff .diff-a{color:var(--red); font-weight:600; line-height:1.3;}
+  td.cell-diff .diff-b{color:var(--blue); font-size:11px; line-height:1.3; margin-top:2px;}
+
+  table.editable-table td.row-action, table.editable-table th.row-action,
+  table.excel-style-table td.row-action, table.excel-style-table th.row-action{
+    width:34px; min-width:34px; text-align:center; background:#EFEDE2; padding:4px !important;
   }
-  #search::placeholder{color:#A6A28E;}
-  .result-count{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12px;
-    color:var(--ink-soft);
-    margin-top:10px;
+  table.editable-table .cell-editable{
+    cursor:text; outline:none;
+  }
+  table.editable-table td.cell-editable:focus{
+    background:var(--green-tint) !important; box-shadow:inset 0 0 0 2px var(--green);
+  }
+  table.editable-table .col-head{display:flex; align-items:center; gap:6px; justify-content:space-between;}
+  table.editable-table .col-head span.cell-editable{flex:1; min-width:0; outline:none;}
+  table.editable-table .col-head span.cell-editable:focus{background:#fff; box-shadow:inset 0 0 0 2px var(--green); border-radius:3px;}
+  .row-del, .col-del{
+    background:none; border:none; color:var(--red); cursor:pointer; font-size:14px;
+    line-height:1; padding:2px 5px; border-radius:4px; flex-shrink:0;
+  }
+  .row-del:hover, .col-del:hover{background:var(--red-tint);}
+
+  /* ---------- editor toolbar / formula bar ---------- */
+  .editor-toolbar{display:flex; flex-direction:column; gap:10px; margin-top:16px;}
+  .toolbar-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .formula-bar-row{
+    display:flex; align-items:stretch; border:1px solid var(--line-strong);
+    border-radius:6px; overflow:hidden; background:#fff;
+  }
+  .cell-ref-box{
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:12.5px;
+    color:var(--green-dark); background:var(--green-tint); padding:0 14px;
+    border-right:1px solid var(--line-strong); min-width:56px;
+    display:flex; align-items:center; justify-content:center; white-space:nowrap;
+  }
+  .fx-label{
+    font-family:'JetBrains Mono', monospace; font-style:italic; font-weight:700;
+    color:var(--ink-soft); padding:0 12px; border-right:1px solid var(--line);
+    font-size:13px; display:flex; align-items:center;
+  }
+  #formulabar-editor{
+    flex:1; border:none; outline:none; padding:9px 12px;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--blue); background:transparent;
+  }
+  #formulabar-editor:disabled{color:var(--ink-soft); background:#FAF9F4;}
+  .formula-note{font-size:11.5px; color:var(--ink-soft); line-height:1.5;}
+
+  table.editable-table th.col-letter-th, table.excel-style-table th.col-letter-th{text-align:center; padding:6px 4px;}
+  table.editable-table .col-head, table.excel-style-table .col-head{display:flex; align-items:center; justify-content:center; gap:4px;}
+  table.editable-table .col-letter, table.excel-style-table .col-letter{font-family:'JetBrains Mono', monospace; font-weight:700;}
+  table.editable-table th.row-num-th, table.excel-style-table th.row-num-th{
+    background:#EFEDE2; text-align:center; padding:4px 2px; white-space:nowrap;
+  }
+  table.editable-table .row-num, table.excel-style-table .row-num{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-soft); margin-right:2px;
+  }
+  table.editable-table td.cell-editable.is-formula{
+    color:var(--blue) !important; background:var(--blue-tint) !important; font-style:italic;
+  }
+  table.editable-table td.cell-editable.is-selected{
+    box-shadow:inset 0 0 0 2px var(--green) !important;
+  }
+  table.editable-table td.cell-editable.range-pick{
+    outline:2px dashed var(--blue) !important; outline-offset:-2px; background:var(--blue-tint) !important;
+  }
+  body.picking-range, body.picking-range *{ user-select:none !important; }
+
+  pre.code-block{
+    background:#F4F3EC; border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; line-height:1.6; overflow:auto;
+    max-height:420px; margin:0;
+  }
+  .error-msg{
+    display:none; background:var(--red-tint); color:var(--red); border:1px solid #E8C6BA;
+    border-radius:8px; padding:10px 14px; font-size:13px; margin-top:12px;
+  }
+  .warning-msg{
+    background:var(--amber-tint); color:#8A5A15; border:1px solid #EFD3A0;
+    border-radius:8px; padding:10px 14px; font-size:13px; margin-top:12px; display:none;
   }
 
-  /* ---------- SHEET TABS (nav) ---------- */
-  .tabs-wrap{
-    display:flex;
-    gap:4px;
-    margin-top:18px;
-    border-bottom:2px solid var(--line-strong);
-    padding:0 4px;
-    overflow-x:auto;
+  /* ---------- paste input (json/csv converters) ---------- */
+  textarea{
+    width:100%; min-height:150px; font-family:'JetBrains Mono', monospace; font-size:12.5px;
+    border:1px solid var(--line-strong); border-radius:8px; padding:12px; resize:vertical;
+    background:#FAF9F4; color:var(--ink);
   }
-  .tab-btn{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:600;
-    font-size:14px;
-    padding:10px 20px;
-    background:#EFEDE2;
-    border:1px solid var(--line-strong);
-    border-bottom:none;
-    border-radius:7px 7px 0 0;
-    color:var(--ink-soft);
-    cursor:pointer;
-    position:relative;
-    top:2px;
-    white-space:nowrap;
-    transition:background .15s, color .15s;
-  }
-  .tab-btn .dot{
-    display:inline-block; width:7px; height:7px; border-radius:50%;
-    margin-right:8px; vertical-align:middle;
-  }
-  .tab-btn.active{
-    background:var(--card);
-    color:var(--ink);
-    border-color:var(--line-strong);
-    border-bottom:2px solid var(--card);
-    top:2px;
-  }
-  .tab-btn:not(.active):hover{background:#E6E3D5;}
+  .paste-actions{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap;}
 
-  /* ---------- PANELS ---------- */
-  .panel{display:none;}
-  .panel.active{display:block; animation:fade .25s ease;}
-  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
-
-  .section-block{margin-top:34px;}
-  .section-head{
-    display:flex; align-items:baseline; gap:10px;
-    margin-bottom:14px;
+  /* ---------- checkbox list (dedupe) ---------- */
+  .checkbox-list{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 16px;}
+  .checkbox-item{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; background:#FAF9F4;
+    border:1px solid var(--line); border-radius:20px; padding:6px 12px;
   }
-  .section-head h2{
-    font-family:'Space Grotesk', sans-serif;
-    font-size:18px;
-    margin:0;
+  .checkbox-item input{accent-color:var(--green);}
+  .field-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .field-row label{font-size:13px; font-weight:600; color:var(--ink);}
+  .radio-group{display:flex; gap:12px; flex-wrap:wrap; font-size:13px;}
+  .radio-group label{font-weight:400; display:flex; align-items:center; gap:5px;}
+  input[type="text"].inline-input{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; padding:7px 10px;
+    border:1px solid var(--line-strong); border-radius:6px; width:110px;
   }
-  .section-head .count-badge{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--ink-soft);
-    background:#EFEDE2;
-    border:1px solid var(--line);
-    padding:2px 8px;
-    border-radius:20px;
+  .stat-banner{
+    background:var(--green-tint); color:var(--green-dark); border:1px solid #C6DFCF;
+    border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px; display:none;
   }
 
-  /* shortcuts */
-  .shortcut-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-    gap:10px;
-  }
-  .shortcut-row{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:12px 14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    box-shadow:var(--shadow);
-  }
-  .shortcut-desc{font-size:13.5px; line-height:1.4;}
-  .keys{display:flex; gap:5px; flex-shrink:0;}
-  kbd{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11.5px;
-    font-weight:600;
-    background:#fff;
-    border:1px solid var(--line-strong);
-    border-bottom:2px solid var(--line-strong);
-    border-radius:4px;
-    padding:3px 7px;
-    color:var(--green-dark);
-    white-space:nowrap;
-  }
-  .plus{color:var(--ink-soft); font-size:11px; align-self:center;}
+  /* ---------- multi-slot (merge / compare) ---------- */
+  .multi-slots{display:flex; flex-direction:column; gap:12px;}
+  .slot-box{border:1px solid var(--line); border-radius:8px; padding:14px;}
+  .slot-label{font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--ink-soft); margin-bottom:8px;}
+  .add-slot-btn{margin-top:4px;}
+  .remove-slot{color:var(--red); cursor:pointer; font-size:12px; text-decoration:underline; background:none; border:none; padding:0;}
 
-  /* functions */
-  .func-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-    gap:12px;
+  /* ---------- data pipeline tool ---------- */
+  .pipe-empty{
+    text-align:center; padding:28px 16px; color:var(--ink-soft); font-size:13px;
+    border:1px dashed var(--line-strong); border-radius:8px; background:#FAF9F4;
   }
-  .func-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:7px;
-    padding:16px 16px 14px;
-    box-shadow:var(--shadow);
+  .pipe-step{
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:12px 14px; margin-bottom:8px; box-shadow:var(--shadow);
   }
-  .func-top{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:8px;
+  .pipe-step-badge{
+    flex-shrink:0; width:24px; height:24px; border-radius:50%;
+    background:var(--green); color:#fff; font-family:'JetBrains Mono', monospace;
+    font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center;
   }
-  .func-name{
-    font-family:'JetBrains Mono', monospace;
-    font-weight:700;
-    font-size:14.5px;
-    color:var(--green-dark);
+  .pipe-step-body{flex:1; min-width:0;}
+  .pipe-step-title{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13.5px;}
+  .pipe-step-desc{font-size:12.5px; color:var(--ink-soft); margin-top:3px;}
+  .pipe-step-actions{display:flex; gap:4px; flex-shrink:0; flex-wrap:wrap;}
+  .pipe-step-actions button{
+    background:#fff; border:1px solid var(--line); border-radius:5px;
+    padding:5px 8px; font-size:11.5px; cursor:pointer; color:var(--ink-soft);
   }
-  .func-cat-tag{
-    font-family:'JetBrains Mono', monospace;
-    font-size:10px;
-    padding:2px 7px;
-    border-radius:4px;
-    background:var(--blue-tint);
-    color:var(--blue);
-    white-space:nowrap;
-  }
-  .func-syntax{
-    font-family:'JetBrains Mono', monospace;
-    font-size:12.5px;
-    background:var(--green-tint);
-    color:var(--green-dark);
-    padding:7px 10px;
-    border-radius:5px;
-    margin-bottom:9px;
-    overflow-x:auto;
-    white-space:nowrap;
-  }
-  .func-desc{font-size:13px; color:var(--ink); line-height:1.5; margin-bottom:8px;}
-  .func-example{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11.5px;
-    color:var(--ink-soft);
-    background:var(--amber-tint);
-    border-left:3px solid var(--amber);
-    padding:6px 9px;
-    border-radius:3px;
-  }
+  .pipe-step-actions button:hover:not(:disabled){background:#EFEDE2; color:var(--ink);}
+  .pipe-step-actions button:disabled{opacity:0.35; cursor:not-allowed;}
+  .pipe-step-actions .pipe-remove:hover{background:var(--red-tint); color:var(--red); border-color:#E8C6BA;}
 
-  /* tips */
-  .tip-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-    gap:12px;
+  .step-type-pills{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .step-type-btn{
+    font-family:'Inter', sans-serif; font-size:13px; font-weight:600;
+    padding:9px 14px; border-radius:20px; border:1px dashed var(--line-strong);
+    background:#FAF9F4; color:var(--ink); cursor:pointer;
   }
-  .tip-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:7px;
-    padding:16px;
-    box-shadow:var(--shadow);
-  }
-  .tip-num{
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--amber);
-    font-weight:700;
-    margin-bottom:6px;
-  }
-  .tip-title{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:600;
-    font-size:14.5px;
-    margin-bottom:6px;
-  }
-  .tip-desc{font-size:13px; color:var(--ink-soft); line-height:1.5;}
+  .step-type-btn:hover{background:var(--green-tint); border-color:#C6DFCF; border-style:solid;}
 
-  .empty-state{
-    text-align:center;
-    padding:60px 20px;
-    color:var(--ink-soft);
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
-    display:none;
+  .step-form-card{
+    border:1px solid var(--green); border-radius:8px; padding:14px 16px;
+    background:var(--green-tint); margin-top:10px;
   }
-
-  /* ---------- interactive: favorites / copy / filter chips ---------- */
-  .fav-btn{
-    background:none; border:none; cursor:pointer;
-    font-size:16px; line-height:1; padding:2px;
-    color:#C7C2AC; flex-shrink:0;
-    transition:color .15s, transform .15s;
-  }
-  .fav-btn:hover{transform:scale(1.18);}
-  .fav-btn.active{color:var(--amber);}
-
-  .copy-btn{
-    background:none;
-    border:1px solid var(--line);
-    border-radius:4px;
-    cursor:pointer;
-    font-size:10.5px;
-    padding:4px 8px;
-    color:var(--ink-soft);
-    font-family:'JetBrains Mono', monospace;
-    flex-shrink:0;
-    transition:background .15s, color .15s, border-color .15s;
-  }
-  .copy-btn:hover{background:var(--green-tint); color:var(--green-dark); border-color:#C6DFCF;}
-  .copy-btn.copied{background:var(--green); color:#fff; border-color:var(--green);}
-
-  .shortcut-row{gap:12px;}
-  .shortcut-actions{display:flex; align-items:center; gap:6px; flex-shrink:0;}
-
-  .func-top{align-items:flex-start;}
-  .func-top-right{display:flex; align-items:center; gap:8px; flex-shrink:0;}
-  .cat-tag-click{cursor:pointer; user-select:none;}
-  .cat-tag-click:hover{filter:brightness(0.93);}
-  .func-footer{
-    display:flex; align-items:center; justify-content:space-between;
-    margin-top:10px; padding-top:9px; border-top:1px dashed var(--line);
-  }
-  .compare-check{
-    display:flex; align-items:center; gap:6px;
-    font-family:'JetBrains Mono', monospace; font-size:10.5px;
-    color:var(--ink-soft); cursor:pointer; user-select:none;
-  }
-  .compare-check input{accent-color:var(--blue); cursor:pointer;}
-
-  .section-head h2.cat-tag-click{
-    text-decoration:underline; text-decoration-style:dotted;
-    text-decoration-color:var(--line-strong); text-underline-offset:4px;
-  }
-
-  .filter-chip-row{margin-top:12px; min-height:1px;}
-  .filter-chip{
-    display:inline-flex; align-items:center; gap:7px;
-    font-family:'JetBrains Mono', monospace; font-size:12px;
-    background:var(--blue-tint); color:var(--blue);
-    padding:5px 8px 5px 12px; border-radius:20px;
-  }
-  .filter-chip button{
-    background:rgba(59,91,165,0.15); border:none; color:var(--blue);
-    width:18px; height:18px; border-radius:50%; cursor:pointer;
-    font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center;
-  }
-  .filter-chip button:hover{background:rgba(59,91,165,0.3);}
-
-  .tip-title-row{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
-
-  /* compare bar + modal */
-  .compare-bar{
-    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-    background:var(--ink); color:#fff;
-    padding:9px 9px 9px 18px; border-radius:40px;
-    display:none; align-items:center; gap:14px;
-    box-shadow:0 14px 34px -10px rgba(0,0,0,0.45);
-    z-index:60; font-size:13.5px; max-width:92vw;
-  }
-  .compare-bar.show{display:flex;}
-  .compare-bar .cb-text{white-space:nowrap;}
-  .compare-bar button.go{
-    background:var(--green); color:#fff; border:none; border-radius:30px;
-    padding:8px 18px; font-weight:600; font-family:'Space Grotesk', sans-serif;
-    cursor:pointer; font-size:13px; white-space:nowrap;
-  }
-  .compare-bar button.go:disabled{background:#4a4a44; cursor:not-allowed;}
-  .compare-bar button.clear{
-    background:none; border:none; color:#bbb; cursor:pointer; font-size:18px;
-    width:26px; height:26px; border-radius:50%;
-  }
-  .compare-bar button.clear:hover{background:rgba(255,255,255,0.12); color:#fff;}
-
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(28,27,23,0.55);
-    display:none; align-items:center; justify-content:center;
-    z-index:100; padding:20px;
-  }
-  .modal-overlay.show{display:flex;}
-  .modal{
-    background:#fff; border-radius:10px; max-width:920px; width:100%;
-    max-height:85vh; overflow:auto;
-    box-shadow:0 30px 60px -20px rgba(0,0,0,0.5);
-  }
-  .modal-head{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 20px; border-bottom:1px solid var(--line);
-    position:sticky; top:0; background:#fff; z-index:2;
-  }
-  .modal-head h3{font-family:'Space Grotesk', sans-serif; margin:0; font-size:16.5px;}
-  .modal-close{
-    background:none; border:none; font-size:20px; cursor:pointer;
-    color:var(--ink-soft); width:30px; height:30px; border-radius:50%;
-  }
-  .modal-close:hover{background:#EFEDE2;}
-  .compare-table{width:100%; border-collapse:collapse;}
-  .compare-table th, .compare-table td{
-    border:1px solid var(--line); padding:10px 13px; text-align:left;
-    font-size:12.5px; vertical-align:top;
-  }
-  .compare-table th{
-    background:#EFEDE2; font-family:'JetBrains Mono', monospace;
-    font-size:13px; color:var(--green-dark); white-space:nowrap;
-  }
-  .compare-table td.label{
-    font-family:'JetBrains Mono', monospace; font-weight:600; font-size:11px;
-    color:var(--ink-soft); background:#FAF9F4; white-space:nowrap;
-  }
-  .compare-table .syn{font-family:'JetBrains Mono', monospace; color:var(--green-dark); background:var(--green-tint);}
-  .compare-table .ex{font-family:'JetBrains Mono', monospace; color:var(--ink-soft);}
-
-  .fav-empty{
-    text-align:center; padding:60px 20px; color:var(--ink-soft);
-  }
-  .fav-empty .big{font-size:32px; margin-bottom:12px;}
-  .fav-empty p{font-size:13.5px; margin:0;}
-
-  .shortcut-row{flex-wrap:wrap;}
-  .keys{flex-wrap:wrap; row-gap:6px;}
-
-  mark{
-    background:var(--amber-tint);
-    color:var(--ink);
-    padding:0 2px;
-    border-radius:2px;
-    box-shadow:0 0 0 1px rgba(217,146,46,0.4) inset;
-  }
+  .step-form-title{font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13.5px; margin-bottom:10px;}
 
   footer{
-    text-align:center;
-    margin-top:50px;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11.5px;
-    color:var(--ink-soft);
+    text-align:center; margin-top:40px; font-family:'JetBrains Mono', monospace;
+    font-size:11.5px; color:var(--ink-soft);
   }
-
-  :focus-visible{outline:2px solid var(--green); outline-offset:2px;}
 
   @media (max-width:640px){
     .frame{padding:0 12px 70px;}
-    .colheader{grid-template-columns:0;}
-    .hero-body{grid-template-columns:1fr;}
-    .rownums, .colheader{display:none;}
-    .sheet-chrome{margin-top:14px; border-radius:8px;}
-    .hero-main{padding:18px 16px 20px;}
-    h1{font-size:24px;}
-    .hero-sub{font-size:14px; margin-bottom:16px;}
-    .eyebrow{font-size:11px; padding:3px 9px; margin-bottom:12px;}
-
-    .formula-bar{max-width:100%;}
-    #search{padding:11px 10px; font-size:14px;}
-    .cellref{padding:0 10px; font-size:12px;}
-    .fx{padding:0 9px; font-size:13px;}
-
-    .tabs-wrap{gap:3px; margin-top:14px; padding:0 2px;}
-    .tab-btn{padding:9px 13px; font-size:12.5px;}
-    .tab-btn .dot{margin-right:6px;}
-
-    .section-block{margin-top:26px;}
-    .section-head h2{font-size:16px;}
-
-    .shortcut-grid, .func-grid, .tip-grid{grid-template-columns:1fr; gap:10px;}
-    .shortcut-row{padding:12px; gap:10px;}
-    .shortcut-desc{font-size:13px; flex-basis:100%;}
-    .keys{flex-basis:auto;}
-    .shortcut-actions{margin-left:auto;}
-
-    .func-card{padding:14px 14px 12px;}
-    .func-syntax{font-size:12px; padding:8px 9px;}
-    .func-example{font-size:11px;}
-
-    .fav-btn{font-size:19px; padding:5px;}
-    .copy-btn{padding:6px 9px; font-size:11px;}
-
-    .compare-bar{
-      left:12px; right:12px; bottom:14px;
-      transform:none; width:auto; max-width:none;
-      justify-content:space-between; padding:9px 9px 9px 14px;
-    }
-    .compare-bar .cb-text{font-size:12px; overflow:hidden; text-overflow:ellipsis;}
-    .compare-bar button.go{padding:8px 14px; font-size:12.5px;}
-
-    .modal{max-height:90vh; border-radius:10px 10px 0 0;}
-    .modal-head{padding:14px 16px;}
-    .modal-head h3{font-size:15px;}
-    #modalBody{padding:14px !important;}
-    .compare-table{font-size:11.5px;}
-    .compare-table th, .compare-table td{padding:8px 9px;}
-  }
-
-  @media (max-width:400px){
-    .cellref{display:none;}
-    .fx{border-right:none;}
-    h1{font-size:21px;}
-  }
-
-  @media (hover:none) and (pointer:coarse){
-    .fav-btn{min-width:36px; min-height:36px; display:inline-flex; align-items:center; justify-content:center;}
-    .copy-btn{min-height:32px;}
-    .tab-btn{min-height:38px;}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .panel.active{animation:none;}
+    .hero{padding:18px 16px; margin-top:14px;}
+    .tool-card{padding:16px 14px;}
+    .cat-tab{padding:9px 13px; font-size:13px;}
+    table.data-table{font-size:11.5px;}
+    table.data-table td, table.data-table th{padding:6px 8px;}
   }
 </style>
 </head>
 <body>
 
 <div class="frame">
+  <header class="hero">
+    <span class="eyebrow">● Excel File Tools</span>
+    <h1>Xem, chuyển đổi và xử lý file Excel thật — ngay trong trình duyệt</h1>
+    <p class="hero-sub">Tải file .xlsx / .xls / .csv lên để xem nội dung, đổi định dạng, hoặc chạy các tiện ích như xoá trùng lặp, sắp xếp, gộp file. Không có công cụ nào ở đây tải file của bạn lên máy chủ — mọi thứ chạy bằng JavaScript ngay trên máy bạn.</p>
+    <div class="privacy-note">🔒 File không rời khỏi trình duyệt của bạn</div>
+  </header>
 
-  <div class="sheet-chrome">
-    <div class="colheader">
-      <div></div><div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div>
-    </div>
-    <div class="hero-body">
-      <div class="rownums"><div>1</div><div>2</div><div>3</div><div>4</div></div>
-      <div class="hero-main">
-        <span class="eyebrow">● Excel Toolkit</span>
-        <h1>Mọi phím tắt, hàm và <span class="accent">mẹo Excel</span> trong một ô tìm kiếm.</h1>
-        <p class="hero-sub">Gõ tên hàm, mô tả phím tắt hoặc từ khoá — kết quả lọc theo thời gian thực trên cả ba danh mục bên dưới.</p>
-        <div class="formula-bar">
-          <div class="cellref">A1</div>
-          <div class="fx">fx</div>
-          <input id="search" type="text" placeholder="Tìm: VLOOKUP, Ctrl+Shift+L, đóng băng dòng…" autocomplete="off">
+  <nav class="cat-tabs" id="catTabs"></nav>
+  <div class="pill-row" id="pillRow"></div>
+
+  <main id="toolArea">
+
+    <!-- ============ EDITOR ============ -->
+    <section class="tool-panel" data-cat="edit" data-tool="editor">
+      <div class="tool-card">
+        <div class="tool-head">
+          <h2>Chỉnh sửa Excel</h2>
+          <p>Tải file lên hoặc tạo một bảng tính trống mới, sửa trực tiếp trong bảng (bấm vào ô để gõ), dùng công thức kiểu Excel, thêm/xoá dòng hoặc cột, tìm kiếm và sắp xếp theo cột, rồi tải kết quả về máy.</p>
         </div>
-        <div class="result-count" id="resultCount"></div>
+        <div class="source-slot" data-tool="editor"></div>
+        <div class="field-row" id="search-row-editor" style="display:none; margin-top:2px;">
+          <input type="text" class="inline-input" style="width:220px" id="search-editor" placeholder="Tìm kiếm trong bảng…">
+        </div>
+        <div class="editor-toolbar" id="toolbar-editor" style="display:none;">
+          <div class="toolbar-actions">
+            <button class="btn-secondary" id="undo-editor" disabled>↶ Quay lại</button>
+            <button class="btn-secondary" id="redo-editor" disabled>↷ Tới</button>
+            <button class="btn-secondary" id="addrow-editor">+ Thêm dòng</button>
+            <button class="btn-secondary" id="addcol-editor">+ Thêm cột</button>
+            <button class="btn-tertiary" id="reset-editor">Hoàn tác toàn bộ (về file gốc)</button>
+          </div>
+          <div class="formula-bar-row">
+            <div class="cell-ref-box" id="cellref-editor">–</div>
+            <div class="fx-label">ƒx</div>
+            <input type="text" id="formulabar-editor" placeholder="Chọn một ô để xem hoặc sửa nội dung / công thức (bắt đầu bằng = để nhập công thức)…" disabled>
+          </div>
+          <div class="formula-note">Ô có công thức được tô <b>xanh</b> và hiển thị giá trị đã tính (dùng engine tính công thức HyperFormula chạy ngay trong trình duyệt). Bấm vào ô hoặc xem thanh công thức phía trên để thấy công thức gốc. Khi đang gõ công thức (bắt đầu bằng =), bạn có thể <b>bấm hoặc kéo (quét khối) qua các ô khác</b> để tự động chèn tham chiếu ô (A1) hoặc vùng (A1:C5) vào đúng vị trí con trỏ — giống thao tác trong Excel. Hỗ trợ hơn 400 hàm kiểu Excel; một số hàm rất hiếm hoặc công thức liên quan đến định dạng/ngày tháng phức tạp có thể không tính chính xác 100% — khi đó Excel sẽ tự tính lại đúng khi bạn mở file đã tải xuống.</div>
+        </div>
+        <div class="preview-wrap" id="preview-editor">
+          <div class="preview-head"><span class="preview-title">Bảng chỉnh sửa</span><span class="preview-count" id="count-editor"></span></div>
+          <div class="table-scroll" id="table-editor"></div>
+        </div>
+        <div class="action-row" id="action-editor">
+          <button class="btn-primary" id="download-editor-xlsx">⬇ Tải Excel đã sửa</button>
+          <button class="btn-secondary" id="download-editor-csv">⬇ Tải CSV</button>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="tabs-wrap">
-    <button class="tab-btn active" data-panel="shortcuts"><span class="dot" style="background:var(--amber)"></span>Phím tắt</button>
-    <button class="tab-btn" data-panel="functions"><span class="dot" style="background:var(--green)"></span>Hàm công thức</button>
-    <button class="tab-btn" data-panel="tips"><span class="dot" style="background:var(--blue)"></span>Mẹo &amp; thủ thuật</button>
-    <button class="tab-btn" data-panel="favorites"><span class="dot" style="background:var(--amber)"></span>★ Yêu thích <span class="tab-count" id="favTabCount"></span></button>
-  </div>
+    <!-- ============ JSON → EXCEL ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="json2xlsx">
+      <div class="tool-card">
+        <div class="tool-head">
+          <h2>JSON → Excel</h2>
+          <p>Dán một mảng JSON (hoặc tải file .json) để chuyển thành file Excel .xlsx.</p>
+        </div>
+        <textarea id="input-json2xlsx" placeholder='[{"ten":"Nguyễn Văn A","tuoi":25},{"ten":"Trần Thị B","tuoi":30}]'></textarea>
+        <div class="paste-actions">
+          <label class="btn-secondary file-label">Tải file .json<input type="file" id="filein-json2xlsx" accept=".json" style="display:none;"></label>
+          <button class="btn-primary" id="parse-json2xlsx">Xem trước</button>
+        </div>
+        <div class="error-msg" id="error-json2xlsx"></div>
+        <div class="preview-wrap" id="preview-json2xlsx">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-json2xlsx"></span></div>
+          <div class="table-scroll" id="table-json2xlsx"></div>
+        </div>
+        <div class="action-row" id="action-json2xlsx">
+          <button class="btn-primary" id="download-json2xlsx">⬇ Tải file Excel (.xlsx)</button>
+        </div>
+      </div>
+    </section>
 
-  <div class="filter-chip-row" id="filterChipRow"></div>
+    <!-- ============ CSV → EXCEL ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="csv2xlsx">
+      <div class="tool-card">
+        <div class="tool-head">
+          <h2>CSV → Excel</h2>
+          <p>Dán nội dung CSV hoặc tải file .csv để chuyển thành file Excel .xlsx.</p>
+        </div>
+        <textarea id="input-csv2xlsx" placeholder="ten,tuoi&#10;Nguyễn Văn A,25&#10;Trần Thị B,30"></textarea>
+        <div class="paste-actions">
+          <label class="btn-secondary file-label">Tải file .csv<input type="file" id="filein-csv2xlsx" accept=".csv,.txt" style="display:none;"></label>
+          <button class="btn-primary" id="parse-csv2xlsx">Xem trước</button>
+        </div>
+        <div class="error-msg" id="error-csv2xlsx"></div>
+        <div class="preview-wrap" id="preview-csv2xlsx">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-csv2xlsx"></span></div>
+          <div class="table-scroll" id="table-csv2xlsx"></div>
+        </div>
+        <div class="action-row" id="action-csv2xlsx">
+          <button class="btn-primary" id="download-csv2xlsx">⬇ Tải file Excel (.xlsx)</button>
+        </div>
+      </div>
+    </section>
 
-  <div class="empty-state" id="emptyState">— Không tìm thấy kết quả phù hợp —</div>
+    <!-- ============ EXCEL → CSV ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="xlsx2csv">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Excel → CSV</h2><p>Tải file Excel lên, xuất ra file CSV.</p></div>
+        <div class="source-slot" data-tool="xlsx2csv"></div>
+        <div class="preview-wrap" id="preview-xlsx2csv">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-xlsx2csv"></span></div>
+          <div class="table-scroll" id="table-xlsx2csv"></div>
+        </div>
+        <div class="action-row" id="action-xlsx2csv">
+          <button class="btn-primary" id="download-xlsx2csv">⬇ Tải file CSV</button>
+        </div>
+      </div>
+    </section>
 
-  <!-- SHORTCUTS PANEL -->
-  <div class="panel active" id="panel-shortcuts"></div>
+    <!-- ============ EXCEL → JSON ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="xlsx2json">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Excel → JSON</h2><p>Tải file Excel lên, mỗi dòng thành một object JSON (dùng dòng đầu làm tên trường).</p></div>
+        <div class="source-slot" data-tool="xlsx2json"></div>
+        <div class="preview-wrap" id="preview-xlsx2json">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-xlsx2json"></span></div>
+          <pre class="code-block" id="table-xlsx2json"></pre>
+        </div>
+        <div class="action-row" id="action-xlsx2json">
+          <button class="btn-primary" id="download-xlsx2json">⬇ Tải file JSON</button>
+          <button class="btn-secondary" id="copy-xlsx2json">Copy</button>
+        </div>
+      </div>
+    </section>
 
-  <!-- FUNCTIONS PANEL -->
-  <div class="panel" id="panel-functions"></div>
+    <!-- ============ EXCEL → MARKDOWN ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="xlsx2md">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Excel → Markdown</h2><p>Tải file Excel lên, xuất bảng dữ liệu dạng bảng Markdown.</p></div>
+        <div class="source-slot" data-tool="xlsx2md"></div>
+        <div class="preview-wrap" id="preview-xlsx2md">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-xlsx2md"></span></div>
+          <pre class="code-block" id="table-xlsx2md"></pre>
+        </div>
+        <div class="action-row" id="action-xlsx2md">
+          <button class="btn-primary" id="download-xlsx2md">⬇ Tải file .md</button>
+          <button class="btn-secondary" id="copy-xlsx2md">Copy</button>
+        </div>
+      </div>
+    </section>
 
-  <!-- TIPS PANEL -->
-  <div class="panel" id="panel-tips"></div>
+    <!-- ============ EXCEL → HTML ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="xlsx2html">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Excel → HTML</h2><p>Tải file Excel lên, xuất ra bảng HTML (&lt;table&gt;).</p></div>
+        <div class="source-slot" data-tool="xlsx2html"></div>
+        <div class="preview-wrap" id="preview-xlsx2html">
+          <div class="preview-head"><span class="preview-title">Xem trước bảng</span><span class="preview-count" id="count-xlsx2html"></span></div>
+          <div class="table-scroll" id="table-xlsx2html"></div>
+          <div class="preview-head" style="margin-top:14px;"><span class="preview-title">Mã HTML</span></div>
+          <pre class="code-block" id="code-xlsx2html"></pre>
+        </div>
+        <div class="action-row" id="action-xlsx2html">
+          <button class="btn-primary" id="download-xlsx2html">⬇ Tải file .html</button>
+          <button class="btn-secondary" id="copy-xlsx2html">Copy mã HTML</button>
+        </div>
+      </div>
+    </section>
 
-  <!-- FAVORITES PANEL -->
-  <div class="panel" id="panel-favorites"></div>
+    <!-- ============ EXCEL → YAML ============ -->
+    <section class="tool-panel" data-cat="convert" data-tool="xlsx2yaml">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Excel → YAML</h2><p>Tải file Excel lên, xuất danh sách bản ghi dạng YAML.</p></div>
+        <div class="source-slot" data-tool="xlsx2yaml"></div>
+        <div class="preview-wrap" id="preview-xlsx2yaml">
+          <div class="preview-head"><span class="preview-title">Xem trước</span><span class="preview-count" id="count-xlsx2yaml"></span></div>
+          <pre class="code-block" id="table-xlsx2yaml"></pre>
+        </div>
+        <div class="action-row" id="action-xlsx2yaml">
+          <button class="btn-primary" id="download-xlsx2yaml">⬇ Tải file .yaml</button>
+          <button class="btn-secondary" id="copy-xlsx2yaml">Copy</button>
+        </div>
+      </div>
+    </section>
 
-  <footer>Excel Toolkit · phím tắt hiển thị cho Windows, macOS dùng ⌘ thay Ctrl và ⌥ thay Alt trong hầu hết trường hợp</footer>
-</div>
+    <!-- ============ DATA PIPELINE ============ -->
+    <section class="tool-panel" data-cat="utils" data-tool="pipeline">
+      <div class="tool-card">
+        <div class="tool-head">
+          <h2>Xử lý dữ liệu (nhiều bước)</h2>
+          <p>Tải file lên một lần, rồi ghép nhiều bước xử lý theo thứ tự bạn muốn — xoá trùng lặp, sắp xếp, lọc dòng, tách cột. Xem trước kết quả sau mỗi bước, tải file kết quả cuối cùng một lần duy nhất.</p>
+        </div>
+        <div class="source-slot" data-tool="pipeline"></div>
 
-<div class="compare-bar" id="compareBar">
-  <span class="cb-text" id="compareBarText">Đã chọn 0 hàm</span>
-  <button class="go" id="compareGoBtn" disabled>So sánh →</button>
-  <button class="clear" id="compareClearBtn" title="Bỏ chọn hết">×</button>
-</div>
+        <div id="pipeline-body" style="display:none;">
+          <div class="section-block">
+            <div class="section-head"><h2>Các bước xử lý</h2></div>
+            <div id="steps-list-pipeline"></div>
+            <div id="step-form-pipeline"></div>
+            <div id="step-picker-pipeline"></div>
+          </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalBox">
-    <div class="modal-head">
-      <h3>So sánh hàm</h3>
-      <button class="modal-close" id="modalCloseBtn">×</button>
-    </div>
-    <div id="modalBody" style="padding:18px 20px;"></div>
-  </div>
+          <div class="preview-wrap" id="preview-pipeline" style="display:block;">
+            <div class="preview-head"><span class="preview-title">Kết quả sau khi áp dụng tất cả bước</span><span class="preview-count" id="count-pipeline"></span></div>
+            <div class="table-scroll" id="table-pipeline"></div>
+          </div>
+          <div class="action-row" id="action-pipeline">
+            <button class="btn-primary" id="download-pipeline-xlsx">⬇ Tải Excel</button>
+            <button class="btn-secondary" id="download-pipeline-csv">⬇ Tải CSV</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MERGE ============ -->
+    <section class="tool-panel" data-cat="utils" data-tool="merge">
+      <div class="tool-card">
+        <div class="tool-head"><h2>Gộp file</h2><p>Tải lên 2 hoặc nhiều file, các dòng sẽ được nối tiếp nhau (dùng tiêu đề của file đầu tiên). Mỗi file chỉ lấy sheet đầu tiên.</p></div>
+        <div class="multi-slots" id="slots-merge"></div>
+        <button class="btn-secondary add-slot-btn" id="add-slot-merge">+ Thêm file</button>
+        <div class="warning-msg" id="warn-merge"></div>
+        <div class="action-row" id="run-row-merge" style="display:none;">
+          <button class="btn-primary" id="run-merge">Gộp tất cả file</button>
+        </div>
+        <div class="preview-wrap" id="preview-merge">
+          <div class="preview-head"><span class="preview-title">Kết quả gộp</span><span class="preview-count" id="count-merge"></span></div>
+          <div class="table-scroll" id="table-merge"></div>
+        </div>
+        <div class="action-row" id="action-merge">
+          <button class="btn-primary" id="download-merge-xlsx">⬇ Tải Excel</button>
+          <button class="btn-secondary" id="download-merge-csv">⬇ Tải CSV</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMPARE ============ -->
+    <section class="tool-panel" data-cat="utils" data-tool="compare">
+      <div class="tool-card">
+        <div class="tool-head"><h2>So sánh file</h2><p>Tải lên File A và File B, so sánh từng ô theo vị trí dòng/cột (mỗi file lấy sheet đầu tiên).</p></div>
+        <div class="multi-slots" id="slots-compare">
+          <div class="slot-box"><div class="slot-label">FILE A</div><div class="source-slot-simple" data-slot="compareA"></div></div>
+          <div class="slot-box"><div class="slot-label">FILE B</div><div class="source-slot-simple" data-slot="compareB"></div></div>
+        </div>
+        <div class="action-row" id="run-row-compare" style="display:none; margin-top:14px;">
+          <button class="btn-primary" id="run-compare">So sánh</button>
+        </div>
+        <div class="stat-banner" id="stat-compare"></div>
+        <div class="preview-wrap" id="preview-compare">
+          <div class="preview-head"><span class="preview-title">File A (ô khác biệt tô đỏ — giá trị File B hiện ngay bên dưới)</span><span class="preview-count" id="count-compare"></span></div>
+          <div class="table-scroll" id="table-compare"></div>
+        </div>
+        <div class="action-row" id="action-compare">
+          <button class="btn-primary" id="download-compare">⬇ Tải báo cáo khác biệt (CSV)</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Excel File Tools · Toàn bộ xử lý chạy bằng JavaScript ngay trong trình duyệt của bạn, không có file nào được tải lên máy chủ.</footer>
 </div>
 
 <script>
-const SHORTCUTS = [
-  {cat:"Điều hướng", desc:"Về ô A1", keys:["Ctrl","Home"]},
-  {cat:"Điều hướng", desc:"Đến ô cuối cùng có dữ liệu", keys:["Ctrl","End"]},
-  {cat:"Điều hướng", desc:"Nhảy đến biên vùng dữ liệu theo hướng mũi tên", keys:["Ctrl","→/←/↑/↓"]},
-  {cat:"Điều hướng", desc:"Chuyển sang sheet kế tiếp / trước đó", keys:["Ctrl","PageDown/Up"]},
-  {cat:"Điều hướng", desc:"Mở hộp thoại Go To", keys:["Ctrl","G"]},
-  {cat:"Điều hướng", desc:"Tìm kiếm trong sheet", keys:["Ctrl","F"]},
-  {cat:"Điều hướng", desc:"Thay thế nội dung", keys:["Ctrl","H"]},
-  {cat:"Điều hướng", desc:"Chuyển giữa các cửa sổ Excel đang mở", keys:["Ctrl","Tab"]},
-  {cat:"Điều hướng", desc:"Di chuyển sang ô tiếp theo trong vùng chọn", keys:["Tab"]},
-
-  {cat:"Chọn vùng", desc:"Chọn toàn bộ vùng dữ liệu / sheet", keys:["Ctrl","A"]},
-  {cat:"Chọn vùng", desc:"Chọn cả dòng hiện tại", keys:["Shift","Space"]},
-  {cat:"Chọn vùng", desc:"Chọn cả cột hiện tại", keys:["Ctrl","Space"]},
-  {cat:"Chọn vùng", desc:"Mở rộng vùng chọn đến ô cuối có dữ liệu", keys:["Ctrl","Shift","End"]},
-  {cat:"Chọn vùng", desc:"Mở rộng vùng chọn theo hướng mũi tên", keys:["Ctrl","Shift","Arrow"]},
-  {cat:"Chọn vùng", desc:"Chọn nhiều vùng không liền kề (giữ và click)", keys:["Ctrl","Click"]},
-
-  {cat:"Chỉnh sửa", desc:"Sao chép", keys:["Ctrl","C"]},
-  {cat:"Chỉnh sửa", desc:"Dán", keys:["Ctrl","V"]},
-  {cat:"Chỉnh sửa", desc:"Cắt", keys:["Ctrl","X"]},
-  {cat:"Chỉnh sửa", desc:"Dán đặc biệt (Paste Special)", keys:["Ctrl","Alt","V"]},
-  {cat:"Chỉnh sửa", desc:"Hoàn tác / Làm lại", keys:["Ctrl","Z / Y"]},
-  {cat:"Chỉnh sửa", desc:"Sửa nội dung ô đang chọn", keys:["F2"]},
-  {cat:"Chỉnh sửa", desc:"Xoá nội dung ô (giữ định dạng)", keys:["Delete"]},
-  {cat:"Chỉnh sửa", desc:"Sao chép công thức/giá trị xuống các ô bên dưới", keys:["Ctrl","D"]},
-  {cat:"Chỉnh sửa", desc:"Sao chép công thức/giá trị sang phải", keys:["Ctrl","R"]},
-  {cat:"Chỉnh sửa", desc:"Xuống dòng trong cùng một ô", keys:["Alt","Enter"]},
-  {cat:"Chỉnh sửa", desc:"Chèn ngày hiện tại", keys:["Ctrl",";"]},
-  {cat:"Chỉnh sửa", desc:"Chèn giờ hiện tại", keys:["Ctrl","Shift",";"]},
-  {cat:"Chỉnh sửa", desc:"Chèn liên kết (Hyperlink)", keys:["Ctrl","K"]},
-  {cat:"Chỉnh sửa", desc:"Chèn ô / dòng / cột mới", keys:["Ctrl","+"]},
-  {cat:"Chỉnh sửa", desc:"Xoá ô / dòng / cột", keys:["Ctrl","-"]},
-  {cat:"Chỉnh sửa", desc:"Flash Fill — tự động điền theo mẫu", keys:["Ctrl","E"]},
-
-  {cat:"Định dạng", desc:"Mở hộp thoại Format Cells", keys:["Ctrl","1"]},
-  {cat:"Định dạng", desc:"In đậm / in nghiêng / gạch chân", keys:["Ctrl","B / I / U"]},
-  {cat:"Định dạng", desc:"Định dạng phần trăm", keys:["Ctrl","Shift","%"]},
-  {cat:"Định dạng", desc:"Định dạng tiền tệ", keys:["Ctrl","Shift","$"]},
-  {cat:"Định dạng", desc:"Định dạng kiểu ngày", keys:["Ctrl","Shift","#"]},
-  {cat:"Định dạng", desc:"Định dạng số có dấu phân cách hàng nghìn", keys:["Ctrl","Shift","!"]},
-  {cat:"Định dạng", desc:"Thêm đường viền cho ô/vùng chọn", keys:["Ctrl","Shift","&"]},
-  {cat:"Định dạng", desc:"Xoá tất cả đường viền", keys:["Ctrl","Shift","_"]},
-  {cat:"Định dạng", desc:"Sao chép định dạng (Format Painter)", keys:["Ctrl","Shift","C/V"]},
-
-  {cat:"Công thức", desc:"Chuyển đổi kiểu tham chiếu tuyệt đối/tương đối ($)", keys:["F4"]},
-  {cat:"Công thức", desc:"Hiện/ẩn công thức thay vì kết quả", keys:["Ctrl","`"]},
-  {cat:"Công thức", desc:"Nhập công thức mảng (phiên bản cũ)", keys:["Ctrl","Shift","Enter"]},
-  {cat:"Công thức", desc:"Tự động tính tổng (AutoSum)", keys:["Alt","="]},
-  {cat:"Công thức", desc:"Mở hộp thoại chèn hàm", keys:["Shift","F3"]},
-  {cat:"Công thức", desc:"Tính lại toàn bộ workbook", keys:["F9"]},
-  {cat:"Công thức", desc:"Hiện gợi ý tham số của hàm đang gõ", keys:["Ctrl","Shift","A"]},
-
-  {cat:"File & Hiển thị", desc:"Tạo file mới / Mở file / Lưu file", keys:["Ctrl","N / O / S"]},
-  {cat:"File & Hiển thị", desc:"In trang tính", keys:["Ctrl","P"]},
-  {cat:"File & Hiển thị", desc:"Ẩn / hiện dải ribbon", keys:["Ctrl","F1"]},
-  {cat:"File & Hiển thị", desc:"Bật / tắt bộ lọc tự động (AutoFilter)", keys:["Ctrl","Shift","L"]},
-  {cat:"File & Hiển thị", desc:"Chèn biểu đồ nhanh trên sheet mới", keys:["F11"]},
-  {cat:"File & Hiển thị", desc:"Chèn biểu đồ nhanh (nhúng cùng sheet)", keys:["Alt","F1"]},
-  {cat:"File & Hiển thị", desc:"Đóng băng ngăn (Freeze Panes) — qua ribbon View", keys:["Alt","W","F"]},
-  {cat:"File & Hiển thị", desc:"Ẩn dòng đang chọn", keys:["Ctrl","9"]},
-  {cat:"File & Hiển thị", desc:"Ẩn cột đang chọn", keys:["Ctrl","0"]},
-];
-
-const FUNCTIONS = [
-  // Logic
-  {cat:"Logic", name:"IF", syntax:"IF(điều_kiện, giá_trị_đúng, giá_trị_sai)", desc:"Trả về một giá trị nếu điều kiện đúng, giá trị khác nếu sai.", ex:"=IF(B2>=5,\"Đạt\",\"Rớt\")"},
-  {cat:"Logic", name:"IFS", syntax:"IFS(đk1, kq1, đk2, kq2, …)", desc:"Kiểm tra nhiều điều kiện liên tiếp, trả về kết quả của điều kiện đúng đầu tiên.", ex:"=IFS(A1>90,\"Giỏi\",A1>70,\"Khá\",TRUE,\"TB\")"},
-  {cat:"Logic", name:"AND", syntax:"AND(đk1, đk2, …)", desc:"Trả về TRUE nếu tất cả điều kiện đều đúng.", ex:"=AND(B2>5,C2<10)"},
-  {cat:"Logic", name:"OR", syntax:"OR(đk1, đk2, …)", desc:"Trả về TRUE nếu ít nhất một điều kiện đúng.", ex:"=OR(B2=\"VIP\",C2>1000)"},
-  {cat:"Logic", name:"NOT", syntax:"NOT(logic)", desc:"Đảo ngược giá trị logic TRUE/FALSE.", ex:"=NOT(B2=\"\")"},
-  {cat:"Logic", name:"IFERROR", syntax:"IFERROR(giá_trị, giá_trị_nếu_lỗi)", desc:"Trả về giá trị thay thế nếu công thức bị lỗi.", ex:"=IFERROR(A1/B1,0)"},
-  {cat:"Logic", name:"IFNA", syntax:"IFNA(giá_trị, giá_trị_nếu_NA)", desc:"Trả về giá trị thay thế riêng cho lỗi #N/A.", ex:"=IFNA(VLOOKUP(...),\"Không có\")"},
-  {cat:"Logic", name:"SWITCH", syntax:"SWITCH(biểu_thức, gt1, kq1, …, [mặc_định])", desc:"So khớp một biểu thức với danh sách giá trị và trả kết quả tương ứng.", ex:"=SWITCH(A2,1,\"T2\",2,\"T3\",\"Khác\")"},
-
-  // Tra cứu & tham chiếu
-  {cat:"Tra cứu", name:"VLOOKUP", syntax:"VLOOKUP(giá_trị_tìm, bảng, số_cột, [chính_xác])", desc:"Tìm giá trị theo cột dọc và trả về dữ liệu cùng dòng ở cột chỉ định.", ex:"=VLOOKUP(A2,Data!A:D,3,FALSE)"},
-  {cat:"Tra cứu", name:"HLOOKUP", syntax:"HLOOKUP(giá_trị_tìm, bảng, số_dòng, [chính_xác])", desc:"Tương tự VLOOKUP nhưng tìm theo hàng ngang.", ex:"=HLOOKUP(A1,B1:F5,3,FALSE)"},
-  {cat:"Tra cứu", name:"XLOOKUP", syntax:"XLOOKUP(giá_trị_tìm, mảng_tìm, mảng_trả, [nếu_ko_thấy])", desc:"Hàm tra cứu hiện đại thay thế VLOOKUP, tìm cả hai hướng, không giới hạn cột.", ex:"=XLOOKUP(A2,ID,Ten,\"Không có\")"},
-  {cat:"Tra cứu", name:"INDEX", syntax:"INDEX(mảng, số_dòng, [số_cột])", desc:"Trả về giá trị tại vị trí dòng/cột chỉ định trong một vùng.", ex:"=INDEX(A1:C10,4,2)"},
-  {cat:"Tra cứu", name:"MATCH", syntax:"MATCH(giá_trị_tìm, mảng, [kiểu_khớp])", desc:"Trả về vị trí (số thứ tự) của giá trị trong một vùng.", ex:"=MATCH(\"Hà Nội\",A1:A20,0)"},
-  {cat:"Tra cứu", name:"INDEX + MATCH", syntax:"INDEX(mảng_trả, MATCH(giá_trị_tìm, mảng_tìm, 0))", desc:"Kết hợp kinh điển thay VLOOKUP, tìm được cả bên trái cột khoá.", ex:"=INDEX(C:C,MATCH(A2,B:B,0))"},
-  {cat:"Tra cứu", name:"CHOOSE", syntax:"CHOOSE(chỉ_số, gt1, gt2, …)", desc:"Chọn một giá trị trong danh sách theo số thứ tự.", ex:"=CHOOSE(2,\"A\",\"B\",\"C\")"},
-  {cat:"Tra cứu", name:"OFFSET", syntax:"OFFSET(ô_gốc, số_dòng, số_cột, [cao],[rộng])", desc:"Trả về tham chiếu lệch khỏi một ô gốc theo số dòng/cột.", ex:"=OFFSET(A1,2,1)"},
-  {cat:"Tra cứu", name:"INDIRECT", syntax:"INDIRECT(chuỗi_địa_chỉ)", desc:"Chuyển một chuỗi văn bản thành tham chiếu ô thực sự.", ex:"=INDIRECT(\"A\"&B1)"},
-
-  // Toán học & thống kê
-  {cat:"Toán học", name:"SUM", syntax:"SUM(số1, số2, …)", desc:"Tính tổng các giá trị.", ex:"=SUM(A1:A10)"},
-  {cat:"Toán học", name:"SUMIF", syntax:"SUMIF(vùng_đk, điều_kiện, [vùng_tính])", desc:"Tính tổng các ô thoả một điều kiện.", ex:"=SUMIF(B:B,\"HCM\",C:C)"},
-  {cat:"Toán học", name:"SUMIFS", syntax:"SUMIFS(vùng_tính, vùng_đk1, đk1, …)", desc:"Tính tổng theo nhiều điều kiện cùng lúc.", ex:"=SUMIFS(D:D,B:B,\"HCM\",C:C,\">100\")"},
-  {cat:"Toán học", name:"AVERAGE", syntax:"AVERAGE(số1, số2, …)", desc:"Tính giá trị trung bình.", ex:"=AVERAGE(B2:B20)"},
-  {cat:"Toán học", name:"AVERAGEIF", syntax:"AVERAGEIF(vùng_đk, điều_kiện, [vùng_tính])", desc:"Tính trung bình các ô thoả một điều kiện.", ex:"=AVERAGEIF(C:C,\">0\")"},
-  {cat:"Toán học", name:"AVERAGEIFS", syntax:"AVERAGEIFS(vùng_tính, vùng_đk1, đk1, …)", desc:"Tính trung bình theo nhiều điều kiện.", ex:"=AVERAGEIFS(D:D,B:B,\"Nam\",C:C,\">18\")"},
-  {cat:"Toán học", name:"COUNT", syntax:"COUNT(giá_trị1, …)", desc:"Đếm số ô chứa dữ liệu dạng số.", ex:"=COUNT(A1:A100)"},
-  {cat:"Toán học", name:"COUNTA", syntax:"COUNTA(giá_trị1, …)", desc:"Đếm số ô không rỗng (mọi kiểu dữ liệu).", ex:"=COUNTA(A1:A100)"},
-  {cat:"Toán học", name:"COUNTIF", syntax:"COUNTIF(vùng, điều_kiện)", desc:"Đếm số ô thoả một điều kiện.", ex:"=COUNTIF(B:B,\"Đạt\")"},
-  {cat:"Toán học", name:"COUNTIFS", syntax:"COUNTIFS(vùng1, đk1, vùng2, đk2, …)", desc:"Đếm số ô thoả nhiều điều kiện.", ex:"=COUNTIFS(B:B,\"HCM\",C:C,\">100\")"},
-  {cat:"Toán học", name:"MAX / MIN", syntax:"MAX(số1,…) / MIN(số1,…)", desc:"Trả về giá trị lớn nhất / nhỏ nhất.", ex:"=MAX(A1:A50)"},
-  {cat:"Toán học", name:"ROUND", syntax:"ROUND(số, số_chữ_số)", desc:"Làm tròn số đến số chữ số thập phân chỉ định.", ex:"=ROUND(3.14159,2)"},
-  {cat:"Toán học", name:"ROUNDUP / ROUNDDOWN", syntax:"ROUNDUP(số,n) / ROUNDDOWN(số,n)", desc:"Làm tròn lên hoặc xuống bất kể quy tắc làm tròn thông thường.", ex:"=ROUNDUP(2.1,0) → 3"},
-  {cat:"Toán học", name:"SUMPRODUCT", syntax:"SUMPRODUCT(mảng1, mảng2, …)", desc:"Nhân các phần tử tương ứng của các mảng rồi cộng lại — rất mạnh để đếm/tính có điều kiện phức tạp.", ex:"=SUMPRODUCT((B2:B10=\"A\")*(C2:C10))"},
-  {cat:"Toán học", name:"RANK", syntax:"RANK(số, vùng_dữ_liệu, [thứ_tự])", desc:"Xếp hạng một giá trị trong một danh sách.", ex:"=RANK(B2,$B$2:$B$20,0)"},
-  {cat:"Toán học", name:"MEDIAN", syntax:"MEDIAN(số1, số2, …)", desc:"Trả về giá trị trung vị của tập số liệu.", ex:"=MEDIAN(A1:A20)"},
-  {cat:"Toán học", name:"SUBTOTAL", syntax:"SUBTOTAL(số_hàm, vùng)", desc:"Tính toán trên vùng đã lọc, bỏ qua các dòng bị ẩn/lọc.", ex:"=SUBTOTAL(9,C2:C100)"},
-
-  // Văn bản
-  {cat:"Văn bản", name:"LEFT / RIGHT", syntax:"LEFT(chuỗi,n) / RIGHT(chuỗi,n)", desc:"Lấy n ký tự từ đầu hoặc cuối chuỗi.", ex:"=LEFT(A2,3)"},
-  {cat:"Văn bản", name:"MID", syntax:"MID(chuỗi, vị_trí_bắt_đầu, số_ký_tự)", desc:"Lấy một đoạn ký tự ở giữa chuỗi.", ex:"=MID(A2,2,4)"},
-  {cat:"Văn bản", name:"LEN", syntax:"LEN(chuỗi)", desc:"Đếm số ký tự trong chuỗi.", ex:"=LEN(A2)"},
-  {cat:"Văn bản", name:"TRIM", syntax:"TRIM(chuỗi)", desc:"Xoá khoảng trắng thừa, chỉ giữ 1 khoảng giữa các từ.", ex:"=TRIM(A2)"},
-  {cat:"Văn bản", name:"CONCAT / TEXTJOIN", syntax:"TEXTJOIN(dấu_nối, bỏ_qua_rỗng, chuỗi1, …)", desc:"Nối nhiều chuỗi lại, có thể chèn dấu phân cách và bỏ ô rỗng.", ex:"=TEXTJOIN(\", \",TRUE,A2:C2)"},
-  {cat:"Văn bản", name:"UPPER / LOWER / PROPER", syntax:"UPPER(chuỗi) / LOWER(chuỗi) / PROPER(chuỗi)", desc:"Chuyển chữ hoa / chữ thường / viết hoa đầu từ.", ex:"=PROPER(\"nguyễn văn a\")"},
-  {cat:"Văn bản", name:"SUBSTITUTE", syntax:"SUBSTITUTE(chuỗi, cũ, mới, [lần])", desc:"Thay thế một đoạn văn bản bằng đoạn khác.", ex:"=SUBSTITUTE(A2,\"-\",\"/\")"},
-  {cat:"Văn bản", name:"FIND / SEARCH", syntax:"FIND(tìm, chuỗi) / SEARCH(tìm, chuỗi)", desc:"Tìm vị trí một chuỗi con; FIND phân biệt hoa-thường, SEARCH thì không.", ex:"=FIND(\"@\",A2)"},
-  {cat:"Văn bản", name:"TEXT", syntax:"TEXT(giá_trị, định_dạng)", desc:"Chuyển số/ngày thành văn bản theo định dạng chỉ định.", ex:"=TEXT(A2,\"dd/mm/yyyy\")"},
-  {cat:"Văn bản", name:"VALUE", syntax:"VALUE(chuỗi_số)", desc:"Chuyển văn bản dạng số thành số thực để tính toán.", ex:"=VALUE(\"123\")"},
-
-  // Ngày giờ
-  {cat:"Ngày giờ", name:"TODAY / NOW", syntax:"TODAY() / NOW()", desc:"Trả về ngày hiện tại / ngày-giờ hiện tại.", ex:"=TODAY()"},
-  {cat:"Ngày giờ", name:"DATE", syntax:"DATE(năm, tháng, ngày)", desc:"Ghép 3 thành phần thành một giá trị ngày.", ex:"=DATE(2026,8,25)"},
-  {cat:"Ngày giờ", name:"YEAR / MONTH / DAY", syntax:"YEAR(ngày) / MONTH(ngày) / DAY(ngày)", desc:"Tách năm, tháng, ngày từ một giá trị ngày.", ex:"=YEAR(A2)"},
-  {cat:"Ngày giờ", name:"DATEDIF", syntax:"DATEDIF(ngày_đầu, ngày_cuối, đơn_vị)", desc:"Tính khoảng cách giữa hai ngày theo năm (Y), tháng (M) hoặc ngày (D).", ex:"=DATEDIF(A2,B2,\"Y\")"},
-  {cat:"Ngày giờ", name:"EDATE", syntax:"EDATE(ngày, số_tháng)", desc:"Trả về ngày cách một mốc n tháng trước/sau.", ex:"=EDATE(A2,3)"},
-  {cat:"Ngày giờ", name:"EOMONTH", syntax:"EOMONTH(ngày, số_tháng)", desc:"Trả về ngày cuối cùng của tháng cách mốc n tháng.", ex:"=EOMONTH(A2,0)"},
-  {cat:"Ngày giờ", name:"WEEKDAY", syntax:"WEEKDAY(ngày, [kiểu])", desc:"Trả về thứ trong tuần dưới dạng số.", ex:"=WEEKDAY(A2,2)"},
-  {cat:"Ngày giờ", name:"NETWORKDAYS", syntax:"NETWORKDAYS(ngày_đầu, ngày_cuối, [ngày_nghỉ])", desc:"Đếm số ngày làm việc giữa hai mốc, loại trừ cuối tuần và ngày nghỉ lễ.", ex:"=NETWORKDAYS(A2,B2)"},
-
-  // Mảng động
-  {cat:"Mảng động", name:"FILTER", syntax:"FILTER(mảng, điều_kiện, [nếu_rỗng])", desc:"Lọc một vùng dữ liệu theo điều kiện, trả về toàn bộ kết quả tự động tràn ô.", ex:"=FILTER(A2:C100,B2:B100=\"HCM\")"},
-  {cat:"Mảng động", name:"SORT / SORTBY", syntax:"SORT(mảng,[cột],[thứ_tự]) · SORTBY(mảng, mảng_sắp_xếp)", desc:"Sắp xếp dữ liệu tự động, không cần chỉnh trực tiếp trên bảng gốc.", ex:"=SORT(A2:B20,2,-1)"},
-  {cat:"Mảng động", name:"UNIQUE", syntax:"UNIQUE(mảng, [theo_cột], [chỉ_lấy_1_lần])", desc:"Trích ra danh sách giá trị duy nhất, không trùng lặp.", ex:"=UNIQUE(A2:A100)"},
-  {cat:"Mảng động", name:"SEQUENCE", syntax:"SEQUENCE(dòng,[cột],[bắt_đầu],[bước])", desc:"Tạo một dãy số tự động tràn ô.", ex:"=SEQUENCE(10,1,1,1)"},
-  {cat:"Mảng động", name:"XMATCH", syntax:"XMATCH(giá_trị_tìm, mảng, [kiểu_khớp],[tìm_kiếm])", desc:"Phiên bản hiện đại của MATCH, hỗ trợ tìm từ cuối và khớp gần đúng linh hoạt hơn.", ex:"=XMATCH(A2,B:B)"},
-];
-
-const TIPS = [
-  {t:"Đóng băng dòng/cột (Freeze Panes)", d:"View → Freeze Panes để giữ tiêu đề luôn hiển thị khi cuộn bảng dữ liệu dài."},
-  {t:"Flash Fill (Ctrl+E)", d:"Excel tự nhận diện quy luật khi bạn gõ mẫu ở ô đầu và tự điền phần còn lại — rất hữu ích để tách/ghép họ tên, số điện thoại."},
-  {t:"Named Range — đặt tên vùng", d:"Chọn vùng rồi gõ tên vào ô Name Box (góc trái formula bar) để dùng tên thay vì địa chỉ ô trong công thức, dễ đọc hơn."},
-  {t:"Data Validation", d:"Data → Data Validation để giới hạn kiểu dữ liệu nhập vào ô, hoặc tạo danh sách chọn (dropdown) từ một vùng khác."},
-  {t:"Conditional Formatting", d:"Tô màu ô tự động theo điều kiện (VD: đỏ nếu âm) giúp phát hiện bất thường trong dữ liệu ngay khi nhìn vào bảng."},
-  {t:"Paste Special → Values", d:"Dán chỉ giá trị (không kèm công thức) khi cần \"đóng băng\" kết quả tính toán, tránh lỗi khi copy công thức sang vị trí khác."},
-  {t:"Remove Duplicates", d:"Data → Remove Duplicates để xoá nhanh các dòng trùng lặp dựa trên một hoặc nhiều cột chọn trước."},
-  {t:"Text to Columns", d:"Data → Text to Columns để tách một cột thành nhiều cột dựa theo dấu phân cách (dấu phẩy, khoảng trắng…)."},
-  {t:"Định dạng số tuỳ chỉnh (Custom Format)", d:"Ctrl+1 → Number → Custom cho phép tạo định dạng riêng, ví dụ 0\"đ\" để hiện đơn vị tiền mà vẫn giữ giá trị số thật."},
-  {t:"PivotTable", d:"Insert → PivotTable để tổng hợp, nhóm và phân tích dữ liệu lớn theo nhiều chiều chỉ bằng thao tác kéo-thả."},
-  {t:"Tham chiếu tuyệt đối $A$1", d:"Dùng F4 để khoá cột/dòng khi copy công thức sang nhiều ô mà vẫn muốn giữ nguyên một tham chiếu cố định."},
-  {t:"Group & Outline", d:"Data → Group để gộp nhiều dòng/cột lại, có thể thu gọn/mở rộng nhanh — hữu ích cho báo cáo phân cấp."},
-  {t:"Tách cửa sổ với Split/New Window", d:"View → Split để xem hai vùng khác nhau của cùng một sheet cùng lúc, tiện đối chiếu dữ liệu ở xa nhau."},
-  {t:"Kiểm tra công thức với Trace Precedents", d:"Formulas → Trace Precedents/Dependents vẽ mũi tên chỉ ra ô nào đang ảnh hưởng đến công thức hiện tại, rất hữu ích khi gỡ lỗi."},
-  {t:"Bảng động (Excel Table)", d:"Ctrl+T chuyển vùng dữ liệu thành Table — tự mở rộng công thức, có tiêu đề cố định và bộ lọc sẵn khi thêm dòng mới."},
-];
-
-// ---------- ids ----------
-SHORTCUTS.forEach((s,i)=>s.id='s'+i);
-FUNCTIONS.forEach((f,i)=>f.id='f'+i);
-TIPS.forEach((t,i)=>t.id='t'+i);
-
-const scGroups = [...new Set(SHORTCUTS.map(s=>s.cat))];
-const fnGroups = [...new Set(FUNCTIONS.map(f=>f.cat))];
-
-// ---------- state ----------
-let favorites = new Set(JSON.parse(localStorage.getItem('excelToolkitFavorites') || '[]'));
-let compareSelection = []; // array of function ids, max 3
-let categoryFilter = { shortcuts:null, functions:null };
-let currentQuery = '';
-
-function saveFavorites(){
-  localStorage.setItem('excelToolkitFavorites', JSON.stringify([...favorites]));
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function esc(str){
-  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// wraps the portion of `text` matching the current (accent-insensitive) search query in <mark>
-function hl(text){
-  const q = currentQuery;
-  if(!q) return text;
-  const nt = norm(text);
-  if(nt.length !== text.length) return text; // safety: skip if normalization changed length
-  let result = '';
-  let i = 0;
-  while(i < text.length){
-    const idx = nt.indexOf(q, i);
-    if(idx === -1){ result += text.slice(i); break; }
-    result += text.slice(i, idx) + '<mark>' + text.slice(idx, idx+q.length) + '</mark>';
-    i = idx + q.length;
+function cellDisplay(v){
+  if(v===null || v===undefined) return '';
+  if(v instanceof Date){
+    const pad=n=>String(n).padStart(2,'0');
+    const hasTime = v.getHours()||v.getMinutes()||v.getSeconds();
+    let s = `${pad(v.getDate())}/${pad(v.getMonth()+1)}/${v.getFullYear()}`;
+    if(hasTime) s += ` ${pad(v.getHours())}:${pad(v.getMinutes())}`;
+    return s;
   }
-  return result;
+  if(typeof v==='boolean') return v ? 'TRUE' : 'FALSE';
+  return String(v);
 }
 
-// ---------- html builders ----------
-function shortcutRowHtml(s){
-  const active = favorites.has(s.id) ? 'active' : '';
-  const copyText = s.keys.join('+');
-  return `<div class="shortcut-row">
-    <div class="shortcut-desc">${hl(s.desc)}</div>
-    <div class="keys">${s.keys.map(k=>`<kbd>${hl(k)}</kbd>`).join('<span class="plus">+</span>')}</div>
-    <div class="shortcut-actions">
-      <button class="copy-btn" data-copy="${esc(copyText)}">Copy</button>
-      <button class="fav-btn ${active}" data-fav="${s.id}" title="Đánh dấu yêu thích">${active?'★':'☆'}</button>
-    </div>
-  </div>`;
-}
-
-function funcCardHtml(f){
-  const active = favorites.has(f.id) ? 'active' : '';
-  const checked = compareSelection.includes(f.id) ? 'checked' : '';
-  return `<div class="func-card">
-    <div class="func-top">
-      <span class="func-name">${hl(f.name)}</span>
-      <div class="func-top-right">
-        <span class="func-cat-tag cat-tag-click" data-catfilter="functions" data-cat="${esc(f.cat)}">${f.cat}</span>
-        <button class="fav-btn ${active}" data-fav="${f.id}" title="Đánh dấu yêu thích">${active?'★':'☆'}</button>
-      </div>
-    </div>
-    <div class="func-syntax">${hl(f.syntax)}</div>
-    <div class="func-desc">${hl(f.desc)}</div>
-    <div class="func-example">${hl(f.ex)}</div>
-    <div class="func-footer">
-      <label class="compare-check"><input type="checkbox" data-compare="${f.id}" ${checked}> So sánh</label>
-      <button class="copy-btn" data-copy="${esc(f.syntax)}">Copy cú pháp</button>
-    </div>
-  </div>`;
-}
-
-function tipCardHtml(tip,i){
-  const active = favorites.has(tip.id) ? 'active' : '';
-  return `<div class="tip-card">
-    <div class="tip-num">MẸO ${String(i+1).padStart(2,'0')}</div>
-    <div class="tip-title-row">
-      <div class="tip-title">${hl(tip.t)}</div>
-      <button class="fav-btn ${active}" data-fav="${tip.id}" title="Đánh dấu yêu thích">${active?'★':'☆'}</button>
-    </div>
-    <div class="tip-desc">${hl(tip.d)}</div>
-  </div>`;
-}
-
-// ---------- render: main panels ----------
-function renderShortcuts(list){
-  const el = document.getElementById('panel-shortcuts');
-  const groups = categoryFilter.shortcuts ? [categoryFilter.shortcuts] : scGroups;
-  let html='';
-  groups.forEach(g=>{
-    const items = list.filter(s=>s.cat===g);
-    if(items.length===0) return;
-    html += `<div class="section-block"><div class="section-head"><h2 class="cat-tag-click" data-catfilter="shortcuts" data-cat="${esc(g)}">${g}</h2><span class="count-badge">${items.length}</span></div><div class="shortcut-grid">`;
-    items.forEach(s=>{ html += shortcutRowHtml(s); });
-    html += `</div></div>`;
+function readFileAsArrayBuffer(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>reject(new Error('Không đọc được file'));
+    r.readAsArrayBuffer(file);
   });
-  el.innerHTML = html;
 }
-
-function renderFunctions(list){
-  const el = document.getElementById('panel-functions');
-  const groups = categoryFilter.functions ? [categoryFilter.functions] : fnGroups;
-  let html='';
-  groups.forEach(g=>{
-    const items = list.filter(f=>f.cat===g);
-    if(items.length===0) return;
-    html += `<div class="section-block"><div class="section-head"><h2 class="cat-tag-click" data-catfilter="functions" data-cat="${esc(g)}">${g}</h2><span class="count-badge">${items.length}</span></div><div class="func-grid">`;
-    items.forEach(f=>{ html += funcCardHtml(f); });
-    html += `</div></div>`;
+function readFileAsText(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=()=>reject(new Error('Không đọc được file'));
+    r.readAsText(file,'utf-8');
   });
-  el.innerHTML = html;
 }
 
-function renderTips(list){
-  const el = document.getElementById('panel-tips');
-  if(list.length===0){ el.innerHTML=''; return; }
-  let html = `<div class="section-block"><div class="section-head"><h2>Mẹo &amp; thủ thuật</h2><span class="count-badge">${list.length}</span></div><div class="tip-grid">`;
-  list.forEach((tip,i)=>{ html += tipCardHtml(tip,i); });
-  html += `</div></div>`;
-  el.innerHTML = html;
-}
-
-// ---------- render: favorites panel ----------
-function renderFavorites(){
-  const el = document.getElementById('panel-favorites');
-  const favShortcuts = SHORTCUTS.filter(s=>favorites.has(s.id));
-  const favFunctions = FUNCTIONS.filter(f=>favorites.has(f.id));
-  const favTips = TIPS.filter(t=>favorites.has(t.id));
-
-  const favCountEl = document.getElementById('favTabCount');
-  favCountEl.textContent = favorites.size > 0 ? `(${favorites.size})` : '';
-
-  if(favShortcuts.length===0 && favFunctions.length===0 && favTips.length===0){
-    el.innerHTML = `<div class="fav-empty"><div class="big">☆</div><p>Chưa có mục yêu thích — nhấn biểu tượng ngôi sao trên bất kỳ phím tắt, hàm hoặc mẹo nào để lưu lại đây.</p></div>`;
-    return;
-  }
-
-  let html = '';
-  if(favShortcuts.length){
-    html += `<div class="section-block"><div class="section-head"><h2>Phím tắt yêu thích</h2><span class="count-badge">${favShortcuts.length}</span></div><div class="shortcut-grid">`;
-    favShortcuts.forEach(s=>{ html += shortcutRowHtml(s); });
-    html += `</div></div>`;
-  }
-  if(favFunctions.length){
-    html += `<div class="section-block"><div class="section-head"><h2>Hàm yêu thích</h2><span class="count-badge">${favFunctions.length}</span></div><div class="func-grid">`;
-    favFunctions.forEach(f=>{ html += funcCardHtml(f); });
-    html += `</div></div>`;
-  }
-  if(favTips.length){
-    html += `<div class="section-block"><div class="section-head"><h2>Mẹo yêu thích</h2><span class="count-badge">${favTips.length}</span></div><div class="tip-grid">`;
-    favTips.forEach((t,i)=>{ html += tipCardHtml(t,i); });
-    html += `</div></div>`;
-  }
-  el.innerHTML = html;
-}
-
-// ---------- filter chip row ----------
-function renderFilterChip(){
-  const row = document.getElementById('filterChipRow');
-  const activePanel = document.querySelector('.panel.active').id.replace('panel-','');
-  const cat = categoryFilter[activePanel];
-  if(!cat){ row.innerHTML=''; return; }
-  row.innerHTML = `<span class="filter-chip">Đang lọc nhóm: ${esc(cat)} <button data-clearfilter="${activePanel}">×</button></span>`;
-}
-
-// ---------- master render pipeline ----------
-function getFiltered(){
-  const q = currentQuery;
-  let scFiltered, fnFiltered, tipFiltered;
-  if(q===''){
-    scFiltered = SHORTCUTS; fnFiltered = FUNCTIONS; tipFiltered = TIPS;
-  } else {
-    scFiltered = SHORTCUTS.filter(s => norm(s.desc+' '+s.cat+' '+s.keys.join(' ')).includes(q));
-    fnFiltered = FUNCTIONS.filter(f => norm(f.name+' '+f.syntax+' '+f.desc+' '+f.cat).includes(q));
-    tipFiltered = TIPS.filter(t => norm(t.t+' '+t.d).includes(q));
-  }
-  return {scFiltered, fnFiltered, tipFiltered};
-}
-
-function renderAll(){
-  const {scFiltered, fnFiltered, tipFiltered} = getFiltered();
-
-  if(currentQuery===''){
-    document.getElementById('resultCount').textContent = '';
-  } else {
-    const total = scFiltered.length + fnFiltered.length + tipFiltered.length;
-    document.getElementById('resultCount').textContent = `${total} kết quả — Phím tắt ${scFiltered.length} · Hàm ${fnFiltered.length} · Mẹo ${tipFiltered.length}`;
-  }
-
-  renderShortcuts(scFiltered);
-  renderFunctions(fnFiltered);
-  renderTips(tipFiltered);
-  renderFavorites();
-  renderFilterChip();
-
-  const activePanel = document.querySelector('.panel.active').id;
-  let activeCount;
-  if(activePanel==='panel-shortcuts') activeCount = scFiltered.filter(s=>!categoryFilter.shortcuts || s.cat===categoryFilter.shortcuts).length;
-  else if(activePanel==='panel-functions') activeCount = fnFiltered.filter(f=>!categoryFilter.functions || f.cat===categoryFilter.functions).length;
-  else if(activePanel==='panel-tips') activeCount = tipFiltered.length;
-  else activeCount = 1; // favorites panel handles its own empty state
-  document.getElementById('emptyState').style.display = (activePanel!=='panel-favorites' && activeCount===0) ? 'block' : 'none';
-
-  updateCompareBar();
-}
-
-// ---------- tabs ----------
-const tabBtns = document.querySelectorAll('.tab-btn');
-const panels = document.querySelectorAll('.panel');
-tabBtns.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    tabBtns.forEach(b=>b.classList.remove('active'));
-    panels.forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
-    renderFilterChip();
-    const activeCountEl = document.querySelector('.panel.active');
-    document.getElementById('emptyState').style.display =
-      (activeCountEl.id!=='panel-favorites' && activeCountEl.children.length===0) ? 'block' : 'none';
-  });
-});
-
-// ---------- search ----------
-const searchInput = document.getElementById('search');
-
-function norm(s){
-  return s.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/đ/g,'d');
-}
-
-searchInput.addEventListener('input', ()=>{
-  currentQuery = norm(searchInput.value.trim());
-  renderAll();
-});
-
-// ---------- compare mode ----------
-const compareBar = document.getElementById('compareBar');
-const compareBarText = document.getElementById('compareBarText');
-const compareGoBtn = document.getElementById('compareGoBtn');
-
-function updateCompareBar(){
-  const n = compareSelection.length;
-  compareBarText.textContent = n===0 ? 'Đã chọn 0 hàm' : `Đã chọn ${n} hàm để so sánh${n>=3?' (tối đa 3)':''}`;
-  compareBar.classList.toggle('show', n>0);
-  compareGoBtn.disabled = n<2;
-}
-
-document.getElementById('compareClearBtn').addEventListener('click', ()=>{
-  compareSelection = [];
-  renderAll();
-});
-
-document.getElementById('compareGoBtn').addEventListener('click', ()=>{
-  if(compareSelection.length<2) return;
-  const fns = compareSelection.map(id => FUNCTIONS.find(f=>f.id===id));
-  const rows = [
-    {label:'Nhóm', get:f=>f.cat},
-    {label:'Cú pháp', get:f=>`<span class="syn">${f.syntax}</span>`},
-    {label:'Mô tả', get:f=>f.desc},
-    {label:'Ví dụ', get:f=>`<span class="ex">${f.ex}</span>`},
-  ];
-  let html = `<table class="compare-table"><thead><tr><th></th>${fns.map(f=>`<th>${f.name}</th>`).join('')}</tr></thead><tbody>`;
-  rows.forEach(r=>{
-    html += `<tr><td class="label">${r.label}</td>${fns.map(f=>`<td>${r.get(f)}</td>`).join('')}</tr>`;
-  });
-  html += `</tbody></table>`;
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('modalOverlay').classList.add('show');
-});
-
-document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-document.getElementById('modalOverlay').addEventListener('click', (e)=>{
-  if(e.target.id==='modalOverlay') closeModal();
-});
-function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
-
-// ---------- event delegation: fav / copy / category filter / compare checkboxes ----------
-document.addEventListener('click', (e)=>{
-  const favBtn = e.target.closest('.fav-btn');
-  if(favBtn){
-    const id = favBtn.dataset.fav;
-    if(favorites.has(id)) favorites.delete(id); else favorites.add(id);
-    saveFavorites();
-    renderAll();
-    return;
-  }
-
-  const copyBtn = e.target.closest('.copy-btn');
-  if(copyBtn){
-    const text = copyBtn.dataset.copy;
-    navigator.clipboard.writeText(text).then(()=>{
-      copyBtn.classList.add('copied');
-      const old = copyBtn.textContent;
-      copyBtn.textContent = 'Đã chép ✓';
-      setTimeout(()=>{ copyBtn.classList.remove('copied'); copyBtn.textContent = old; }, 1100);
-    }).catch(()=>{});
-    return;
-  }
-
-  const catTag = e.target.closest('.cat-tag-click');
-  if(catTag){
-    const panel = catTag.dataset.catfilter;
-    const cat = catTag.dataset.cat;
-    categoryFilter[panel] = (categoryFilter[panel]===cat) ? null : cat;
-    renderAll();
-    return;
-  }
-
-  const clearFilter = e.target.closest('[data-clearfilter]');
-  if(clearFilter){
-    categoryFilter[clearFilter.dataset.clearfilter] = null;
-    renderAll();
-    return;
-  }
-});
-
-document.addEventListener('change', (e)=>{
-  const cb = e.target.closest('[data-compare]');
-  if(!cb) return;
-  const id = cb.dataset.compare;
-  if(cb.checked){
-    if(compareSelection.length>=3){
-      cb.checked = false;
-      compareBarText.textContent = 'Tối đa 3 hàm để so sánh';
-      compareBar.classList.add('show');
-      return;
+/* SheetJS silently drops a cell that has a <f>formula</f> but no cached <v>value</v> —
+   common in files generated by tools like openpyxl/xlsxwriter that don't precompute formulas.
+   Patch the raw sheet XML to inject a dummy <v>0</v> so the formula survives parsing. */
+async function patchXlsxBufferIfNeeded(arrayBuffer){
+  if(typeof JSZip === 'undefined') return arrayBuffer;
+  try{
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    let changed = false;
+    const sheetFiles = Object.keys(zip.files).filter(n=> /^xl\/worksheets\/sheet\d+\.xml$/.test(n));
+    for(const name of sheetFiles){
+      const xml = await zip.file(name).async('string');
+      const patched = xml.replace(/(<f[^>]*>[^<]*<\/f>)(<v\s*\/>|<v>\s*<\/v>)?(<\/c>)/g, (m,f,v,c)=>{ changed=true; return f+'<v>0</v>'+c; });
+      if(patched !== xml) zip.file(name, patched);
     }
-    compareSelection.push(id);
-  } else {
-    compareSelection = compareSelection.filter(x=>x!==id);
+    if(!changed) return arrayBuffer;
+    return await zip.generateAsync({type:'arraybuffer'});
+  }catch(err){
+    return arrayBuffer; // if patching fails for any reason, fall back to the original file untouched
   }
-  updateCompareBar();
+}
+
+async function parseSpreadsheetFile(file){
+  const ext = (file.name.split('.').pop()||'').toLowerCase();
+  if(ext==='csv' || ext==='txt'){
+    const text = await readFileAsText(file);
+    return XLSX.read(text, {type:'string', raw:true, cellDates:true});
+  }
+  let buf = await readFileAsArrayBuffer(file);
+  if(ext==='xlsx' || ext==='xlsm'){
+    buf = await patchXlsxBufferIfNeeded(buf);
+  }
+  return XLSX.read(buf, {type:'array', cellDates:true});
+}
+
+function sheetToAOA(wb, sheetName){
+  const ws = wb.Sheets[sheetName];
+  const ref = ws['!ref'];
+  if(!ref) return [['']];
+  const range = XLSX.utils.decode_range(ref);
+  const aoa = [];
+  for(let R=range.s.r; R<=range.e.r; R++){
+    const row = [];
+    for(let C=range.s.c; C<=range.e.c; C++){
+      const addr = XLSX.utils.encode_cell({r:R, c:C});
+      const cell = ws[addr];
+      if(!cell){ row.push(''); continue; }
+      if(cell.f){ row.push('='+cell.f); }
+      else { row.push(cell.v===undefined||cell.v===null ? '' : cell.v); }
+    }
+    aoa.push(row);
+  }
+  return aoa.length ? aoa : [['']];
+}
+
+function downloadText(content, filename, mime){
+  const blob = new Blob([content], {type: mime+';charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 3000);
+}
+
+function downloadAOAasXLSX(aoa, filename){
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, filename);
+}
+
+function aoaToCSV(aoa){
+  return aoa.map(row=> row.map(c=>{
+    let s = cellDisplay(c);
+    if(/[",\n]/.test(s)) s = '"'+s.replace(/"/g,'""')+'"';
+    return s;
+  }).join(',')).join('\r\n');
+}
+
+function toMarkdownTable(aoa){
+  if(!aoa.length) return '';
+  const esc = s => cellDisplay(s).replace(/\|/g,'\\|').replace(/\n/g,' ');
+  const header = aoa[0].map((h,i)=> esc(h===''?('Cột '+(i+1)):h));
+  const sep = header.map(()=>'---');
+  const lines = ['| '+header.join(' | ')+' |', '| '+sep.join(' | ')+' |'];
+  for(let i=1;i<aoa.length;i++) lines.push('| '+aoa[i].map(esc).join(' | ')+' |');
+  return lines.join('\n');
+}
+
+function toHTMLTable(aoa){
+  let html = '<table>\n  <thead>\n    <tr>' + aoa[0].map((h,i)=>`<th>${escapeHtml(h===''?('Cột '+(i+1)):h)}</th>`).join('') + '</tr>\n  </thead>\n  <tbody>\n';
+  for(let i=1;i<aoa.length;i++){
+    html += '    <tr>' + aoa[i].map(c=>`<td>${escapeHtml(cellDisplay(c))}</td>`).join('') + '</tr>\n';
+  }
+  html += '  </tbody>\n</table>';
+  return html;
+}
+
+function toYAMLFromAOA(aoa){
+  if(!aoa.length) return '';
+  const headers = aoa[0];
+  const rows = aoa.slice(1);
+  const esc = v=>{
+    if(v===null||v===undefined||v==='') return 'null';
+    if(typeof v==='number'||typeof v==='boolean') return String(v);
+    const s = cellDisplay(v);
+    if(/^[\p{L}0-9 ._-]+$/u.test(s) && !/^(true|false|null|yes|no)$/i.test(s) && !/^-?\d/.test(s)) return s;
+    return '"' + s.replace(/\\/g,'\\\\').replace(/"/g,'\\"') + '"';
+  };
+  let out='';
+  rows.forEach(row=>{
+    headers.forEach((h,i)=>{
+      const key = String(h).trim() || ('col'+(i+1));
+      out += (i===0? '- ' : '  ') + key + ': ' + esc(row[i]) + '\n';
+    });
+  });
+  return out;
+}
+
+function objectsToAOA(arr){
+  if(!Array.isArray(arr)){
+    if(arr && typeof arr==='object') arr=[arr];
+    else throw new Error('JSON phải là một object hoặc một mảng object.');
+  }
+  const headers=[];
+  arr.forEach(obj=>{
+    if(obj && typeof obj==='object' && !Array.isArray(obj)){
+      Object.keys(obj).forEach(k=>{ if(!headers.includes(k)) headers.push(k); });
+    }
+  });
+  if(headers.length===0) throw new Error('Không tìm thấy trường dữ liệu nào trong JSON.');
+  const rows = arr.map(obj=> headers.map(h=> (obj && obj[h]!==undefined && obj[h]!==null) ? obj[h] : ''));
+  return [headers, ...rows];
+}
+
+function renderDataTable(container, aoa, opts={}){
+  const maxRows = opts.maxRows || 300;
+  const totalRows = aoa.length;
+  const colCount = aoa.reduce((m,r)=>Math.max(m, r.length), 0) || 1;
+  const shown = Math.min(totalRows, maxRows);
+
+  let html = '<table class="data-table excel-style-table"><thead><tr><th class="row-action corner"></th>';
+  for(let c=0;c<colCount;c++){
+    html += `<th class="col-letter-th${opts.sortable?' sortable':''}" data-col="${c}"><div class="col-head"><span class="col-letter">${colLetter(c)}</span></div></th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for(let i=0;i<shown;i++){
+    const row = aoa[i]||[];
+    const rowLabel = (opts.rowNumbers && opts.rowNumbers[i]!==undefined) ? opts.rowNumbers[i] : (i+1);
+    html += `<tr><th class="row-action row-num-th"><span class="row-num">${rowLabel}</span></th>`;
+    for(let c=0;c<colCount;c++){
+      const cls = opts.cellClass ? (opts.cellClass(i,c)||'') : '';
+      const title = opts.cellTitle ? opts.cellTitle(i,c) : '';
+      const content = opts.cellContent ? opts.cellContent(i,c) : escapeHtml(cellDisplay(row[c]));
+      html += `<td class="${cls}"${title?` title="${escapeHtml(title)}"`:''}>${content}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  if(opts.sortable && opts.onHeaderClick){
+    container.querySelectorAll('th.sortable').forEach(th=>{
+      th.addEventListener('click', ()=> opts.onHeaderClick(parseInt(th.dataset.col,10)));
+    });
+  }
+  return {shown, total: totalRows};
+}
+
+function colLetter(n){
+  let s=''; n++;
+  while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); }
+  return s;
+}
+
+/* reads a sheet cell-by-cell (not via sheet_to_json) so formulas (.f) are preserved,
+   not just their cached computed value (.v) */
+function sheetToGrid(wb, sheetName){
+  const ws = wb.Sheets[sheetName];
+  const ref = ws['!ref'];
+  if(!ref) return [[{v:'', f:null}]];
+  const range = XLSX.utils.decode_range(ref);
+  const grid = [];
+  for(let R=range.s.r; R<=range.e.r; R++){
+    const row=[];
+    for(let C=range.s.c; C<=range.e.c; C++){
+      const addr = XLSX.utils.encode_cell({r:R, c:C});
+      const cell = ws[addr];
+      if(!cell){ row.push({v:'', f:null}); continue; }
+      const formula = cell.f ? ('='+cell.f) : null;
+      row.push({v: (cell.v===undefined||cell.v===null) ? '' : cell.v, f: formula});
+    }
+    grid.push(row);
+  }
+  return grid.length ? grid : [[{v:'', f:null}]];
+}
+
+function cellRawText(cellObj){
+  if(!cellObj) return '';
+  return cellObj.f ? cellObj.f : cellDisplay(cellObj.v);
+}
+
+function cloneGrid(grid){
+  return grid.map(row=> row.map(cell=>({v:cell.v, f:cell.f})));
+}
+
+/* ---------- formula computation (HyperFormula) ---------- */
+const EXCEL_EPOCH_MS = Date.UTC(1899, 11, 30);
+function toHFValue(v){
+  if(v instanceof Date) return (v.getTime() - EXCEL_EPOCH_MS) / 86400000;
+  return v;
+}
+function hfErrorToText(v){
+  if(v && typeof v==='object' && typeof v.value==='string') return v.value; // e.g. "#VALUE!", "#NAME?"
+  return v;
+}
+function newHFInstance(){
+  if(typeof HyperFormula === 'undefined') return null;
+  const hf = HyperFormula.buildEmpty({licenseKey:'gpl-v3'});
+  // Excel accepts bare TRUE/FALSE as boolean literals in formulas (e.g. VLOOKUP's 4th arg);
+  // HyperFormula does not recognize these by default, so register them as named expressions.
+  try{ hf.addNamedExpression('TRUE', true); }catch(e){}
+  try{ hf.addNamedExpression('FALSE', false); }catch(e){}
+  return hf;
+}
+
+/* One-shot compute for read-only tools (Viewer, Converters, Utilities).
+   Takes a raw AOA (formula cells as "=..." strings) and returns a same-shaped AOA
+   with computed values. Falls back to the raw AOA unchanged if HyperFormula
+   isn't available or a sheet fails to build (e.g. unsupported syntax). */
+function computeFormulas(aoa){
+  if(typeof HyperFormula === 'undefined') return aoa;
+  try{
+    const prepared = aoa.map(row=> row.map(toHFValue));
+    const hf = HyperFormula.buildFromArray(prepared, {licenseKey:'gpl-v3'});
+    try{ hf.addNamedExpression('TRUE', true); }catch(e){}
+    try{ hf.addNamedExpression('FALSE', false); }catch(e){}
+    const values = hf.getSheetValues(0).map(row=> row.map(hfErrorToText));
+    hf.destroy();
+    // getSheetValues can trim trailing empty columns/rows — pad back to original shape
+    return aoa.map((row,r)=> row.map((cell,c)=> (values[r] && values[r][c]!==undefined) ? values[r][c] : (typeof cell==='string' && cell.startsWith('=') ? '' : cell)));
+  }catch(err){
+    return aoa; // safest fallback: show the raw formula text rather than crash
+  }
+}
+
+/* reads a sheet's raw content (values + formulas) AND its computed values in one call,
+   plus a boolean mask marking which cells are formulas (for UI indicators/tooltips) */
+function sheetToComputedAOA(wb, sheetName){
+  const raw = sheetToAOA(wb, sheetName);
+  const mask = raw.map(row=> row.map(c=> typeof c==='string' && c.startsWith('=')));
+  const computed = computeFormulas(raw);
+  return {raw, computed, mask};
+}
+
+/* merges formula-aware cell styling (blue tint + tooltip showing the formula) into
+   an existing renderDataTable opts object, preserving any cellClass/cellTitle already set */
+function withFormulaIndicator(mask, raw, opts){
+  opts = opts || {};
+  const prevClass = opts.cellClass, prevTitle = opts.cellTitle;
+  return Object.assign({}, opts, {
+    cellClass: (r,c)=>{
+      let cls = prevClass ? (prevClass(r,c)||'') : '';
+      if(mask[r] && mask[r][c]) cls = (cls+' is-formula').trim();
+      return cls;
+    },
+    cellTitle: (r,c)=>{
+      if(mask[r] && mask[r][c]) return 'Công thức: ' + raw[r][c];
+      return prevTitle ? prevTitle(r,c) : '';
+    }
+  });
+}
+
+/* Persistent engine for the live Editor: keeps one HyperFormula instance in sync
+   with the grid so edits recompute incrementally instead of rebuilding from scratch. */
+function createFormulaEngine(grid){
+  let hf = null;
+  let ready = (typeof HyperFormula !== 'undefined');
+  function rebuild(g){
+    if(!ready) return;
+    try{
+      if(hf) hf.destroy();
+      hf = newHFInstance();
+      hf.addSheet('Sheet1');
+      hf.setSheetContent(0, g.map(row=> row.map(cell=> cell.f || toHFValue(cell.v))));
+    }catch(err){ ready = false; }
+  }
+  rebuild(grid);
+  return {
+    isReady: ()=> ready,
+    rebuild,
+    setCell(r,c,content){
+      if(!ready) return;
+      try{ hf.setCellContents({sheet:0, row:r, col:c}, [[content]]); }catch(err){}
+    },
+    getComputed(r,c){
+      if(!ready) return undefined;
+      try{ return hfErrorToText(hf.getCellValue({sheet:0, row:r, col:c})); }
+      catch(err){ return undefined; }
+    },
+    getAllComputed(rowCount, colCount){
+      if(!ready) return null;
+      try{
+        const vals = hf.getSheetValues(0);
+        const out = [];
+        for(let r=0;r<rowCount;r++){
+          const row=[];
+          for(let c=0;c<colCount;c++) row.push(vals[r] && vals[r][c]!==undefined ? hfErrorToText(vals[r][c]) : '');
+          out.push(row);
+        }
+        return out;
+      }catch(err){ return null; }
+    },
+    destroy(){ if(hf){ try{ hf.destroy(); }catch(e){} } }
+  };
+}
+
+/* builds a worksheet from a grid of {v,f} cells, writing real formulas back
+   so they survive as formulas in the downloaded file (Excel recalculates them on open) */
+function gridToWorksheet(grid, computedGrid){
+  const ws = {};
+  let maxR=0, maxC=0;
+  grid.forEach((row,r)=>{
+    row.forEach((cell,c)=>{
+      const addr = XLSX.utils.encode_cell({r,c});
+      if(cell.f){
+        maxR=Math.max(maxR,r); maxC=Math.max(maxC,c);
+        const cv = (computedGrid && computedGrid[r]) ? computedGrid[r][c] : undefined;
+        if(typeof cv === 'number') ws[addr] = {t:'n', f: cell.f.replace(/^=/,''), v: cv};
+        else if(typeof cv === 'boolean') ws[addr] = {t:'b', f: cell.f.replace(/^=/,''), v: cv};
+        else if(typeof cv === 'string' && cv!=='' && cv.charAt(0)==='#') ws[addr] = {t:'e', f: cell.f.replace(/^=/,''), v: 0};
+        else if(typeof cv === 'string' && cv!=='') ws[addr] = {t:'str', f: cell.f.replace(/^=/,''), v: cv};
+        else ws[addr] = {t:'n', f: cell.f.replace(/^=/,''), v: 0};
+      } else if(cell.v !== '' && cell.v !== null && cell.v !== undefined){
+        maxR=Math.max(maxR,r); maxC=Math.max(maxC,c);
+        if(typeof cell.v === 'number') ws[addr] = {t:'n', v:cell.v};
+        else if(typeof cell.v === 'boolean') ws[addr] = {t:'b', v:cell.v};
+        else if(cell.v instanceof Date) ws[addr] = {t:'d', v:cell.v};
+        else if(/^-?\d+(\.\d+)?$/.test(String(cell.v).trim())) ws[addr] = {t:'n', v:Number(cell.v)};
+        else ws[addr] = {t:'s', v:String(cell.v)};
+      }
+    });
+  });
+  ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:maxR,c:maxC}});
+  return ws;
+}
+
+function downloadGridAsXLSX(grid, filename, computedGrid){
+  const ws = gridToWorksheet(grid, computedGrid);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  XLSX.writeFile(wb, filename);
+}
+
+/* =========================================================================
+   GENERIC SINGLE-FILE EXCEL SOURCE (drag/drop + sheet picker)
+   ========================================================================= */
+function setupExcelSource(toolId, opts){
+  opts = opts || {};
+  const accept = opts.accept || '.xlsx,.xls,.xlsm,.xlsb,.csv';
+  const acceptLabel = opts.acceptLabel || '.xlsx, .xls, .xlsm, .xlsb, .csv';
+  const onReady = opts.onReady || function(){};
+  const simple = !!opts.simple; // simple = no sheet selector, always first sheet, compact UI
+
+  const slotSel = simple ? `.source-slot-simple[data-slot="${toolId}"]` : `.source-slot[data-tool="${toolId}"]`;
+  const slot = document.querySelector(slotSel);
+  if(!slot) return null;
+
+  slot.innerHTML = `
+    <div class="dropzone" id="dz-${toolId}">
+      <div class="dz-icon">⇪</div>
+      <div class="dz-text">Kéo thả file vào đây hoặc <span class="dz-browse">chọn file</span></div>
+      <div class="dz-sub">${acceptLabel} · xử lý ngay trong trình duyệt</div>
+      <input type="file" id="file-${toolId}" accept="${accept}" style="display:none;">
+    </div>
+    ${opts.allowBlank ? `<div class="dz-blank-row"><button type="button" class="btn-link" id="blank-${toolId}">+ Tạo bảng tính trống mới (không cần tải file)</button></div>` : ''}
+    <div class="source-meta" id="meta-${toolId}">
+      <span class="file-chip" id="chip-${toolId}"></span>
+      ${simple ? '' : `<div class="sheet-select-row" id="sheetrow-${toolId}"><label>Sheet:</label><select id="sheetsel-${toolId}"></select></div>`}
+      <button class="btn-tertiary" id="clear-${toolId}">Đổi file khác</button>
+    </div>
+  `;
+
+  const dz = slot.querySelector(`#dz-${toolId}`);
+  const input = slot.querySelector(`#file-${toolId}`);
+  const meta = slot.querySelector(`#meta-${toolId}`);
+  const chip = slot.querySelector(`#chip-${toolId}`);
+  const sheetRow = simple ? null : slot.querySelector(`#sheetrow-${toolId}`);
+  const sheetSel = simple ? null : slot.querySelector(`#sheetsel-${toolId}`);
+  const clearBtn = slot.querySelector(`#clear-${toolId}`);
+  const blankBtn = opts.allowBlank ? slot.querySelector(`#blank-${toolId}`) : null;
+  const blankRow = opts.allowBlank ? slot.querySelector(`.dz-blank-row`) : null;
+
+  let currentWb = null;
+  let currentFileName = '';
+
+  function activateSheet(name){
+    let aoa;
+    try{ aoa = sheetToAOA(currentWb, name); }
+    catch(err){ onReady(null, null); return; }
+    onReady(aoa, {sheetName:name, sheetNames: currentWb.SheetNames, fileName: currentFileName, wb: currentWb});
+  }
+
+  async function handleFile(file){
+    try{
+      const wb = await parseSpreadsheetFile(file);
+      if(!wb.SheetNames.length) throw new Error('File không có sheet nào.');
+      currentWb = wb; currentFileName = file.name;
+      dz.style.display='none';
+      meta.style.display='flex';
+      chip.textContent = `${file.name} · ${wb.SheetNames.length} sheet`;
+      if(!simple){
+        if(wb.SheetNames.length>1){
+          sheetRow.style.display='flex';
+          sheetSel.innerHTML = wb.SheetNames.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+        } else {
+          sheetRow.style.display='none';
+        }
+      }
+      activateSheet(wb.SheetNames[0]);
+    }catch(err){
+      alert('Không đọc được file: ' + err.message);
+    }
+  }
+
+  function activateBlank(rows, cols){
+    currentWb = null; currentFileName = 'Bảng tính mới';
+    const aoa = Array.from({length:rows}, ()=> Array.from({length:cols}, ()=> ''));
+    dz.style.display='none';
+    if(blankRow) blankRow.style.display='none';
+    meta.style.display='flex';
+    chip.textContent = `📄 Bảng tính mới · ${rows} dòng × ${cols} cột`;
+    if(sheetRow) sheetRow.style.display='none';
+    onReady(aoa, {sheetName:null, sheetNames:[], fileName:currentFileName, wb:null, blank:true});
+  }
+
+  dz.addEventListener('click', ()=>input.click());
+  dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('dragover'); });
+  dz.addEventListener('dragleave', ()=> dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e=>{
+    e.preventDefault(); dz.classList.remove('dragover');
+    if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  input.addEventListener('change', e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+  if(sheetSel) sheetSel.addEventListener('change', ()=> activateSheet(sheetSel.value));
+  if(blankBtn) blankBtn.addEventListener('click', ()=> activateBlank(30, 10));
+  clearBtn.addEventListener('click', ()=>{
+    currentWb=null; currentFileName=''; input.value='';
+    dz.style.display='block'; meta.style.display='none';
+    if(blankRow) blankRow.style.display='block';
+    onReady(null, null);
+  });
+
+  return { getFileName: ()=>currentFileName };
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+const CATEGORIES = [
+  {id:'edit', label:'✏️ Chỉnh sửa / Xem file', tools:[
+    {id:'editor', label:'Chỉnh sửa Excel'}
+  ]},
+  {id:'convert', label:'🔁 Chuyển đổi', tools:[
+    {id:'json2xlsx', label:'JSON → Excel'},
+    {id:'csv2xlsx', label:'CSV → Excel'},
+    {id:'xlsx2csv', label:'Excel → CSV'},
+    {id:'xlsx2json', label:'Excel → JSON'},
+    {id:'xlsx2md', label:'Excel → Markdown'},
+    {id:'xlsx2html', label:'Excel → HTML'},
+    {id:'xlsx2yaml', label:'Excel → YAML'}
+  ]},
+  {id:'utils', label:'🧰 Tiện ích', tools:[
+    {id:'pipeline', label:'⚙️ Xử lý dữ liệu'},
+    {id:'merge', label:'Gộp file'},
+    {id:'compare', label:'So sánh file'}
+  ]}
+];
+
+let activeCat = 'edit';
+let activeTool = 'editor';
+
+function renderCatTabs(){
+  document.getElementById('catTabs').innerHTML = CATEGORIES.map(c=>
+    `<button class="cat-tab ${c.id===activeCat?'active':''}" data-cat="${c.id}">${c.label}</button>`
+  ).join('');
+  document.querySelectorAll('.cat-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectCategory(btn.dataset.cat));
+  });
+}
+function renderPillRow(){
+  const cat = CATEGORIES.find(c=>c.id===activeCat);
+  const row = document.getElementById('pillRow');
+  if(cat.tools.length<=1){ row.style.display='none'; row.innerHTML=''; return; }
+  row.style.display='flex';
+  row.innerHTML = cat.tools.map(t=>`<button class="pill ${t.id===activeTool?'active':''}" data-tool="${t.id}">${t.label}</button>`).join('');
+  row.querySelectorAll('.pill').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectTool(btn.dataset.tool));
+  });
+}
+function selectCategory(catId){
+  activeCat = catId;
+  const cat = CATEGORIES.find(c=>c.id===catId);
+  activeTool = cat.tools[0].id;
+  renderCatTabs(); renderPillRow(); showActivePanel();
+}
+function selectTool(toolId){
+  activeTool = toolId;
+  renderPillRow(); showActivePanel();
+}
+function showActivePanel(){
+  document.querySelectorAll('.tool-panel').forEach(p=>{
+    p.classList.toggle('active', p.dataset.tool===activeTool);
+  });
+}
+
+/* =========================================================================
+   TOOL: EDITOR
+   ========================================================================= */
+(function(){
+  const state = {grid:null, original:null, selected:null, engine:null, computed:null, filterText:'', sortCol:null, sortDir:'asc', history:[], redoStack:[], armedKey:null, fileBase:'du-lieu', formulaMode:false};
+  const UNDO_LIMIT = 50;
+
+  const cellRefBox = document.getElementById('cellref-editor');
+  const formulaBar = document.getElementById('formulabar-editor');
+  const undoBtn = document.getElementById('undo-editor');
+  const redoBtn = document.getElementById('redo-editor');
+
+  const searchInput = document.getElementById('search-editor');
+  const searchRow = document.getElementById('search-row-editor');
+
+  function updateUndoButton(){
+    undoBtn.disabled = state.history.length===0;
+    redoBtn.disabled = state.redoStack.length===0;
+  }
+
+  // snapshot the grid BEFORE a mutation, so undo can restore it. Call this right
+  // before changing state.grid (editing a cell, add/del row/col, full reset).
+  // Any new edit invalidates the "future" redo path, so it's cleared here too —
+  // same behaviour as Ctrl+Z/Ctrl+Y in normal editors.
+  function pushHistory(){
+    if(!state.grid) return;
+    state.history.push(cloneGrid(state.grid));
+    if(state.history.length>UNDO_LIMIT) state.history.shift();
+    state.redoStack = [];
+    updateUndoButton();
+  }
+
+  function clearSelectionUI(){
+    state.armedKey = null;
+    state.selected = null;
+    formulaBar.value=''; formulaBar.disabled=true; cellRefBox.textContent='–';
+  }
+
+  function undo(){
+    if(!state.history.length) return;
+    state.redoStack.push(cloneGrid(state.grid));
+    if(state.redoStack.length>UNDO_LIMIT) state.redoStack.shift();
+    state.grid = state.history.pop();
+    clearSelectionUI();
+    if(state.engine) state.engine.rebuild(state.grid);
+    render();
+    updateUndoButton();
+  }
+  undoBtn.addEventListener('click', undo);
+
+  function redo(){
+    if(!state.redoStack.length) return;
+    state.history.push(cloneGrid(state.grid));
+    if(state.history.length>UNDO_LIMIT) state.history.shift();
+    state.grid = state.redoStack.pop();
+    clearSelectionUI();
+    if(state.engine) state.engine.rebuild(state.grid);
+    render();
+    updateUndoButton();
+  }
+  redoBtn.addEventListener('click', redo);
+
+  setupExcelSource('editor', {allowBlank:true, onReady:(aoa, meta)=>{
+    document.getElementById('toolbar-editor').style.display='none';
+    document.getElementById('preview-editor').style.display='none';
+    document.getElementById('action-editor').style.display='none';
+    searchRow.style.display='none';
+    state.selected = null;
+    state.filterText=''; state.sortCol=null; state.sortDir='asc';
+    state.history=[]; state.redoStack=[]; state.armedKey=null; updateUndoButton();
+    searchInput.value='';
+    formulaBar.value=''; formulaBar.disabled=true; cellRefBox.textContent='–';
+    if(state.engine) state.engine.destroy();
+    if(!aoa || !meta){ state.grid=null; state.original=null; state.engine=null; return; }
+    state.fileBase = meta.blank ? 'bang-tinh-moi' : (meta.fileName||'du-lieu').replace(/\.[^./\\]+$/,'');
+    const grid = meta.blank
+      ? aoa.map(row=> row.map(()=> ({v:'', f:null})))
+      : sheetToGrid(meta.wb, meta.sheetName);
+    state.original = cloneGrid(grid);
+    state.grid = cloneGrid(grid);
+    state.engine = createFormulaEngine(state.grid);
+    document.getElementById('toolbar-editor').style.display='flex';
+    searchRow.style.display='flex';
+    render();
+  }});
+
+  // returns the real row indices (into state.grid) to display, after filtering + sorting.
+  // sorting/filtering never touches state.grid itself, so cell edits, formulas and
+  // row/col delete (which use the real index) keep working exactly as before.
+  function getVisibleRows(){
+    let order = state.grid.map((_,i)=>i);
+    if(state.filterText){
+      const q = state.filterText.toLowerCase();
+      order = order.filter(r=> state.grid[r].some((cell,c)=> cellDisplayValue(r,c).toLowerCase().includes(q)));
+    }
+    if(state.sortCol!==null){
+      const col = state.sortCol;
+      order = order.slice().sort((ra,rb)=>{
+        const av=cellDisplayValue(ra,col), bv=cellDisplayValue(rb,col);
+        const an=parseFloat(av), bn=parseFloat(bv);
+        let cmp;
+        if(av!=='' && bv!=='' && !isNaN(an) && !isNaN(bn)) cmp = an-bn;
+        else cmp = av.localeCompare(bv,'vi');
+        return state.sortDir==='desc' ? -cmp : cmp;
+      });
+    }
+    return order;
+  }
+
+  searchInput.addEventListener('input', e=>{ state.filterText = e.target.value; render(); });
+
+  function cellDisplayValue(r,c){
+    const computedVal = state.computed && state.computed[r] ? state.computed[r][c] : undefined;
+    return computedVal!==undefined ? cellDisplay(computedVal) : cellRawText(state.grid[r][c]);
+  }
+
+  function recomputeAll(){
+    if(!state.engine || !state.grid) return;
+    const rows = state.grid.length, cols = state.grid[0].length;
+    state.computed = state.engine.getAllComputed(rows, cols);
+  }
+
+  // updates every cell's displayed text/class to match the latest computed values,
+  // WITHOUT touching the cell currently focused for editing (so typing isn't disrupted)
+  function refreshDisplay(){
+    if(!state.grid) return;
+    const active = document.activeElement;
+    state.grid.forEach((row,r)=>{
+      row.forEach((cell,c)=>{
+        const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+        if(!td || td===active) return;
+        const text = cellDisplayValue(r,c);
+        if(td.textContent !== text) td.textContent = text;
+        td.classList.toggle('is-formula', !!cell.f);
+      });
+    });
+  }
+
+  function selectCell(r,c){
+    state.selected = {r,c};
+    cellRefBox.textContent = colLetter(c) + (r+1);
+    formulaBar.disabled = false;
+    formulaBar.value = cellRawText(state.grid[r][c]);
+    document.querySelectorAll('#table-editor td.is-selected').forEach(td=> td.classList.remove('is-selected'));
+    const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+    if(td){
+      td.classList.add('is-selected');
+      // entering edit mode: reveal the raw formula/value (like Excel does when you start editing a cell)
+      td.textContent = cellRawText(state.grid[r][c]);
+    }
+  }
+
+  function deselectCell(r,c){
+    // leaving the cell ends this edit session: the next keystroke on any cell
+    // (even the same one, if re-focused later) will snapshot again before applying.
+    state.armedKey = null;
+    state.formulaMode = false;
+    endPointDrag();
+    const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+    if(td){
+      td.classList.remove('is-selected');
+      td.textContent = cellDisplayValue(r,c);
+      td.classList.toggle('is-formula', !!state.grid[r][c].f);
+    }
+  }
+
+  // snapshots history once per "edit session" on a given cell (i.e. on its first
+  // keystroke since being selected), whether typed directly in the cell or via
+  // the formula bar, so one Undo reverts the whole edit rather than one keystroke.
+  function armForEdit(r,c){
+    const key = r+','+c;
+    if(state.armedKey!==key){ pushHistory(); state.armedKey = key; }
+  }
+
+  /* ---------- quét khối để chèn tham chiếu ô/vùng vào công thức (kiểu Excel) ----------
+     Khi ô đang sửa có nội dung bắt đầu bằng "=" (state.formulaMode), bấm hoặc kéo chuột
+     qua các ô khác sẽ chèn tham chiếu (A1 hoặc A1:C5) vào đúng vị trí con trỏ, thay vì
+     nhảy sang sửa ô đó. */
+  let pointDrag = null; // {anchorR, anchorC, start, len, usedFormulaBar}
+
+  function rangeRefText(r1,c1,r2,c2){
+    if(r1===r2 && c1===c2) return colLetter(c1)+(r1+1);
+    const minR=Math.min(r1,r2), maxR=Math.max(r1,r2), minC=Math.min(c1,c2), maxC=Math.max(c1,c2);
+    return `${colLetter(minC)}${minR+1}:${colLetter(maxC)}${maxR+1}`;
+  }
+
+  function highlightRange(r1,c1,r2,c2){
+    clearRangeHighlight();
+    const minR=Math.min(r1,r2), maxR=Math.max(r1,r2), minC=Math.min(c1,c2), maxC=Math.max(c1,c2);
+    for(let r=minR;r<=maxR;r++){
+      for(let c=minC;c<=maxC;c++){
+        const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+        if(td) td.classList.add('range-pick');
+      }
+    }
+  }
+  function clearRangeHighlight(){
+    document.querySelectorAll('#table-editor td.range-pick').forEach(td=> td.classList.remove('range-pick'));
+  }
+
+  function placeCaretInTd(td, offset){
+    const textNode = td.firstChild;
+    const sel = window.getSelection();
+    const range = document.createRange();
+    if(textNode && textNode.nodeType===Node.TEXT_NODE){
+      const safe = Math.max(0, Math.min(offset, textNode.textContent.length));
+      range.setStart(textNode, safe); range.setEnd(textNode, safe);
+    } else {
+      range.selectNodeContents(td); range.collapse(false);
+    }
+    sel.removeAllRanges(); sel.addRange(range);
+  }
+
+  // Chèn/thay thế refText vào vị trí con trỏ (hoặc vùng rangeOverride) của ô/formula bar
+  // đang được sửa. Trả về {start, end, usedFormulaBar} để lần kéo tiếp theo biết vùng cần thay.
+  function spliceEditText(refText, rangeOverride){
+    if(!state.selected) return null;
+    const {r,c} = state.selected;
+    const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+    const usedFormulaBar = document.activeElement===formulaBar || !(td && document.activeElement===td);
+    let oldText, start, end;
+    if(usedFormulaBar){
+      oldText = formulaBar.value;
+      if(rangeOverride){ start=rangeOverride.start; end=rangeOverride.end; }
+      else { start = formulaBar.selectionStart==null?oldText.length:formulaBar.selectionStart; end = formulaBar.selectionEnd==null?oldText.length:formulaBar.selectionEnd; }
+    } else {
+      oldText = td.textContent;
+      if(rangeOverride){ start=rangeOverride.start; end=rangeOverride.end; }
+      else {
+        const sel = window.getSelection();
+        if(sel.rangeCount && td.contains(sel.getRangeAt(0).startContainer)){
+          const rg = sel.getRangeAt(0); start=rg.startOffset; end=rg.endOffset;
+        } else { start = oldText.length; end = oldText.length; }
+      }
+    }
+    const newText = oldText.slice(0,start) + refText + oldText.slice(end);
+    const newCaret = start + refText.length;
+
+    armForEdit(r,c);
+    applyEdit(r,c,newText);
+    state.formulaMode = newText.trim().startsWith('=');
+
+    if(usedFormulaBar){
+      formulaBar.value = newText;
+      formulaBar.setSelectionRange(newCaret, newCaret);
+      formulaBar.focus();
+      if(td) td.textContent = newText;
+    } else {
+      td.textContent = newText;
+      placeCaretInTd(td, newCaret);
+      formulaBar.value = newText;
+    }
+    return {start, end:newCaret, usedFormulaBar};
+  }
+
+  function cellAtPoint(x,y){
+    const el = document.elementFromPoint(x,y);
+    const td = el && el.closest ? el.closest('#table-editor td.cell-editable') : null;
+    if(!td) return null;
+    return {r:parseInt(td.dataset.row,10), c:parseInt(td.dataset.col,10)};
+  }
+
+  function startPointDrag(r,c){
+    const inserted = spliceEditText(rangeRefText(r,c,r,c));
+    if(!inserted) return;
+    pointDrag = {anchorR:r, anchorC:c, start:inserted.start, len:inserted.end-inserted.start};
+    highlightRange(r,c,r,c);
+    document.body.classList.add('picking-range');
+    document.addEventListener('mousemove', onPointDragMove);
+    document.addEventListener('mouseup', onPointDragEnd);
+  }
+  function onPointDragMove(e){
+    if(!pointDrag) return;
+    const cell = cellAtPoint(e.clientX, e.clientY);
+    if(!cell) return;
+    const refText = rangeRefText(pointDrag.anchorR, pointDrag.anchorC, cell.r, cell.c);
+    const replaced = spliceEditText(refText, {start:pointDrag.start, end:pointDrag.start+pointDrag.len});
+    if(replaced) pointDrag.len = refText.length;
+    highlightRange(pointDrag.anchorR, pointDrag.anchorC, cell.r, cell.c);
+  }
+  function onPointDragEnd(){
+    endPointDrag();
+  }
+  function endPointDrag(){
+    if(!pointDrag && !document.querySelector('#table-editor td.range-pick')) return;
+    document.removeEventListener('mousemove', onPointDragMove);
+    document.removeEventListener('mouseup', onPointDragEnd);
+    document.body.classList.remove('picking-range');
+    pointDrag = null;
+    clearRangeHighlight();
+  }
+
+  function applyEdit(r, c, text){
+    const cell = state.grid[r][c];
+    if(text.startsWith('=') && text.length>1){ cell.f = text; cell.v = text; }
+    else { cell.f = null; cell.v = text; }
+    if(state.engine) state.engine.setCell(r, c, cell.f || cell.v);
+    recomputeAll();
+    refreshDisplay();
+  }
+
+  function render(){
+    const container = document.getElementById('table-editor');
+    const grid = state.grid;
+    const colCount = grid[0].length;
+    recomputeAll();
+    const order = getVisibleRows();
+
+    let html = '<table class="data-table editable-table"><thead><tr><th class="row-action corner"></th>';
+    for(let c=0;c<colCount;c++){
+      const arrow = state.sortCol===c ? (state.sortDir==='desc' ? ' ▼' : ' ▲') : '';
+      html += `<th class="col-letter-th sortable" data-col="${c}"><div class="col-head"><span class="col-letter">${colLetter(c)}${arrow}</span><button class="col-del" data-col="${c}" title="Xoá cột này">×</button></div></th>`;
+    }
+    html += '</tr></thead><tbody>';
+    order.forEach(r=>{
+      const row = grid[r];
+      html += `<tr><th class="row-action row-num-th"><span class="row-num">${r+1}</span><button class="row-del" data-row="${r}" title="Xoá dòng này">×</button></th>`;
+      row.forEach((cell,c)=>{
+        const isFormula = !!cell.f;
+        html += `<td class="cell-editable${isFormula?' is-formula':''}" contenteditable="true" spellcheck="false" data-row="${r}" data-col="${c}">${escapeHtml(cellDisplayValue(r,c))}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('th.sortable').forEach(th=>{
+      th.addEventListener('click', e=>{
+        if(e.target.closest('.col-del')) return;
+        const c = parseInt(th.dataset.col,10);
+        if(state.sortCol===c) state.sortDir = state.sortDir==='asc' ? 'desc' : 'asc';
+        else { state.sortCol=c; state.sortDir='asc'; }
+        render();
+      });
+    });
+
+    container.querySelectorAll('td.cell-editable').forEach(td=>{
+      const r = parseInt(td.dataset.row,10), c = parseInt(td.dataset.col,10);
+      td.addEventListener('mousedown', e=>{
+        if(state.formulaMode && state.selected && !(state.selected.r===r && state.selected.c===c)){
+          e.preventDefault();
+          startPointDrag(r,c);
+        }
+      });
+      td.addEventListener('focus', ()=> selectCell(r,c));
+      td.addEventListener('blur', ()=> deselectCell(r,c));
+      td.addEventListener('input', ()=>{
+        armForEdit(r,c);
+        applyEdit(r, c, td.textContent);
+        state.formulaMode = td.textContent.trim().startsWith('=');
+        if(state.selected && state.selected.r===r && state.selected.c===c) formulaBar.value = td.textContent;
+      });
+      td.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); td.blur(); } });
+    });
+    container.querySelectorAll('.row-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        pushHistory();
+        state.grid.splice(parseInt(btn.dataset.row,10), 1);
+        state.selected=null; formulaBar.value=''; formulaBar.disabled=true; cellRefBox.textContent='–';
+        if(state.engine) state.engine.rebuild(state.grid);
+        render();
+      });
+    });
+    container.querySelectorAll('.col-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        pushHistory();
+        const c = parseInt(btn.dataset.col,10);
+        state.grid.forEach(row=> row.splice(c,1));
+        state.selected=null; formulaBar.value=''; formulaBar.disabled=true; cellRefBox.textContent='–';
+        if(state.engine) state.engine.rebuild(state.grid);
+        render();
+      });
+    });
+
+    document.getElementById('count-editor').textContent = state.filterText
+      ? `${order.length} / ${grid.length} dòng khớp tìm kiếm, ${colCount} cột`
+      : `${grid.length} dòng, ${colCount} cột`;
+    document.getElementById('preview-editor').style.display='block';
+    document.getElementById('action-editor').style.display='flex';
+  }
+
+  formulaBar.addEventListener('input', ()=>{
+    if(!state.selected) return;
+    const {r,c} = state.selected;
+    armForEdit(r,c);
+    applyEdit(r, c, formulaBar.value);
+    state.formulaMode = formulaBar.value.trim().startsWith('=');
+    const td = document.querySelector(`#table-editor td[data-row="${r}"][data-col="${c}"]`);
+    if(td) td.textContent = formulaBar.value;
+  });
+  formulaBar.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); formulaBar.blur(); } });
+
+  document.getElementById('addrow-editor').addEventListener('click', ()=>{
+    if(!state.grid) return;
+    pushHistory();
+    state.grid.push(Array.from({length:state.grid[0].length}, ()=>({v:'',f:null})));
+    if(state.engine) state.engine.rebuild(state.grid);
+    render();
+  });
+  document.getElementById('addcol-editor').addEventListener('click', ()=>{
+    if(!state.grid) return;
+    pushHistory();
+    state.grid.forEach(row=> row.push({v:'',f:null}));
+    if(state.engine) state.engine.rebuild(state.grid);
+    render();
+  });
+  document.getElementById('reset-editor').addEventListener('click', ()=>{
+    if(!state.original) return;
+    if(!confirm('Hoàn tác toàn bộ về nội dung file gốc?')) return;
+    pushHistory();
+    state.grid = cloneGrid(state.original);
+    state.selected=null; formulaBar.value=''; formulaBar.disabled=true; cellRefBox.textContent='–';
+    if(state.engine) state.engine.rebuild(state.grid);
+    render();
+  });
+  document.getElementById('download-editor-xlsx').addEventListener('click', ()=>{
+    if(state.grid) downloadGridAsXLSX(state.grid, state.fileBase+'-da-sua.xlsx', state.computed);
+  });
+  document.getElementById('download-editor-csv').addEventListener('click', ()=>{
+    if(!state.grid) return;
+    recomputeAll();
+    const aoa = state.grid.map((row,r)=> row.map((cell,c)=> cellDisplayValue(r,c)));
+    downloadText(aoaToCSV(aoa), state.fileBase+'-da-sua.csv', 'text/csv');
+  });
+})();
+
+/* =========================================================================
+   TOOL: JSON -> EXCEL
+   ========================================================================= */
+(function(){
+  let currentAOA=null;
+  const ta = document.getElementById('input-json2xlsx');
+  const errEl = document.getElementById('error-json2xlsx');
+
+  function doParse(){
+    errEl.style.display='none';
+    let data;
+    try{ data = JSON.parse(ta.value); }
+    catch(e){ errEl.textContent='JSON không hợp lệ: '+e.message; errEl.style.display='block'; return; }
+    try{ currentAOA = objectsToAOA(data); }
+    catch(e){ errEl.textContent=e.message; errEl.style.display='block'; return; }
+    const {shown,total} = renderDataTable(document.getElementById('table-json2xlsx'), currentAOA, {});
+    document.getElementById('count-json2xlsx').textContent = `${total} dòng` + (shown<total?` (hiển thị ${shown})`:'');
+    document.getElementById('preview-json2xlsx').style.display='block';
+    document.getElementById('action-json2xlsx').style.display='flex';
+  }
+
+  document.getElementById('parse-json2xlsx').addEventListener('click', doParse);
+  document.getElementById('filein-json2xlsx').addEventListener('change', async e=>{
+    const f = e.target.files[0]; if(!f) return;
+    ta.value = await readFileAsText(f);
+    doParse();
+  });
+  document.getElementById('download-json2xlsx').addEventListener('click', ()=>{
+    if(currentAOA) downloadAOAasXLSX(currentAOA, 'converted.xlsx');
+  });
+})();
+
+/* =========================================================================
+   TOOL: CSV -> EXCEL
+   ========================================================================= */
+(function(){
+  let currentAOA=null;
+  const ta = document.getElementById('input-csv2xlsx');
+  const errEl = document.getElementById('error-csv2xlsx');
+
+  function doParse(){
+    errEl.style.display='none';
+    if(!ta.value.trim()){ errEl.textContent='Vui lòng dán nội dung CSV hoặc tải file.'; errEl.style.display='block'; return; }
+    try{
+      const wb = XLSX.read(ta.value, {type:'string', raw:true});
+      currentAOA = sheetToAOA(wb, wb.SheetNames[0]);
+    }catch(e){ errEl.textContent='Không đọc được CSV: '+e.message; errEl.style.display='block'; return; }
+    const {shown,total} = renderDataTable(document.getElementById('table-csv2xlsx'), currentAOA, {});
+    document.getElementById('count-csv2xlsx').textContent = `${total} dòng` + (shown<total?` (hiển thị ${shown})`:'');
+    document.getElementById('preview-csv2xlsx').style.display='block';
+    document.getElementById('action-csv2xlsx').style.display='flex';
+  }
+
+  document.getElementById('parse-csv2xlsx').addEventListener('click', doParse);
+  document.getElementById('filein-csv2xlsx').addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    ta.value = await readFileAsText(f);
+    doParse();
+  });
+  document.getElementById('download-csv2xlsx').addEventListener('click', ()=>{
+    if(currentAOA) downloadAOAasXLSX(currentAOA, 'converted.xlsx');
+  });
+})();
+
+/* =========================================================================
+   TOOL: EXCEL -> CSV / JSON / MARKDOWN / HTML / YAML  (shared pattern)
+   ========================================================================= */
+function setupExcelToFormat(toolId, renderFn){
+  setupExcelSource(toolId, {onReady:(aoa, meta)=>{
+    const previewEl = document.getElementById('preview-'+toolId);
+    const actionEl = document.getElementById('action-'+toolId);
+    if(!aoa || !meta){ previewEl.style.display='none'; actionEl.style.display='none'; return; }
+    const {raw, computed, mask} = sheetToComputedAOA(meta.wb, meta.sheetName);
+    renderFn(computed, {raw, mask});
+    previewEl.style.display='block';
+    actionEl.style.display='flex';
+  }});
+}
+
+setupExcelToFormat('xlsx2csv', (aoa, {raw, mask})=>{
+  const {shown,total} = renderDataTable(document.getElementById('table-xlsx2csv'), aoa, withFormulaIndicator(mask, raw, {}));
+  document.getElementById('count-xlsx2csv').textContent = `${total} dòng`+(shown<total?` (hiển thị ${shown})`:'');
+  document.getElementById('download-xlsx2csv').onclick = ()=> downloadText(aoaToCSV(aoa), 'converted.csv', 'text/csv');
 });
 
-// initial paint — runs only after every const/function above has been declared
-renderAll();
+setupExcelToFormat('xlsx2json', (aoa)=>{
+  const headers = aoa[0];
+  const objs = aoa.slice(1).map(row=>{
+    const o={};
+    headers.forEach((h,i)=>{ o[h===''?('col'+(i+1)):h] = row[i]===''?null:row[i]; });
+    return o;
+  });
+  const jsonStr = JSON.stringify(objs, null, 2);
+  document.getElementById('table-xlsx2json').textContent = jsonStr;
+  document.getElementById('count-xlsx2json').textContent = `${objs.length} bản ghi`;
+  document.getElementById('download-xlsx2json').onclick = ()=> downloadText(jsonStr, 'converted.json', 'application/json');
+  document.getElementById('copy-xlsx2json').onclick = (e)=> copyToClipboard(jsonStr, e.target);
+});
+
+setupExcelToFormat('xlsx2md', (aoa)=>{
+  const md = toMarkdownTable(aoa);
+  document.getElementById('table-xlsx2md').textContent = md;
+  document.getElementById('count-xlsx2md').textContent = `${aoa.length-1} dòng`;
+  document.getElementById('download-xlsx2md').onclick = ()=> downloadText(md, 'converted.md', 'text/markdown');
+  document.getElementById('copy-xlsx2md').onclick = (e)=> copyToClipboard(md, e.target);
+});
+
+setupExcelToFormat('xlsx2html', (aoa, {raw, mask})=>{
+  const htmlSnippet = toHTMLTable(aoa);
+  const {shown,total} = renderDataTable(document.getElementById('table-xlsx2html'), aoa, withFormulaIndicator(mask, raw, {}));
+  document.getElementById('code-xlsx2html').textContent = htmlSnippet;
+  document.getElementById('count-xlsx2html').textContent = `${total} dòng`+(shown<total?` (hiển thị ${shown})`:'');
+  const fullDoc = `<!DOCTYPE html>\n<html lang="vi">\n<head>\n<meta charset="UTF-8">\n<title>Dữ liệu Excel</title>\n</head>\n<body>\n${htmlSnippet}\n</body>\n</html>`;
+  document.getElementById('download-xlsx2html').onclick = ()=> downloadText(fullDoc, 'converted.html', 'text/html');
+  document.getElementById('copy-xlsx2html').onclick = (e)=> copyToClipboard(htmlSnippet, e.target);
+});
+
+setupExcelToFormat('xlsx2yaml', (aoa)=>{
+  const yaml = toYAMLFromAOA(aoa);
+  document.getElementById('table-xlsx2yaml').textContent = yaml;
+  document.getElementById('count-xlsx2yaml').textContent = `${aoa.length-1} bản ghi`;
+  document.getElementById('download-xlsx2yaml').onclick = ()=> downloadText(yaml, 'converted.yaml', 'text/yaml');
+  document.getElementById('copy-xlsx2yaml').onclick = (e)=> copyToClipboard(yaml, e.target);
+});
+
+function copyToClipboard(text, btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    const old = btn.textContent;
+    btn.textContent = 'Đã chép ✓';
+    setTimeout(()=> btn.textContent = old, 1200);
+  }).catch(()=>{});
+}
+
+/* =========================================================================
+   TOOL: DATA PIPELINE (chain multiple steps: dedupe / sort / filter / split columns)
+   ========================================================================= */
+(function(){
+  const STEP_TYPES = {
+    dedupe: {label:'Xoá trùng lặp', icon:'🧹'},
+    sort:   {label:'Sắp xếp',       icon:'↕️'},
+    filter: {label:'Lọc dòng',      icon:'🔎'},
+    ttc:    {label:'Tách cột',      icon:'✂️'}
+  };
+
+  let originalAOA = null; // header (row 0) is treated as fixed/protected throughout the pipeline
+  let steps = [];          // [{type, config}]
+  let editingIndex = null; // index of step being edited, or null when adding a new one
+  let finalData = null;
+
+  // ---- per-step apply logic (header row is always preserved as row 0) ----
+  function applyDedupeStep(data, cfg){
+    const header = data[0];
+    const rows = data.slice(1);
+    const validCols = (cfg.cols||[]).filter(c=>c < header.length);
+    const cols = validCols.length ? validCols : header.map((_,i)=>i);
+    const seen = new Set(); const kept=[];
+    rows.forEach(row=>{
+      const key = cols.map(c=>cellDisplay(row[c])).join('␟');
+      if(!seen.has(key)){ seen.add(key); kept.push(row); }
+    });
+    return [header, ...kept];
+  }
+  function applySortStep(data, cfg){
+    const header = data[0];
+    const col = Math.min(cfg.col||0, header.length-1);
+    let rows = data.slice(1).slice();
+    rows.sort((a,b)=>{
+      const av=cellDisplay(a[col]), bv=cellDisplay(b[col]);
+      const an=parseFloat(av), bn=parseFloat(bv);
+      let cmp;
+      if(av!=='' && bv!=='' && !isNaN(an) && !isNaN(bn)) cmp=an-bn;
+      else cmp = av.localeCompare(bv,'vi');
+      return cfg.dir==='desc' ? -cmp : cmp;
+    });
+    return [header, ...rows];
+  }
+  function applyFilterStep(data, cfg){
+    const header = data[0];
+    const q = (cfg.text||'').toLowerCase();
+    let rows = data.slice(1);
+    if(q){
+      rows = rows.filter(r=>{
+        const match = r.some(c=>cellDisplay(c).toLowerCase().includes(q));
+        return cfg.mode==='exclude' ? !match : match;
+      });
+    }
+    return [header, ...rows];
+  }
+  function applyTTCStep(data, cfg){
+    const header = data[0];
+    const rows = data.slice(1);
+    const col = Math.min(cfg.col||0, header.length-1);
+    const delim = cfg.delimiter || ',';
+    const splitParts = rows.map(r=> cellDisplay(r[col]).split(delim));
+    const maxParts = splitParts.reduce((m,p)=>Math.max(m,p.length),1);
+    const newHeader = [...header.slice(0,col), ...Array.from({length:maxParts},(_,i)=>`${header[col]||('Cột '+(col+1))} (${i+1})`), ...header.slice(col+1)];
+    const newRows = rows.map((r,ri)=>{
+      const parts = splitParts[ri];
+      const padded = Array.from({length:maxParts},(_,i)=> parts[i]!==undefined?parts[i]:'');
+      return [...r.slice(0,col), ...padded, ...r.slice(col+1)];
+    });
+    return [newHeader, ...newRows];
+  }
+  function applyStep(data, step){
+    if(step.type==='dedupe') return applyDedupeStep(data, step.config);
+    if(step.type==='sort') return applySortStep(data, step.config);
+    if(step.type==='filter') return applyFilterStep(data, step.config);
+    if(step.type==='ttc') return applyTTCStep(data, step.config);
+    return data;
+  }
+  function computeStates(){
+    const states=[originalAOA];
+    steps.forEach((step,i)=> states.push(applyStep(states[i], step)));
+    return states;
+  }
+  function colLabel(header, i){ return header[i]===''||header[i]===undefined ? ('Cột '+(i+1)) : header[i]; }
+  function describeStep(step, header){
+    if(step.type==='dedupe'){
+      return (step.config.cols && step.config.cols.length)
+        ? `Theo cột: ${step.config.cols.map(i=>escapeHtml(colLabel(header,i))).join(', ')}`
+        : 'Theo toàn bộ các cột';
+    }
+    if(step.type==='sort'){
+      return `Theo cột <b>${escapeHtml(colLabel(header, step.config.col||0))}</b>, ${step.config.dir==='desc'?'giảm dần':'tăng dần'}`;
+    }
+    if(step.type==='filter'){
+      return `${step.config.mode==='exclude'?'Loại bỏ':'Chỉ giữ'} dòng chứa “${escapeHtml(step.config.text||'')}”`;
+    }
+    if(step.type==='ttc'){
+      const d = step.config.delimiter;
+      const dLabel = d===' ' ? 'khoảng trắng' : d==='\t' ? 'Tab' : d;
+      return `Tách cột <b>${escapeHtml(colLabel(header, step.config.col||0))}</b> theo "${escapeHtml(dLabel)}"`;
+    }
+    return '';
+  }
+
+  // ---- inline step config form ----
+  function openStepForm(type, existingConfig, headerRow){
+    editingIndex = existingConfig ? editingIndex : null; // (editingIndex already set by caller when editing)
+    const container = document.getElementById('step-form-pipeline');
+    let inner = '';
+    if(type==='dedupe'){
+      const selected = (existingConfig && existingConfig.cols) || [];
+      inner = `<div class="field-row"><label>Cột dùng để xác định trùng lặp (bỏ trống = toàn bộ cột):</label></div>
+        <div class="checkbox-list">${headerRow.map((h,i)=>`<label class="checkbox-item"><input type="checkbox" class="pf-dedupe-col" value="${i}" ${selected.includes(i)?'checked':''}>${escapeHtml(colLabel(headerRow,i))}</label>`).join('')}</div>`;
+    } else if(type==='sort'){
+      const col = existingConfig ? existingConfig.col : 0;
+      const dir = existingConfig ? existingConfig.dir : 'asc';
+      inner = `<div class="field-row">
+        <label>Sắp xếp theo cột:</label>
+        <select id="pf-sort-col">${headerRow.map((h,i)=>`<option value="${i}" ${i===col?'selected':''}>${escapeHtml(colLabel(headerRow,i))}</option>`).join('')}</select>
+        <div class="radio-group">
+          <label><input type="radio" name="pf-sort-dir" value="asc" ${dir==='asc'?'checked':''}> Tăng dần</label>
+          <label><input type="radio" name="pf-sort-dir" value="desc" ${dir==='desc'?'checked':''}> Giảm dần</label>
+        </div>
+      </div>`;
+    } else if(type==='filter'){
+      const text = existingConfig ? existingConfig.text : '';
+      const mode = existingConfig ? existingConfig.mode : 'keep';
+      inner = `<div class="field-row">
+        <label>Từ khoá:</label>
+        <input type="text" class="inline-input" style="width:220px" id="pf-filter-text" value="${escapeHtml(text)}" placeholder="Nhập từ khoá…">
+        <div class="radio-group">
+          <label><input type="radio" name="pf-filter-mode" value="keep" ${mode==='keep'?'checked':''}> Chỉ giữ dòng khớp</label>
+          <label><input type="radio" name="pf-filter-mode" value="exclude" ${mode==='exclude'?'checked':''}> Loại bỏ dòng khớp</label>
+        </div>
+      </div>`;
+    } else if(type==='ttc'){
+      const col = existingConfig ? existingConfig.col : 0;
+      const delim = existingConfig ? existingConfig.delimiter : ',';
+      const isCustom = ![',',';',' ','\t'].includes(delim);
+      inner = `<div class="field-row">
+        <label>Cột cần tách:</label>
+        <select id="pf-ttc-col">${headerRow.map((h,i)=>`<option value="${i}" ${i===col?'selected':''}>${escapeHtml(colLabel(headerRow,i))}</option>`).join('')}</select>
+      </div>
+      <div class="field-row">
+        <label>Ký tự phân cách:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="pf-ttc-delim" value="," ${delim===','?'checked':''}> Dấu phẩy (,)</label>
+          <label><input type="radio" name="pf-ttc-delim" value=";" ${delim===';'?'checked':''}> Dấu chấm phẩy (;)</label>
+          <label><input type="radio" name="pf-ttc-delim" value=" " ${delim===' '?'checked':''}> Khoảng trắng</label>
+          <label><input type="radio" name="pf-ttc-delim" value="	" ${delim==='\t'?'checked':''}> Tab</label>
+          <label><input type="radio" name="pf-ttc-delim" value="custom" ${isCustom?'checked':''}> Khác: <input type="text" class="inline-input" id="pf-ttc-customdelim" style="width:50px;" maxlength="3" value="${isCustom?escapeHtml(delim):''}"></label>
+        </div>
+      </div>`;
+    }
+
+    container.innerHTML = `<div class="step-form-card">
+      <div class="step-form-title">${editingIndex!==null?'Sửa bước':'Thêm bước'}: ${STEP_TYPES[type].icon} ${STEP_TYPES[type].label}</div>
+      ${inner}
+      <div class="action-row" style="display:flex; margin-top:12px;">
+        <button class="btn-primary" id="pf-save">${editingIndex!==null?'Lưu thay đổi':'Thêm bước này'}</button>
+        <button class="btn-tertiary" id="pf-cancel">Huỷ</button>
+      </div>
+    </div>`;
+
+    document.getElementById('pf-save').addEventListener('click', ()=>{
+      let config = {};
+      if(type==='dedupe'){
+        config.cols = Array.from(document.querySelectorAll('.pf-dedupe-col:checked')).map(cb=>parseInt(cb.value,10));
+      } else if(type==='sort'){
+        config.col = parseInt(document.getElementById('pf-sort-col').value,10);
+        config.dir = document.querySelector('input[name="pf-sort-dir"]:checked').value;
+      } else if(type==='filter'){
+        config.text = document.getElementById('pf-filter-text').value;
+        config.mode = document.querySelector('input[name="pf-filter-mode"]:checked').value;
+      } else if(type==='ttc'){
+        config.col = parseInt(document.getElementById('pf-ttc-col').value,10);
+        let d = document.querySelector('input[name="pf-ttc-delim"]:checked').value;
+        if(d==='custom') d = document.getElementById('pf-ttc-customdelim').value || ',';
+        config.delimiter = d;
+      }
+      if(editingIndex!==null){ steps[editingIndex].config = config; }
+      else { steps.push({type, config}); }
+      editingIndex = null;
+      renderAll();
+    });
+    document.getElementById('pf-cancel').addEventListener('click', ()=>{
+      editingIndex = null;
+      document.getElementById('step-form-pipeline').innerHTML='';
+      renderPicker();
+    });
+  }
+
+  function renderPicker(){
+    const el = document.getElementById('step-picker-pipeline');
+    el.innerHTML = `<div class="step-type-pills">${Object.entries(STEP_TYPES).map(([type,meta])=>`<button class="step-type-btn" data-type="${type}">${meta.icon} ${meta.label}</button>`).join('')}</div>`;
+    el.querySelectorAll('.step-type-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editingIndex = null;
+        const states = computeStates();
+        openStepForm(btn.dataset.type, null, states[steps.length][0]);
+        el.innerHTML = '';
+      });
+    });
+  }
+
+  function renderStepsList(states){
+    const el = document.getElementById('steps-list-pipeline');
+    if(steps.length===0){ el.innerHTML = '<div class="pipe-empty">Chưa có bước nào — thêm bước xử lý đầu tiên bên dưới.</div>'; return; }
+    el.innerHTML = steps.map((step,i)=>`
+      <div class="pipe-step">
+        <div class="pipe-step-badge">${i+1}</div>
+        <div class="pipe-step-body">
+          <div class="pipe-step-title">${STEP_TYPES[step.type].icon} ${STEP_TYPES[step.type].label}</div>
+          <div class="pipe-step-desc">${describeStep(step, states[i][0])}</div>
+        </div>
+        <div class="pipe-step-actions">
+          <button class="pipe-move" data-idx="${i}" data-dir="up" ${i===0?'disabled':''} title="Chuyển lên">↑</button>
+          <button class="pipe-move" data-idx="${i}" data-dir="down" ${i===steps.length-1?'disabled':''} title="Chuyển xuống">↓</button>
+          <button class="pipe-edit" data-idx="${i}">Sửa</button>
+          <button class="pipe-remove" data-idx="${i}">Xoá</button>
+        </div>
+      </div>
+    `).join('');
+
+    el.querySelectorAll('.pipe-move').forEach(btn=> btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.idx,10), dir = btn.dataset.dir;
+      const j = dir==='up' ? i-1 : i+1;
+      if(j<0 || j>=steps.length) return;
+      const tmp = steps[i]; steps[i]=steps[j]; steps[j]=tmp;
+      editingIndex=null; document.getElementById('step-form-pipeline').innerHTML='';
+      renderAll();
+    }));
+    el.querySelectorAll('.pipe-edit').forEach(btn=> btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.idx,10);
+      editingIndex = i;
+      const states = computeStates();
+      openStepForm(steps[i].type, steps[i].config, states[i][0]);
+      document.getElementById('step-picker-pipeline').innerHTML='';
+    }));
+    el.querySelectorAll('.pipe-remove').forEach(btn=> btn.addEventListener('click', ()=>{
+      const i = parseInt(btn.dataset.idx,10);
+      steps.splice(i,1);
+      editingIndex=null; document.getElementById('step-form-pipeline').innerHTML='';
+      renderAll();
+    }));
+  }
+
+  function renderAll(){
+    if(!originalAOA) return;
+    const states = computeStates();
+    renderStepsList(states);
+    document.getElementById('step-form-pipeline').innerHTML='';
+    renderPicker();
+    finalData = states[states.length-1];
+    const {shown,total} = renderDataTable(document.getElementById('table-pipeline'), finalData, {});
+    document.getElementById('count-pipeline').textContent = `${total} dòng`+(shown<total?` (hiển thị ${shown})`:'');
+  }
+
+  setupExcelSource('pipeline', {onReady:(aoa, meta)=>{
+    document.getElementById('pipeline-body').style.display = (aoa && meta) ? 'block' : 'none';
+    document.getElementById('action-pipeline').style.display='none';
+    if(!aoa || !meta){ originalAOA=null; steps=[]; finalData=null; return; }
+    originalAOA = computeFormulas(aoa);
+    steps = []; editingIndex=null;
+    renderAll();
+    document.getElementById('action-pipeline').style.display='flex';
+  }});
+
+  document.getElementById('download-pipeline-xlsx').addEventListener('click', ()=>{
+    if(finalData) downloadAOAasXLSX(finalData, 'xu-ly-du-lieu.xlsx');
+  });
+  document.getElementById('download-pipeline-csv').addEventListener('click', ()=>{
+    if(finalData) downloadText(aoaToCSV(finalData), 'xu-ly-du-lieu.csv', 'text/csv');
+  });
+})();
+
+/* =========================================================================
+   TOOL: MERGE
+   ========================================================================= */
+(function(){
+  let slotCount = 0;
+  const slotData = new Map(); // slotId -> {aoa, fileName}
+  let resultAOA=null;
+
+  function addSlot(){
+    slotCount++;
+    const id = 'mergefile'+slotCount;
+    const box = document.createElement('div');
+    box.className='slot-box';
+    box.innerHTML = `<div class="slot-label">FILE ${slotCount} <button class="remove-slot" data-remove="${id}">Bỏ file này</button></div><div class="source-slot-simple" data-slot="${id}"></div>`;
+    document.getElementById('slots-merge').appendChild(box);
+    setupExcelSource(id, {simple:true, onReady:(aoa, meta)=>{
+      if(aoa && meta) slotData.set(id, {aoa: computeFormulas(aoa), fileName: meta.fileName});
+      else slotData.delete(id);
+      updateRunButton();
+    }});
+    box.querySelector('[data-remove]').addEventListener('click', ()=>{
+      slotData.delete(id);
+      box.remove();
+      updateRunButton();
+    });
+  }
+  function updateRunButton(){
+    document.getElementById('run-row-merge').style.display = slotData.size>=2 ? 'flex' : 'none';
+  }
+
+  document.getElementById('add-slot-merge').addEventListener('click', addSlot);
+  addSlot(); addSlot();
+
+  document.getElementById('run-merge').addEventListener('click', ()=>{
+    const entries = Array.from(slotData.values());
+    if(entries.length<2) return;
+    const firstHeader = entries[0].aoa[0];
+    const warnEl = document.getElementById('warn-merge');
+    const mismatched = entries.filter(e=> e.aoa[0].length !== firstHeader.length || e.aoa[0].some((h,i)=>cellDisplay(h)!==cellDisplay(firstHeader[i])));
+    if(mismatched.length){
+      warnEl.textContent = `⚠ ${mismatched.length} file có tiêu đề cột khác với file đầu tiên — vẫn gộp theo vị trí cột, dữ liệu có thể bị lệch cột. Kiểm tra lại nếu cần.`;
+      warnEl.style.display='block';
+    } else warnEl.style.display='none';
+
+    let merged = [firstHeader];
+    entries.forEach(e=>{ merged = merged.concat(e.aoa.slice(1)); });
+    const maxCols = merged.reduce((m,r)=>Math.max(m,r.length),0);
+    merged = merged.map(r=>{ const row=r.slice(); while(row.length<maxCols) row.push(''); return row; });
+    resultAOA = merged;
+    const {shown,total} = renderDataTable(document.getElementById('table-merge'), resultAOA, {});
+    document.getElementById('count-merge').textContent = `${total} dòng từ ${entries.length} file`+(shown<total?` (hiển thị ${shown})`:'');
+    document.getElementById('preview-merge').style.display='block';
+    document.getElementById('action-merge').style.display='flex';
+  });
+
+  document.getElementById('download-merge-xlsx').addEventListener('click', ()=>{ if(resultAOA) downloadAOAasXLSX(resultAOA, 'gop-file.xlsx'); });
+  document.getElementById('download-merge-csv').addEventListener('click', ()=>{ if(resultAOA) downloadText(aoaToCSV(resultAOA), 'gop-file.csv', 'text/csv'); });
+})();
+
+/* =========================================================================
+   TOOL: COMPARE
+   ========================================================================= */
+(function(){
+  let aoaA=null, aoaB=null;
+  let diffResult=null;
+
+  setupExcelSource('compareA', {simple:true, onReady:(aoa, meta)=>{ aoaA = (aoa && meta) ? computeFormulas(aoa) : null; updateRunButton(); }});
+  setupExcelSource('compareB', {simple:true, onReady:(aoa, meta)=>{ aoaB = (aoa && meta) ? computeFormulas(aoa) : null; updateRunButton(); }});
+
+  function updateRunButton(){
+    document.getElementById('run-row-compare').style.display = (aoaA && aoaB) ? 'flex' : 'none';
+  }
+
+  document.getElementById('run-compare').addEventListener('click', ()=>{
+    if(!aoaA || !aoaB) return;
+    const maxRows = Math.max(aoaA.length, aoaB.length);
+    const maxCols = Math.max(aoaA.reduce((m,r)=>Math.max(m,r.length),0), aoaB.reduce((m,r)=>Math.max(m,r.length),0));
+    const grid = [];
+    const diffs = [];
+    for(let r=0;r<maxRows;r++){
+      const rowA = aoaA[r]||[];
+      const rowB = aoaB[r]||[];
+      const outRow = [];
+      for(let c=0;c<maxCols;c++){
+        const va = rowA[c]; const vb = rowB[c];
+        const sa = va===undefined?'':cellDisplay(va);
+        const sb = vb===undefined?'':cellDisplay(vb);
+        outRow.push(sa);
+        if(sa!==sb) diffs.push({row:r, col:c, a:sa, b:sb, existsA: va!==undefined, existsB: vb!==undefined});
+      }
+      grid.push(outRow);
+    }
+    diffResult = {grid, diffs, maxRows, maxCols};
+    const statEl = document.getElementById('stat-compare');
+    statEl.textContent = `Tìm thấy ${diffs.length} ô khác biệt trên ${maxRows} dòng, ${maxCols} cột (dòng 1 là tiêu đề).`;
+    statEl.style.display='block';
+
+    const diffMap = new Map();
+    diffs.forEach(d=> diffMap.set(d.row+':'+d.col, d));
+    const {shown,total} = renderDataTable(document.getElementById('table-compare'), grid, {
+      cellClass: (r,c)=>{
+        const key=r+':'+c;
+        if(diffMap.has(key)){
+          const d = diffMap.get(key);
+          return d.existsA ? 'cell-diff' : 'cell-extra';
+        }
+        return '';
+      },
+      cellContent: (r,c)=>{
+        const key=r+':'+c;
+        const sa = cellDisplay((grid[r]||[])[c]);
+        if(diffMap.has(key)){
+          const d = diffMap.get(key);
+          const bText = d.existsB ? d.b : '(không có)';
+          return `<div class="diff-a">${escapeHtml(sa)}</div><div class="diff-b">→ ${escapeHtml(bText)}</div>`;
+        }
+        return escapeHtml(sa);
+      }
+    });
+    document.getElementById('count-compare').textContent = `${total} dòng`+(shown<total?` (hiển thị ${shown})`:'');
+    document.getElementById('preview-compare').style.display='block';
+    document.getElementById('action-compare').style.display='flex';
+  });
+
+  document.getElementById('download-compare').addEventListener('click', ()=>{
+    if(!diffResult) return;
+    const rows = [['Dòng','Cột','Giá trị (File A)','Giá trị (File B)']];
+    diffResult.diffs.forEach(d=> rows.push([String(d.row+1), colLetter(d.col), d.a, d.b]));
+    downloadText(aoaToCSV(rows), 'bao-cao-khac-biet.csv', 'text/csv');
+  });
+})();
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+renderCatTabs();
+renderPillRow();
+showActivePanel();
 </script>
 </body>
 </html>
